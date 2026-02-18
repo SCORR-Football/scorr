@@ -1,1 +1,603 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Wedstrijden - SCORR Kantine Display</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --scorr-electric: #00FF88;
+            --scorr-deep: #0A0E27;
+            --scorr-slate: #1E2749;
+            --scorr-accent: #FF3D71;
+            --scorr-cloud: #F5F7FA;
+            --scorr-warning: #FFB800;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--scorr-deep);
+            min-height: 100vh;
+            padding: 0;
+            color: white;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--scorr-deep) 0%, var(--scorr-slate) 100%);
+            padding: 32px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--scorr-electric);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .club-logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 4px;
+        }
+
+        .club-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .club-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .header-subtitle {
+            font-size: 16px;
+            color: var(--scorr-electric);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .scorr-logo {
+            font-size: 56px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, var(--scorr-electric) 0%, #00DDFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* Competition Section */
+        .competition-section {
+            margin-bottom: 48px;
+        }
+
+        .competition-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            background: var(--scorr-slate);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .competition-icon {
+            font-size: 32px;
+        }
+
+        .competition-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            flex: 1;
+        }
+
+        .match-count {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+        }
+
+        /* Match Card */
+        .match-card {
+            background: var(--scorr-slate);
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .match-card.live {
+            border-color: var(--scorr-electric);
+            background: linear-gradient(135deg, var(--scorr-slate) 0%, rgba(0, 255, 136, 0.05) 100%);
+        }
+
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Match Status */
+        .match-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px;
+        }
+
+        .match-time {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--scorr-electric);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .match-time.live {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: var(--scorr-electric);
+            color: var(--scorr-deep);
+        }
+
+        .status-badge.finished {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .status-badge.scheduled {
+            background: var(--scorr-warning);
+            color: var(--scorr-deep);
+        }
+
+        /* Teams Container */
+        .teams-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .team {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .team.away {
+            flex-direction: row-reverse;
+        }
+
+        .team-logo {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            padding: 3px;
+        }
+
+        .team-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .team-name {
+            font-size: 22px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .team.away .team-name {
+            text-align: right;
+        }
+
+        /* Score */
+        .score-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px;
+        }
+
+        .score {
+            font-size: 48px;
+            font-weight: 900;
+            color: white;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .score-separator {
+            font-size: 32px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Live Indicator */
+        .live-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--scorr-accent);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+        }
+
+        .auto-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+        }
+
+        .refresh-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--scorr-electric);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .match-card {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .teams-container {
+                flex-direction: column;
+                width: 100%;
+                gap: 16px;
+            }
+
+            .team {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .team.away {
+                flex-direction: row;
+            }
+
+            .team.away .team-name {
+                text-align: left;
+            }
+
+            .score-container {
+                order: -1;
+            }
+        }
+
+        /* No matches state */
+        .no-matches {
+            text-align: center;
+            padding: 80px 40px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .no-matches-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+        }
+
+        .no-matches-text {
+            font-size: 24px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="club-logo">
+                <img src="../assets/logos/logo_fcpurmerend_nieuw.png" alt="FC Purmerend">
+            </div>
+            <div class="header-title">
+                <div class="club-name">FC Purmerend</div>
+                <div class="header-subtitle">Live Wedstrijden</div>
+            </div>
+        </div>
+        <div class="scorr-logo">SCORR</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Competition Section: FC Purmerend Wedstrijden -->
+        <div class="competition-section">
+            <div class="competition-header">
+                <div class="competition-icon">⚽</div>
+                <div class="competition-name">FC Purmerend - Alle Teams Vandaag</div>
+                <div class="match-count">5 wedstrijden</div>
+            </div>
+
+            <!-- Live Match - FC Purmerend 1 -->
+            <div class="match-card live">
+                <div class="match-status">
+                    <div class="match-time live">67'</div>
+                    <div class="status-badge">LIVE</div>
+                </div>
+
+                <div class="teams-container">
+                    <div class="team home">
+                        <div class="team-logo">
+                            <img src="../assets/logos/logo_fcpurmerend_nieuw.png" alt="FC Purmerend 1">
+                        </div>
+                        <div class="team-name">FC Purmerend 1</div>
+                    </div>
+
+                    <div class="score-container">
+                        <div class="score">2</div>
+                        <div class="score-separator">-</div>
+                        <div class="score">1</div>
+                    </div>
+
+                    <div class="team away">
+                        <div class="team-logo">
+                            <img src="../assets/logos/logo-512-512.png" alt="VV Monnickendam">
+                        </div>
+                        <div class="team-name">VV Monnickendam</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Match - FC Purmerend O19-1 -->
+            <div class="match-card live">
+                <div class="match-status">
+                    <div class="match-time live">42'</div>
+                    <div class="status-badge">LIVE</div>
+                </div>
+
+                <div class="teams-container">
+                    <div class="team home">
+                        <div class="team-logo">
+                            <img src="../assets/logos/logo_fcpurmerend_nieuw.png" alt="FC Purmerend O19-1">
+                        </div>
+                        <div class="team-name">FC Purmerend O19-1</div>
+                    </div>
+
+                    <div class="score-container">
+                        <div class="score">0</div>
+                        <div class="score-separator">-</div>
+                        <div class="score">0</div>
+                    </div>
+
+                    <div class="team away">
+                        <div class="team-logo">
+                            <div style="width: 100%; height: 100%; background: #0066cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 20px;">ZOB</div>
+                        </div>
+                        <div class="team-name">ZOB O19-1</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finished Match - FC Purmerend 2 (Away) -->
+            <div class="match-card">
+                <div class="match-status">
+                    <div class="match-time">AFG</div>
+                    <div class="status-badge finished">Afgelopen</div>
+                </div>
+
+                <div class="teams-container">
+                    <div class="team home">
+                        <div class="team-logo">
+                            <div style="width: 100%; height: 100%; background: #cc0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 20px;">AFC</div>
+                        </div>
+                        <div class="team-name">AFC Amsterdam</div>
+                    </div>
+
+                    <div class="score-container">
+                        <div class="score">1</div>
+                        <div class="score-separator">-</div>
+                        <div class="score">3</div>
+                    </div>
+
+                    <div class="team away">
+                        <div class="team-logo">
+                            <img src="../assets/logos/logo_fcpurmerend_nieuw.png" alt="FC Purmerend 2">
+                        </div>
+                        <div class="team-name">FC Purmerend 2</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Match - FC Purmerend O17-1 -->
+            <div class="match-card live">
+                <div class="match-status">
+                    <div class="match-time live">78'</div>
+                    <div class="status-badge">LIVE</div>
+                </div>
+
+                <div class="teams-container">
+                    <div class="team home">
+                        <div class="team-logo">
+                            <div style="width: 100%; height: 100%; background: #00aa00; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 18px;">EVC</div>
+                        </div>
+                        <div class="team-name">EVC Edam O17-1</div>
+                    </div>
+
+                    <div class="score-container">
+                        <div class="score">2</div>
+                        <div class="score-separator">-</div>
+                        <div class="score">4</div>
+                    </div>
+
+                    <div class="team away">
+                        <div class="team-logo">
+                            <img src="../assets/logos/logo_fcpurmerend_nieuw.png" alt="FC Purmerend O17-1">
+                        </div>
+                        <div class="team-name">FC Purmerend O17-1</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduled Match - FC Purmerend 3 -->
+            <div class="match-card">
+                <div class="match-status">
+                    <div class="match-time">16:30</div>
+                    <div class="status-badge scheduled">Straks</div>
+                </div>
+
+                <div class="teams-container">
+                    <div class="team home">
+                        <div class="team-logo">
+                            <img src="../assets/logos/logo_fcpurmerend_nieuw.png" alt="FC Purmerend 3">
+                        </div>
+                        <div class="team-name">FC Purmerend 3</div>
+                    </div>
+
+                    <div class="score-container">
+                        <div class="score">-</div>
+                        <div class="score-separator">-</div>
+                        <div class="score">-</div>
+                    </div>
+
+                    <div class="team away">
+                        <div class="team-logo">
+                            <div style="width: 100%; height: 100%; background: #ff6600; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 16px;">RKAV</div>
+                        </div>
+                        <div class="team-name">RKAV Volendam 2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div>Laatste update: <span id="lastUpdate">18 feb 2026 - 15:23</span></div>
+        <div class="auto-refresh">
+            <div class="refresh-dot"></div>
+            <span>Updates automatisch elke 10 seconden</span>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const options = { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('lastUpdate').textContent = 
+                now.toLocaleDateString('nl-NL', options).replace(',', ' -');
+        }
+
+        // Update every 10 seconds
+        setInterval(() => {
+            updateTimestamp();
+            // In production: fetch new data from API
+            console.log('Fetching latest scores...');
+        }, 10000);
+
+        // Initial update
+        updateTimestamp();
+
+        // Simulate live time updates for demo
+        setInterval(() => {
+            const liveTimes = document.querySelectorAll('.match-time.live');
+            liveTimes.forEach(timeEl => {
+                const currentTime = parseInt(timeEl.textContent);
+                if (!isNaN(currentTime) && currentTime < 90) {
+                    timeEl.textContent = (currentTime + 1) + "'";
+                }
+            });
+        }, 60000); // Update every minute for demo
+    </script>
+</body>
+</html>

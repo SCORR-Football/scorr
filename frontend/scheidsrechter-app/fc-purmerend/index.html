@@ -897,20 +897,30 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        async function startTimer() {
-            if (!isRunning) {
-                isRunning = true;
-                timerStartTime = Date.now();
-                initAudioContext();
-                await requestWakeLock();
-                timerInterval = setInterval(() => {
-                    updateDisplay();
-                    checkTimeExpired();
-                    saveTimerState();
-                }, 100);
-                saveTimerState();
-            }
+        aasync function startTimer() {
+    if (!isRunning) {
+        isRunning = true;
+        timerStartTime = Date.now();
+        initAudioContext();
+        await requestWakeLock();
+        timerInterval = setInterval(() => {
+            updateDisplay();
+            checkTimeExpired();
+            saveTimerState();
+        }, 100);
+        saveTimerState();
+
+        // Firebase status update
+        const wedstrijdId = localStorage.getItem('wedstrijdId');
+        if (wedstrijdId && window._firebaseDb) {
+            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update }) => {
+                update(ref(window._firebaseDb, `wedstrijden/${wedstrijdId}`), {
+                    status: 'bezig'
+                });
+            });
         }
+    }
+}
 
         let timeExpiredTriggered = false;
 

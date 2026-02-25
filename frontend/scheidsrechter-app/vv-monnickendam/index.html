@@ -1303,34 +1303,31 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     </script>
 <!-- 
   ================================================
-  SCORR - Wedstrijd Popup v2 voor VV Monnickendam
+  SCORR - Wedstrijd Popup v3 voor VV Monnickendam
   INSTRUCTIE: Vervang de vorige popup code en 
   plak deze net voor </body> in je HTML
   ================================================
 -->
 
-<!-- Firebase SDK -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-  // ⚠️ VERVANG DIT met jouw Firebase config
   const firebaseConfig = {
-    apiKey: "JOUW_API_KEY",
+    apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
     authDomain: "scorr-c604a.firebaseapp.com",
     databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "scorr-c604a",
-    storageBucket: "scorr-c604a.appspot.com",
-    messagingSenderId: "JOUW_SENDER_ID",
-    appId: "JOUW_APP_ID"
+    storageBucket: "scorr-c604a.firebasestorage.app",
+    messagingSenderId: "413840042688",
+    appId: "1:413840042688:web:3183c36fd20f27ac925b25"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const auth = getAuth(app);
 
-  // Team mapping VV Monnickendam
   const teamMapping = {
     "team1@vvmonnickendam.nl": "VV Monnickendam O14-1",
     "team2@vvmonnickendam.nl": "VV Monnickendam O14-2",
@@ -1339,12 +1336,10 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   };
 
   let huidigWedstrijdId = null;
-  let huidigUser = null;
 
   window.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        huidigUser = user;
         const teamNaam = teamMapping[user.email] || "Onbekend Team";
         checkBestaandeWedstrijd(teamNaam, user);
       } else {
@@ -1354,8 +1349,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   });
 
   async function checkBestaandeWedstrijd(teamNaam, user) {
-    const wedstrijdenRef = ref(db, 'wedstrijden');
-    const snapshot = await get(wedstrijdenRef);
+    const snapshot = await get(ref(db, 'wedstrijden'));
 
     let gevondenWedstrijd = null;
     let gevondenId = null;
@@ -1401,12 +1395,10 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
     document.getElementById('scorr-popup-overlay').style.display = 'flex';
     document.getElementById('popup-team-naam').textContent = teamNaam;
-
     document.getElementById('popup-tegenstander').value = bestaandeData ? bestaandeData.uitteam : '';
     document.getElementById('popup-klasse').value = bestaandeData ? bestaandeData.klasse : '';
     document.getElementById('popup-datum').value = bestaandeData ? bestaandeData.datum : vandaag;
     document.getElementById('popup-tijdstip').value = bestaandeData ? bestaandeData.tijdstip : huidigTijdstip;
-
     document.getElementById('popup-subtitel').textContent = bestaandeData ? 'Wedstrijd wijzigen' : 'Wedstrijd instellen';
 
     document.getElementById('popup-start-btn').onclick = () => {

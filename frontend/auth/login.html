@@ -306,12 +306,50 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Redirect to team selection after login
-            window.location.href = '/frontend/scheidsrechter-app/fc-purmerend/index.html';
-        });
-    </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
+    authDomain: "scorr-c604a.firebaseapp.com",
+    databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "scorr-c604a",
+    storageBucket: "scorr-c604a.firebasestorage.app",
+    messagingSenderId: "413840042688",
+    appId: "1:413840042688:web:3183c36fd20f27ac925b25"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const purmerendTeams = [
+    "team1@fcpurmerend.nl",
+    "team2@fcpurmerend.nl",
+    "team3@fcpurmerend.nl",
+    "team4@fcpurmerend.nl"
+  ];
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorEl = document.getElementById('errorMessage');
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      // Redirect op basis van club
+      if (purmerendTeams.includes(email)) {
+        window.location.href = '/frontend/scheidsrechter-app/fc-purmerend/index.html';
+      } else {
+        window.location.href = '/frontend/scheidsrechter-app/vv-monnickendam/index.html';
+      }
+    } catch (error) {
+      if (errorEl) errorEl.textContent = 'Verkeerd e-mailadres of wachtwoord.';
+      console.error(error);
+    }
+  });
+</script>
 </body>
 </html>

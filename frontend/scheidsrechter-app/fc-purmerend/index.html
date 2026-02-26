@@ -1433,22 +1433,33 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
       const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
 
-      set(ref(db, `wedstrijden/${wedstrijdId}`), {
-        thuisteam: teamNaam,
-        uitteam: tegenstander,
-        klasse: klasse,
-        datum: datum,
-        tijdstip: tijdstip,
-        thuisscore: 0,
-        uitscore: 0,
-        status: 'gepland',
-        club: 'fc-purmerend'
-      });
+set(ref(db, `wedstrijden/${wedstrijdId}`), {
+    thuisteam: teamNaam,
+    uitteam: tegenstander,
+    klasse: klasse,
+    datum: datum,
+    tijdstip: tijdstip,
+    helfttijd: helfttijd,
+    thuisscore: 0,
+    uitscore: 0,
+    status: 'gepland',
+    club: 'fc-purmerend'
+});
 
       localStorage.setItem('wedstrijdId', wedstrijdId);
       localStorage.setItem('thuisteam', teamNaam);
       localStorage.setItem('uitteam', tegenstander);
+// Teamnamen invullen in de app
+document.getElementById('homeTeamName').value = teamNaam;
+document.getElementById('awayTeamName').value = tegenstander;
 
+// Helfttijd instellen
+const helfttijd = parseInt(document.getElementById('popup-helfttijd').value) || 45;
+halfDuration = helfttijd;
+document.getElementById('homeTeamName').value = teamNaam;
+document.getElementById('awayTeamName').value = tegenstander;
+const helfttijd = parseInt(document.getElementById('popup-helfttijd').value) || 45;
+halfDuration = helfttijd;
       document.getElementById('scorr-popup-overlay').style.display = 'none';
     };
   }
@@ -1497,6 +1508,10 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
+        <div style="margin-bottom:16px;">
+  <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Duur per helft (min)</label>
+  <input id="popup-helfttijd" type="number" value="45" min="10" max="90" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
+</div>
       <div>
         <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Datum</label>
         <input id="popup-datum" type="date" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:14px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />

@@ -1348,10 +1348,10 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   const auth = getAuth(app);
 
   const teamMapping = {
-    "team1@fcpurmerend.nl": "FC Purmerend O14-1",
-    "team2@fcpurmerend.nl": "FC Purmerend O14-2",
-    "team3@fcpurmerend.nl": "FC Purmerend O16-1",
-    "team4@fcpurmerend.nl": "FC Purmerend O18-1"
+    "team1@fcpurmerend.nl": "FC Purmerend Heren 1",
+    "team2@fcpurmerend.nl": "FC Purmerend Dames 1",
+    "team3@fcpurmerend.nl": "FC Purmerend O14-1",
+    "team4@fcpurmerend.nl": "FC Purmerend O16-1"
   };
 
   let huidigWedstrijdId = null;
@@ -1440,6 +1440,7 @@ set(ref(db, `wedstrijden/${wedstrijdId}`), {
     datum: datum,
     tijdstip: tijdstip,
     helfttijd: helfttijd,
+    veld: document.getElementById('popup-veld').value,
     thuisscore: 0,
     uitscore: 0,
     status: 'gepland',
@@ -1504,6 +1505,19 @@ document.getElementById('scorr-popup-overlay').style.display = 'none';
       <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Klasse *</label>
       <input id="popup-klasse" type="text" placeholder="bijv. 4e klasse district" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
     </div>
+
+    <div style="margin-bottom:16px;">
+  <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Veld</label>
+  <select id="popup-veld" style="width:100%; background:#1E2749; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none; appearance:none;">
+    <option value="A">Veld A</option>
+    <option value="B">Veld B</option>
+    <option value="C">Veld C</option>
+    <option value="D">Veld D</option>
+    <option value="E">Veld E</option>
+    <option value="F">Veld F</option>
+    <option value="n.v.t.">n.v.t.</option>
+  </select>
+</div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
         <div style="margin-bottom:16px;">

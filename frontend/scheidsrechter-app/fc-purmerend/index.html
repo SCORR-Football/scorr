@@ -901,6 +901,7 @@
             if (!isRunning) {
                 isRunning = true;
                 timerStartTime = Date.now();
+                localStorage.setItem('startTijd', Date.now());
 timerStartTime = Date.now();
 var wId = localStorage.getItem('wedstrijdId');
 if (wId && window._firebaseDb) {
@@ -1052,7 +1053,7 @@ saveTimerState();
         }
 
         // ===== SCORE =====
-    function changeScore(team, delta) {
+function changeScore(team, delta) {
     if (team === 'home') {
         homeScoreValue = Math.max(0, homeScoreValue + delta);
         homeScore.textContent = homeScoreValue;
@@ -1060,18 +1061,35 @@ saveTimerState();
         awayScoreValue = Math.max(0, awayScoreValue + delta);
         awayScore.textContent = awayScoreValue;
     }
-    // Firebase sync
+
     var wedstrijdId = localStorage.getItem('wedstrijdId');
     if (wedstrijdId && window._firebaseDb) {
-        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update }) => {
+        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update, push }) => {
+            // Score updaten
             update(ref(window._firebaseDb, `wedstrijden/${wedstrijdId}`), {
                 thuisscore: homeScoreValue,
                 uitscore: awayScoreValue
             });
+
+            // Event opslaan bij doelpunt
+            if (delta > 0) {
+                var nu = Date.now();
+                var startTijd = parseInt(localStorage.getItem('startTijd') || nu);
+                var minuut = Math.floor((nu - startTijd) / 60000) + 1;
+                var ploeg = team === 'home'
+                    ? (localStorage.getItem('homeTeamName') || 'Thuis')
+                    : (localStorage.getItem('awayTeamName') || 'Uit');
+
+                push(ref(window._firebaseDb, `wedstrijden/${wedstrijdId}/events`), {
+                    type: 'goal',
+                    minuut: minuut,
+                    omschrijving: 'Doelpunt ' + ploeg + ' (' + homeScoreValue + '-' + awayScoreValue + ')',
+                    tijdstip: nu
+                });
+            }
         });
     }
 }
-
         // ===== EVENTS =====
         function showEventModal(eventType, team = null) {
             currentEventType = eventType;

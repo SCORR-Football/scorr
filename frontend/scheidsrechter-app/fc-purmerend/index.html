@@ -1402,34 +1402,44 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     document.getElementById('banner-tijdstip').textContent = wedstrijd.tijdstip;
     document.getElementById('banner-klasse').textContent = wedstrijd.klasse;
 
-    document.getElementById('banner-wijzig-btn').addEventListener('click', () => {
-      document.getElementById('scorr-banner').style.display = 'none';
-      toonPopup(teamNaam, user, wedstrijd);
-    });
-  }
+ document.getElementById('popup-start-btn').onclick = () => {
+    const tegenstander = document.getElementById('popup-tegenstander').value.trim();
+    const klasse = document.getElementById('popup-klasse').value.trim();
+    const datum = document.getElementById('popup-datum').value;
+    const tijdstip = document.getElementById('popup-tijdstip').value;
+    const helfttijd = parseInt(document.getElementById('popup-helfttijd').value) || 45;
+    const veld = document.getElementById('popup-veld').value;
 
-  function toonPopup(teamNaam, user, bestaandeData) {
-    const vandaag = new Date().toISOString().split('T')[0];
-    const huidigTijdstip = new Date().toTimeString().slice(0,5);
-
-    document.getElementById('scorr-popup-overlay').style.display = 'flex';
-    document.getElementById('popup-team-naam').textContent = teamNaam;
-    document.getElementById('popup-tegenstander').value = bestaandeData ? bestaandeData.uitteam : '';
-    document.getElementById('popup-klasse').value = bestaandeData ? bestaandeData.klasse : '';
-    document.getElementById('popup-datum').value = bestaandeData ? bestaandeData.datum : vandaag;
-    document.getElementById('popup-tijdstip').value = bestaandeData ? bestaandeData.tijdstip : huidigTijdstip;
-    document.getElementById('popup-subtitel').textContent = bestaandeData ? 'Wedstrijd wijzigen' : 'Wedstrijd instellen';
-
-    document.getElementById('popup-start-btn').onclick = () => {
-      const tegenstander = document.getElementById('popup-tegenstander').value.trim();
-      const klasse = document.getElementById('popup-klasse').value.trim();
-      const datum = document.getElementById('popup-datum').value;
-      const tijdstip = document.getElementById('popup-tijdstip').value;
-
-      if (!tegenstander || !klasse) {
+    if (!tegenstander || !klasse) {
         document.getElementById('popup-error').style.display = 'block';
         return;
-      }
+    }
+
+    const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
+
+    set(ref(db, `wedstrijden/${wedstrijdId}`), {
+        thuisteam: teamNaam,
+        uitteam: tegenstander,
+        klasse: klasse,
+        datum: datum,
+        tijdstip: tijdstip,
+        helfttijd: helfttijd,
+        veld: veld,
+        thuisscore: 0,
+        uitscore: 0,
+        status: 'gepland',
+        club: 'fc-purmerend'
+    });
+
+    localStorage.setItem('wedstrijdId', wedstrijdId);
+    localStorage.setItem('thuisteam', teamNaam);
+    localStorage.setItem('uitteam', tegenstander);
+
+    document.getElementById('homeTeamName').value = teamNaam;
+    document.getElementById('awayTeamName').value = tegenstander;
+    halfDuration = helfttijd;
+    document.getElementById('scorr-popup-overlay').style.display = 'none';
+};
 
       const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
 

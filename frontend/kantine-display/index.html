@@ -431,8 +431,11 @@
                                     var w = data[key];
                                     if (w && w.datum) {
                                         var wedstrijdDatum = new Date(w.datum + 'T00:00:00');
-                                        var verschilUren = (wedstrijdDatum - nu) / (1000 * 60 * 60);
-                                        if (verschilUren >= -24 && verschilUren <= 48) {
+var verschilUren = (wedstrijdDatum - nu) / (1000 * 60 * 60);
+var tijdstipUren = w.tijdstip ? parseInt(w.tijdstip.split(':')[0]) : 12;
+var eindTijd = new Date(w.datum + 'T' + (w.tijdstip || '12:00') + ':00');
+var urenNaEinde = (nu - eindTijd) / (1000 * 60 * 60);
+if (verschilUren <= 48 && urenNaEinde <= 24) {
                                             wedstrijden.push(w);
                                         }
                                     }

@@ -551,7 +551,12 @@
             document.getElementById('lastUpdate').textContent = str;
             document.getElementById('footerUpdate').textContent = str;
         }
-
+    function getLogo(naam) {
+        if (naam.toLowerCase().includes('purmerend')) return '/frontend/assets/logos/logo_fcpurmerend_nieuw.png';
+        if (naam.toLowerCase().includes('monnickendam')) return '/frontend/assets/logos/logo-512-512.png';
+        if (naam.toLowerCase().includes('graveland')) return '/frontend/assets/logos/images-3.png';
+        return null;
+    }
         function getInitials(naam) {
             return naam.split(' ').map(w => w[0]).join('').substring(0, 3).toUpperCase();
         }
@@ -597,30 +602,34 @@
 
                 const veldBadge = w.veld && w.veld !== 'n.v.t.' ? `<div class="veld-badge">Veld ${w.veld}</div>` : '';
 
-                return `
-            <div class="match-status">
-                <div class="match-time ${isLive ? 'live' : ''}">${tijdText}</div>
-                <div class="status-badge ${badgeClass}">${badgeText}</div>
-                <div style="font-size:11px; color:rgba(240,244,255,0.35); margin-top:4px; text-align:center;">${new Date(w.datum + 'T00:00:00').toLocaleDateString('nl-NL', {weekday:'short', day:'numeric', month:'short'})}</div>
+               return `
+    <div class="match-card ${isLive || isRust ? 'live' : ''} ${isAfgelopen ? 'afgelopen' : ''}">
+        <div class="match-status">
+            <div class="match-time ${isLive ? 'live' : ''}">${tijdText}</div>
+            <div class="status-badge ${badgeClass}">${badgeText}</div>
+            <div style="font-size:11px; color:rgba(240,244,255,0.35); margin-top:4px; text-align:center;">${new Date(w.datum + 'T00:00:00').toLocaleDateString('nl-NL', {weekday:'short', day:'numeric', month:'short'})}</div>
         </div>
-                    <div class="card-divider"></div>
-                    <div class="teams-row">
-                        <div class="team home">
-                            <div class="team-logo" style="background:#003399;">${thuisInitials}</div>
-                            <div class="team-name">${w.thuisteam || 'Thuis'}</div>
-                        </div>
-                        <div class="score-block">${score}</div>
-                        <div class="team away">
-                            <div class="team-logo" style="background:#1E2749;">${uitInitials}</div>
-                            <div class="team-name">${w.uitteam || 'Uit'}</div>
-                        </div>
-                    </div>
-                    ${veldBadge}
-                </div>`;
-            }).join('');
-
-            updateTimestamp();
-        }
+        <div class="card-divider"></div>
+        <div class="teams-row">
+            <div class="team home">
+                <div class="team-logo" style="background:${getLogo(w.thuisteam) ? 'white' : '#003399'};">
+                    ${getLogo(w.thuisteam) ? `<img src="${getLogo(w.thuisteam)}" style="width:100%;height:100%;object-fit:contain;padding:3px;">` : thuisInitials}
+                </div>
+                <div class="team-name">${w.thuisteam || 'Thuis'}</div>
+            </div>
+            <div class="score-block">${score}</div>
+            <div class="team away">
+                <div class="team-logo" style="background:${getLogo(w.uitteam) ? 'white' : '#1E2749'};">
+                    ${getLogo(w.uitteam) ? `<img src="${getLogo(w.uitteam)}" style="width:100%;height:100%;object-fit:contain;padding:3px;">` : uitInitials}
+                </div>
+                <div class="team-name">${w.uitteam || 'Uit'}</div>
+            </div>
+        </div>
+        ${veldBadge}
+    </div>`;
+}).join('');
+updateTimestamp();
+}
 
         // Live Firebase listener
         onValue(ref(db, 'wedstrijden'), (snapshot) => {

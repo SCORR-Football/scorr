@@ -583,7 +583,9 @@
                 const isRust = w.status === 'rust';
 
                 const badgeClass = isLive || isRust ? 'live' : isAfgelopen ? 'afgelopen' : 'straks';
-                const badgeText = isLive ? 'LIVE' : isRust ? 'RUST' : isAfgelopen ? 'Afgelopen' : 'Straks';
+                const vandaagStr = new Date().toISOString().split('T')[0];
+                const isVandaag = w.datum === vandaagStr;
+                const badgeText = isLive ? 'LIVE' : isRust ? 'RUST' : isAfgelopen ? 'Afgelopen' : isVandaag ? 'Straks' : 'Morgen';
                 const tijdText = isLive ? '●' : isAfgelopen ? 'AFG' : (w.tijdstip || '—');
 
                 const thuisInitials = getInitials(w.thuisteam || 'Thuis');
@@ -596,11 +598,11 @@
                 const veldBadge = w.veld && w.veld !== 'n.v.t.' ? `<div class="veld-badge">Veld ${w.veld}</div>` : '';
 
                 return `
-                <div class="match-card ${isLive || isRust ? 'live' : ''} ${isAfgelopen ? 'afgelopen' : ''}">
-                    <div class="match-status">
-                        <div class="match-time ${isLive ? 'live' : ''}">${tijdText}</div>
-                        <div class="status-badge ${badgeClass}">${badgeText}</div>
-                    </div>
+            <div class="match-status">
+                <div class="match-time ${isLive ? 'live' : ''}">${tijdText}</div>
+                <div class="status-badge ${badgeClass}">${badgeText}</div>
+                <div style="font-size:11px; color:rgba(240,244,255,0.35); margin-top:4px; text-align:center;">${new Date(w.datum + 'T00:00:00').toLocaleDateString('nl-NL', {weekday:'short', day:'numeric', month:'short'})}</div>
+        </div>
                     <div class="card-divider"></div>
                     <div class="teams-row">
                         <div class="team home">

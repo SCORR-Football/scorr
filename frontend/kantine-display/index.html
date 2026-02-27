@@ -26,7 +26,6 @@
             overflow-x: hidden;
         }
 
-        /* Subtle grid background */
         body::before {
             content: '';
             position: fixed;
@@ -39,7 +38,6 @@
             z-index: 0;
         }
 
-        /* ===== HEADER ===== */
         .header {
             position: relative;
             z-index: 1;
@@ -107,7 +105,6 @@
             flex-shrink: 0;
         }
 
-        /* ===== LIVE TICKER ===== */
         .live-ticker {
             position: relative;
             z-index: 1;
@@ -163,7 +160,6 @@
             gap: 6px;
         }
 
-        /* ===== CONTAINER ===== */
         .container {
             position: relative;
             z-index: 1;
@@ -172,7 +168,6 @@
             padding: 32px 40px;
         }
 
-        /* ===== SECTION HEADER ===== */
         .section-header {
             display: flex;
             align-items: center;
@@ -200,7 +195,6 @@
             font-weight: 600;
         }
 
-        /* ===== MATCH CARD ===== */
         .match-card {
             background: rgba(30,39,73,0.6);
             border: 1px solid rgba(255,255,255,0.07);
@@ -211,20 +205,16 @@
             align-items: center;
             gap: 20px;
             transition: all 0.3s ease;
-            backdrop-filter: blur(4px);
         }
 
         .match-card.live {
             border-color: rgba(0,255,136,0.3);
             background: linear-gradient(135deg, rgba(30,39,73,0.8) 0%, rgba(0,255,136,0.04) 100%);
-            box-shadow: 0 0 24px rgba(0,255,136,0.06), inset 0 0 0 1px rgba(0,255,136,0.15);
+            box-shadow: 0 0 24px rgba(0,255,136,0.06);
         }
 
-        .match-card.afgelopen {
-            opacity: 0.6;
-        }
+        .match-card.afgelopen { opacity: 0.6; }
 
-        /* Status */
         .match-status {
             display: flex;
             flex-direction: column;
@@ -263,7 +253,6 @@
         .status-badge.straks { background: var(--yellow); color: var(--dark); }
         .status-badge.afgelopen { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
 
-        /* Divider */
         .card-divider {
             width: 1px;
             height: 48px;
@@ -271,7 +260,6 @@
             flex-shrink: 0;
         }
 
-        /* Teams */
         .teams-row {
             flex: 1;
             display: flex;
@@ -301,6 +289,14 @@
             font-size: 12px;
             color: white;
             border: 2px solid rgba(255,255,255,0.15);
+            overflow: hidden;
+        }
+
+        .team-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 3px;
         }
 
         .team-name {
@@ -314,7 +310,6 @@
 
         .team.away .team-name { text-align: right; }
 
-        /* Score */
         .score-block {
             display: flex;
             align-items: center;
@@ -340,7 +335,6 @@
             color: rgba(240,244,255,0.2);
         }
 
-        /* Veld badge */
         .veld-badge {
             font-size: 11px;
             color: rgba(240,244,255,0.3);
@@ -352,7 +346,6 @@
             flex-shrink: 0;
         }
 
-        /* ===== EMPTY STATE ===== */
         .empty-state {
             text-align: center;
             padding: 80px 40px;
@@ -363,7 +356,6 @@
         .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
         .empty-sub { font-size: 14px; font-weight: 300; }
 
-        /* ===== FOOTER ===== */
         .footer {
             position: relative;
             z-index: 1;
@@ -398,87 +390,43 @@
             animation: blink 2s infinite;
         }
 
-        /* ===== RESPONSIVE: VERTICAAL SCHERM ===== */
-@media (max-width: 768px) {
-    .header {
-        padding: 16px;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .club-name { font-size: 20px; }
-    .scorr-logo { font-size: 32px; }
-    .club-logo { width: 44px; height: 44px; font-size: 20px; }
-    .live-ticker { padding: 8px 16px; }
-    .ticker-update { display: none; }
-    .container { padding: 12px 16px; }
-    
-    .match-card {
-        padding: 14px 16px;
-        gap: 10px;
-        flex-direction: row;
-        align-items: center;
-    }
-    
-    .match-status {
-        flex-direction: column;
-        align-items: center;
-        min-width: 64px;
-        gap: 4px;
-    }
-    
-    .match-time { font-size: 18px; }
-    .card-divider { display: none; }
-    
-    .teams-row {
-        flex-direction: column;
-        gap: 6px;
-        flex: 1;
-    }
-    
-    .team, .team.away {
-        flex-direction: row;
-        justify-content: flex-start;
-        width: 100%;
-        gap: 8px;
-    }
-    
-    .team.away .team-name { text-align: left; }
-    .team-name { font-size: 14px; }
-    .team-logo { width: 32px; height: 32px; font-size: 10px; }
-    
-    .score-block {
-        justify-content: center;
-        padding: 4px 0;
-        gap: 4px;
-    }
-    
-    .score { font-size: 28px; min-width: 32px; }
-    .score-sep { font-size: 20px; }
-    
-    .veld-badge { display: none; }
-    
-    .footer {
-        flex-direction: column;
-        gap: 6px;
-        padding: 12px 16px;
-        font-size: 11px;
-    }
-}
+        @media (max-width: 768px) {
+            .header { padding: 16px; flex-wrap: wrap; gap: 10px; }
+            .club-name { font-size: 20px; }
+            .scorr-logo { font-size: 32px; }
+            .club-logo { width: 44px; height: 44px; font-size: 20px; }
+            .live-ticker { padding: 8px 16px; }
+            .ticker-update { display: none; }
+            .container { padding: 12px 16px; }
+            .match-card { padding: 14px 16px; gap: 10px; flex-direction: row; align-items: center; }
+            .match-status { flex-direction: column; align-items: center; min-width: 64px; gap: 4px; }
+            .match-time { font-size: 18px; }
+            .card-divider { display: none; }
+            .teams-row { flex-direction: column; gap: 6px; flex: 1; }
+            .team, .team.away { flex-direction: row; justify-content: flex-start; width: 100%; gap: 8px; }
+            .team.away .team-name { text-align: left; }
+            .team-name { font-size: 14px; }
+            .team-logo { width: 32px; height: 32px; font-size: 10px; }
+            .score-block { justify-content: center; padding: 4px 0; gap: 4px; }
+            .score { font-size: 28px; min-width: 32px; }
+            .score-sep { font-size: 20px; }
+            .veld-badge { display: none; }
+            .footer { flex-direction: column; gap: 6px; padding: 12px 16px; font-size: 11px; }
+        }
 
-@media (max-width: 480px) {
-    .club-name { font-size: 17px; }
-    .header-subtitle { font-size: 9px; }
-    .scorr-logo { font-size: 26px; }
-    .section-title { font-size: 14px; }
-    .team-name { font-size: 13px; }
-    .score { font-size: 24px; }
-    .match-time { font-size: 16px; }
-}
+        @media (max-width: 480px) {
+            .club-name { font-size: 17px; }
+            .header-subtitle { font-size: 9px; }
+            .scorr-logo { font-size: 26px; }
+            .section-title { font-size: 14px; }
+            .team-name { font-size: 13px; }
+            .score { font-size: 24px; }
+            .match-time { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <div class="header">
         <div class="header-left">
             <div class="club-logo">⚽</div>
@@ -491,7 +439,6 @@
         <div class="scorr-logo">SCORR</div>
     </div>
 
-    <!-- Live ticker -->
     <div class="live-ticker">
         <div class="live-pill">
             <div class="live-dot"></div>
@@ -503,7 +450,6 @@
         </div>
     </div>
 
-    <!-- Content -->
     <div class="container">
         <div id="competition-section">
             <div class="section-header">
@@ -520,7 +466,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         <div class="footer-scorr">SCORR</div>
         <div>Laatste update: <span id="footerUpdate">—</span></div>
@@ -530,11 +475,12 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+    <!-- Firebase compat versie - werkt op alle browsers inclusief LG TV -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-        const firebaseConfig = {
+    <script>
+        var firebaseConfig = {
             apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
             authDomain: "scorr-c604a.firebaseapp.com",
             databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
@@ -544,104 +490,112 @@
             appId: "1:413840042688:web:3183c36fd20f27ac925b25"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
 
         function updateTimestamp() {
-            const now = new Date();
-            const str = now.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            var now = new Date();
+            var str = now.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
             document.getElementById('lastUpdate').textContent = str;
             document.getElementById('footerUpdate').textContent = str;
         }
-    function getLogo(naam) {
-        if (naam.toLowerCase().includes('purmerend')) return '/frontend/assets/logos/logo_fcpurmerend_nieuw.png';
-        if (naam.toLowerCase().includes('monnickendam')) return '/frontend/assets/logos/logo-512-512.png';
-        if (naam.toLowerCase().includes('graveland')) return '/frontend/assets/logos/images-3.png';
-        return null;
-    }
+
+        function getLogo(naam) {
+            if (!naam) return null;
+            if (naam.toLowerCase().indexOf('purmerend') !== -1) return '/frontend/assets/logos/logo_fcpurmerend_nieuw.png';
+            if (naam.toLowerCase().indexOf('monnickendam') !== -1) return '/frontend/assets/logos/logo-512-512.png';
+            if (naam.toLowerCase().indexOf('graveland') !== -1) return '/frontend/assets/logos/images-3.png';
+            return null;
+        }
+
         function getInitials(naam) {
-            return naam.split(' ').map(w => w[0]).join('').substring(0, 3).toUpperCase();
+            if (!naam) return '?';
+            return naam.split(' ').map(function(w) { return w[0]; }).join('').substring(0, 3).toUpperCase();
         }
 
         function renderWedstrijden(wedstrijden) {
-            const list = document.getElementById('wedstrijden-list');
-            document.getElementById('matchCount').textContent = `${wedstrijden.length} wedstrijd${wedstrijden.length !== 1 ? 'en' : ''}`;
+            var list = document.getElementById('wedstrijden-list');
+            var count = wedstrijden.length;
+            document.getElementById('matchCount').textContent = count + ' wedstrijd' + (count !== 1 ? 'en' : '');
 
-            if (wedstrijden.length === 0) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📅</div>
-                        <div class="empty-title">Geen wedstrijden gepland</div>
-                        <div class="empty-sub">Er staan geen wedstrijden in de komende 48 uur</div>
-                    </div>`;
+            if (count === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Geen wedstrijden gepland</div><div class="empty-sub">Er staan geen wedstrijden in de komende 48 uur</div></div>';
                 return;
             }
 
-            // Sorteer: live eerst, dan op tijdstip
-            wedstrijden.sort((a, b) => {
+            wedstrijden.sort(function(a, b) {
                 if (a.status === 'bezig' && b.status !== 'bezig') return -1;
                 if (b.status === 'bezig' && a.status !== 'bezig') return 1;
                 return (a.tijdstip || '').localeCompare(b.tijdstip || '');
             });
 
-            list.innerHTML = wedstrijden.map(w => {
-                const isLive = w.status === 'bezig';
-                const isAfgelopen = w.status === 'afgelopen';
-                const isRust = w.status === 'rust';
+            var vandaagStr = new Date().toISOString().split('T')[0];
 
-                const badgeClass = isLive || isRust ? 'live' : isAfgelopen ? 'afgelopen' : 'straks';
-                const vandaagStr = new Date().toISOString().split('T')[0];
-                const isVandaag = w.datum === vandaagStr;
-                const badgeText = isLive ? 'LIVE' : isRust ? 'RUST' : isAfgelopen ? 'Afgelopen' : isVandaag ? 'Straks' : 'Morgen';
-                const tijdText = isLive ? '●' : isAfgelopen ? 'AFG' : (w.tijdstip || '—');
+            var html = '';
+            for (var i = 0; i < wedstrijden.length; i++) {
+                var w = wedstrijden[i];
+                var isLive = w.status === 'bezig';
+                var isAfgelopen = w.status === 'afgelopen';
+                var isRust = w.status === 'rust';
 
-                const thuisInitials = getInitials(w.thuisteam || 'Thuis');
-                const uitInitials = getInitials(w.uitteam || 'Uit');
+                var badgeClass = (isLive || isRust) ? 'live' : isAfgelopen ? 'afgelopen' : 'straks';
+                var isVandaag = w.datum === vandaagStr;
+                var badgeText = isLive ? 'LIVE' : isRust ? 'RUST' : isAfgelopen ? 'Afgelopen' : isVandaag ? 'Straks' : 'Morgen';
+                var tijdText = isLive ? '●' : isAfgelopen ? 'AFG' : (w.tijdstip || '—');
 
-                const score = isLive || isAfgelopen || isRust
-                    ? `<div class="score">${w.thuisscore ?? 0}</div><div class="score-sep">—</div><div class="score">${w.uitscore ?? 0}</div>`
-                    : `<div class="score" style="color:rgba(240,244,255,0.3)">-</div><div class="score-sep">—</div><div class="score" style="color:rgba(240,244,255,0.3)">-</div>`;
+                var datumStr = '';
+                if (w.datum) {
+                    var d = new Date(w.datum + 'T00:00:00');
+                    datumStr = d.toLocaleDateString('nl-NL', {weekday:'short', day:'numeric', month:'short'});
+                }
 
-                const veldBadge = w.veld && w.veld !== 'n.v.t.' ? `<div class="veld-badge">Veld ${w.veld}</div>` : '';
+                var thuisLogo = getLogo(w.thuisteam);
+                var uitLogo = getLogo(w.uitteam);
+                var thuisInitials = getInitials(w.thuisteam);
+                var uitInitials = getInitials(w.uitteam);
 
-               return `
-    <div class="match-card ${isLive || isRust ? 'live' : ''} ${isAfgelopen ? 'afgelopen' : ''}">
-        <div class="match-status">
-            <div class="match-time ${isLive ? 'live' : ''}">${tijdText}</div>
-            <div class="status-badge ${badgeClass}">${badgeText}</div>
-            <div style="font-size:11px; color:rgba(240,244,255,0.35); margin-top:4px; text-align:center;">${new Date(w.datum + 'T00:00:00').toLocaleDateString('nl-NL', {weekday:'short', day:'numeric', month:'short'})}</div>
-        </div>
-        <div class="card-divider"></div>
-        <div class="teams-row">
-            <div class="team home">
-                <div class="team-logo" style="background:${getLogo(w.thuisteam) ? 'white' : '#003399'};">
-                    ${getLogo(w.thuisteam) ? `<img src="${getLogo(w.thuisteam)}" style="width:100%;height:100%;object-fit:contain;padding:3px;">` : thuisInitials}
-                </div>
-                <div class="team-name">${w.thuisteam || 'Thuis'}</div>
-            </div>
-            <div class="score-block">${score}</div>
-            <div class="team away">
-                <div class="team-logo" style="background:${getLogo(w.thuisteam) ? 'white' : '#003399'};"">
-                    ${getLogo(w.uitteam) ? `<img src="${getLogo(w.uitteam)}" style="width:100%;height:100%;object-fit:contain;padding:3px;">` : uitInitials}
-                </div>
-                <div class="team-name">${w.uitteam || 'Uit'}</div>
-            </div>
-        </div>
-        ${veldBadge}
-    </div>`;
-}).join('');
-updateTimestamp();
-}
+                var thuisLogoHtml = thuisLogo
+                    ? '<div class="team-logo" style="background:white;"><img src="' + thuisLogo + '"></div>'
+                    : '<div class="team-logo" style="background:#003399;">' + thuisInitials + '</div>';
 
-        // Live Firebase listener
-        onValue(ref(db, 'wedstrijden'), (snapshot) => {
-            const wedstrijden = [];
+                var uitLogoHtml = uitLogo
+                    ? '<div class="team-logo" style="background:white;"><img src="' + uitLogo + '"></div>'
+                    : '<div class="team-logo" style="background:#1E2749;">' + uitInitials + '</div>';
+
+                var scoreHtml = (isLive || isAfgelopen || isRust)
+                    ? '<div class="score">' + (w.thuisscore || 0) + '</div><div class="score-sep">—</div><div class="score">' + (w.uitscore || 0) + '</div>'
+                    : '<div class="score" style="color:rgba(240,244,255,0.3)">-</div><div class="score-sep">—</div><div class="score" style="color:rgba(240,244,255,0.3)">-</div>';
+
+                var veldBadge = (w.veld && w.veld !== 'n.v.t.') ? '<div class="veld-badge">Veld ' + w.veld + '</div>' : '';
+
+                html += '<div class="match-card ' + ((isLive || isRust) ? 'live' : '') + ' ' + (isAfgelopen ? 'afgelopen' : '') + '">';
+                html += '<div class="match-status">';
+                html += '<div class="match-time ' + (isLive ? 'live' : '') + '">' + tijdText + '</div>';
+                html += '<div class="status-badge ' + badgeClass + '">' + badgeText + '</div>';
+                html += '<div style="font-size:11px;color:rgba(240,244,255,0.35);margin-top:4px;text-align:center;">' + datumStr + '</div>';
+                html += '</div>';
+                html += '<div class="card-divider"></div>';
+                html += '<div class="teams-row">';
+                html += '<div class="team home">' + thuisLogoHtml + '<div class="team-name">' + (w.thuisteam || 'Thuis') + '</div></div>';
+                html += '<div class="score-block">' + scoreHtml + '</div>';
+                html += '<div class="team away">' + uitLogoHtml + '<div class="team-name">' + (w.uitteam || 'Uit') + '</div></div>';
+                html += '</div>';
+                html += veldBadge;
+                html += '</div>';
+            }
+
+            list.innerHTML = html;
+            updateTimestamp();
+        }
+
+        db.ref('wedstrijden').on('value', function(snapshot) {
+            var wedstrijden = [];
             if (snapshot.exists()) {
-                snapshot.forEach((child) => {
-                    const data = child.val();
-                    const wedstrijdDatum = new Date(data.datum + 'T00:00:00');
-                    const nu = new Date();
-                    const verschilUren = (wedstrijdDatum - nu) / (1000 * 60 * 60);
+                snapshot.forEach(function(child) {
+                    var data = child.val();
+                    var wedstrijdDatum = new Date(data.datum + 'T00:00:00');
+                    var nu = new Date();
+                    var verschilUren = (wedstrijdDatum - nu) / (1000 * 60 * 60);
                     if (verschilUren >= -24 && verschilUren <= 48) {
                         wedstrijden.push(data);
                     }

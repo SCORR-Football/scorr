@@ -37,6 +37,7 @@
             z-index: 0;
         }
 
+        /* ===== HEADER ===== */
         .header {
             position: relative;
             z-index: 1;
@@ -52,8 +53,7 @@
         .header::after {
             content: '';
             position: absolute;
-            bottom: -1px;
-            left: 0; right: 0;
+            bottom: -1px; left: 0; right: 0;
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--green), transparent);
         }
@@ -72,12 +72,29 @@
         .club-name { font-size: 28px; font-weight: 700; color: var(--white); line-height: 1.1; }
         .header-subtitle { font-size: 11px; color: var(--green); font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-top: 4px; }
 
+        /* PILOT badge - centered, green */
+        .pilot-badge {
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--green);
+            border: 2px solid rgba(0,255,136,0.5);
+            padding: 6px 20px;
+            border-radius: 20px;
+            text-shadow: 0 0 16px rgba(0,255,136,0.4);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         .scorr-logo {
             font-size: 52px; font-weight: 900; letter-spacing: -3px;
             color: var(--green); text-shadow: 0 0 40px rgba(0,255,136,0.3);
             line-height: 1; flex-shrink: 0;
         }
 
+        /* ===== LIVE TICKER ===== */
         .live-ticker {
             position: relative; z-index: 1;
             background: rgba(0,255,136,0.06);
@@ -94,16 +111,14 @@
             text-transform: uppercase; flex-shrink: 0;
         }
 
-        .live-dot {
-            width: 6px; height: 6px; background: white;
-            border-radius: 50%; animation: blink 1.5s infinite;
-        }
+        .live-dot { width: 6px; height: 6px; background: white; border-radius: 50%; animation: blink 1.5s infinite; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
         .ticker-text { font-size: 12px; color: rgba(240,244,255,0.5); font-weight: 300; letter-spacing: 1px; }
         .ticker-update { margin-left: auto; font-size: 11px; color: rgba(240,244,255,0.3); }
 
+        /* ===== CONTAINER ===== */
         .container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 32px 40px; }
 
         .section-header {
@@ -116,6 +131,7 @@
         .section-title { font-size: 18px; font-weight: 700; color: var(--white); flex: 1; }
         .match-count { font-size: 12px; color: rgba(240,244,255,0.4); background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 20px; font-weight: 600; }
 
+        /* ===== MATCH CARD ===== */
         .match-card {
             background: rgba(30,39,73,0.6);
             border: 1px solid rgba(255,255,255,0.07);
@@ -131,8 +147,9 @@
             box-shadow: 0 0 24px rgba(0,255,136,0.06);
         }
 
-        .match-card.afgelopen { opacity: 0.6; }
+        .match-card.afgelopen { opacity: 0.7; }
 
+        /* Status */
         .match-status { display: flex; flex-direction: column; align-items: center; min-width: 88px; gap: 6px; }
 
         .match-time { font-size: 26px; font-weight: 700; color: var(--white); line-height: 1; }
@@ -146,39 +163,61 @@
         .status-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 3px 10px; border-radius: 10px; }
         .status-badge.live { background: var(--green); color: var(--dark); }
         .status-badge.straks { background: var(--yellow); color: var(--dark); }
-        .status-badge.afgelopen { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+        .status-badge.morgen { background: var(--yellow); color: var(--dark); }
+        .status-badge.afgelopen { background: var(--red); color: white; }
 
         .card-divider { width: 1px; height: 48px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
 
+        /* Teams */
         .teams-row { flex: 1; display: flex; align-items: center; gap: 16px; }
 
         .team { flex: 1; display: flex; align-items: center; gap: 14px; min-width: 0; }
         .team.away { flex-direction: row-reverse; }
 
+        /* Logo - geen zwarte rand */
         .team-logo {
-            width: 44px; height: 44px; border-radius: 50%;
+            width: 48px; height: 48px;
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; font-weight: 900; font-size: 12px; color: white;
-            border: 2px solid rgba(255,255,255,0.15); overflow: hidden;
+            flex-shrink: 0;
+            font-weight: 900; font-size: 12px; color: white;
+            overflow: hidden;
+            background: white;
         }
 
-        .team-logo img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+        .team-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .team-logo.initials {
+            background: #003399;
+            font-size: 13px;
+        }
+
+        .team-logo.initials.away { background: #1E2749; }
 
         .team-name { font-size: 18px; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .team.away .team-name { text-align: right; }
 
+        /* Score */
         .score-block { display: flex; align-items: center; gap: 8px; padding: 0 16px; flex-shrink: 0; }
         .score { font-size: 44px; font-weight: 900; color: var(--white); min-width: 48px; text-align: center; line-height: 1; }
         .match-card.live .score { color: var(--green); }
         .score-sep { font-size: 28px; font-weight: 300; color: rgba(240,244,255,0.2); }
 
+        /* Veld */
         .veld-badge { font-size: 11px; color: rgba(240,244,255,0.3); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 8px; font-weight: 600; flex-shrink: 0; }
 
+        /* Empty */
         .empty-state { text-align: center; padding: 80px 40px; color: rgba(240,244,255,0.2); }
         .empty-icon { font-size: 64px; margin-bottom: 16px; }
         .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
         .empty-sub { font-size: 14px; font-weight: 300; }
 
+        /* Footer */
         .footer {
             position: relative; z-index: 1;
             padding: 24px 40px; color: rgba(255,255,255,0.2); font-size: 12px;
@@ -190,8 +229,10 @@
         .auto-refresh { display: flex; align-items: center; gap: 8px; }
         .refresh-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: blink 2s infinite; }
 
+        /* Responsive */
         @media (max-width: 768px) {
             .header { padding: 16px; flex-wrap: wrap; gap: 10px; }
+            .pilot-badge { position: static; transform: none; font-size: 10px; padding: 4px 12px; }
             .club-name { font-size: 20px; }
             .scorr-logo { font-size: 32px; }
             .club-logo { width: 44px; height: 44px; font-size: 20px; }
@@ -206,7 +247,7 @@
             .team, .team.away { flex-direction: row; justify-content: flex-start; width: 100%; gap: 8px; }
             .team.away .team-name { text-align: left; }
             .team-name { font-size: 14px; }
-            .team-logo { width: 32px; height: 32px; font-size: 10px; }
+            .team-logo { width: 32px; height: 32px; }
             .score-block { justify-content: center; padding: 4px 0; gap: 4px; }
             .score { font-size: 28px; min-width: 32px; }
             .score-sep { font-size: 20px; }
@@ -233,7 +274,7 @@
                 <div class="header-subtitle">Live Wedstrijden</div>
             </div>
         </div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(240,244,255,0.4);border:1px solid rgba(240,244,255,0.2);padding:4px 14px;border-radius:20px;">PILOT</div>
+        <div class="pilot-badge">PILOT</div>
         <div class="scorr-logo">SCORR</div>
     </div>
 
@@ -280,6 +321,17 @@
             return naam.split(' ').map(function(w) { return w[0]; }).join('').substring(0, 3).toUpperCase();
         }
 
+        function getMinuut(w) {
+            if (!w.startTijd) return null;
+            var nu = Date.now();
+            var verstreken = Math.floor((nu - w.startTijd) / 60000);
+            var helfttijd = w.helfttijd || 45;
+            if (w.status === 'bezig') {
+                return Math.min(verstreken + 1, helfttijd) + "'";
+            }
+            return null;
+        }
+
         function updateTimestamp() {
             var now = new Date();
             var str = now.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -313,10 +365,13 @@
                 var isAfgelopen = w.status === 'afgelopen';
                 var isRust = w.status === 'rust';
 
-                var badgeClass = (isLive || isRust) ? 'live' : isAfgelopen ? 'afgelopen' : 'straks';
                 var isVandaag = w.datum === vandaagStr;
+                var badgeClass = (isLive || isRust) ? 'live' : isAfgelopen ? 'afgelopen' : isVandaag ? 'straks' : 'morgen';
                 var badgeText = isLive ? 'LIVE' : isRust ? 'RUST' : isAfgelopen ? 'Afgelopen' : isVandaag ? 'Straks' : 'Morgen';
-                var tijdText = isLive ? '●' : isAfgelopen ? 'AFG' : (w.tijdstip || '—');
+
+                // Tijd display: minuut als live, anders tijdstip
+                var minutStr = getMinuut(w);
+                var tijdText = isLive && minutStr ? minutStr : isAfgelopen ? 'AFG' : (w.tijdstip || '—');
 
                 var datumStr = '';
                 if (w.datum) {
@@ -328,12 +383,12 @@
                 var uitLogo = getLogo(w.uitteam);
 
                 var thuisLogoHtml = thuisLogo
-                    ? '<div class="team-logo" style="background:white;"><img src="' + thuisLogo + '"></div>'
-                    : '<div class="team-logo" style="background:#003399;">' + getInitials(w.thuisteam) + '</div>';
+                    ? '<div class="team-logo"><img src="' + thuisLogo + '" onerror="this.parentNode.className=\'team-logo initials\';this.parentNode.innerHTML=\'' + getInitials(w.thuisteam) + '\'"></div>'
+                    : '<div class="team-logo initials">' + getInitials(w.thuisteam) + '</div>';
 
                 var uitLogoHtml = uitLogo
-                    ? '<div class="team-logo" style="background:white;"><img src="' + uitLogo + '"></div>'
-                    : '<div class="team-logo" style="background:#1E2749;">' + getInitials(w.uitteam) + '</div>';
+                    ? '<div class="team-logo"><img src="' + uitLogo + '" onerror="this.parentNode.className=\'team-logo initials away\';this.parentNode.innerHTML=\'' + getInitials(w.uitteam) + '\'"></div>'
+                    : '<div class="team-logo initials away">' + getInitials(w.uitteam) + '</div>';
 
                 var scoreHtml = (isLive || isAfgelopen || isRust)
                     ? '<div class="score">' + (w.thuisscore || 0) + '</div><div class="score-sep">—</div><div class="score">' + (w.uitscore || 0) + '</div>'
@@ -370,7 +425,6 @@
                         var data = JSON.parse(xhr.responseText);
                         var wedstrijden = [];
                         var nu = new Date();
-
                         if (data) {
                             for (var key in data) {
                                 if (data.hasOwnProperty(key)) {
@@ -394,7 +448,6 @@
             xhr.send();
         }
 
-        // Direct laden en daarna elke 10 seconden
         fetchWedstrijden();
         setInterval(fetchWedstrijden, 10000);
     </script>

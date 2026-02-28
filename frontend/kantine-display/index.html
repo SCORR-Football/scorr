@@ -176,7 +176,7 @@
 
         /* Logo - geen zwarte rand */
         .team-logo {
-            width: 48px; height: 48px;
+            width: 56px; height: 56px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
@@ -313,7 +313,7 @@
             naam = naam.toLowerCase();
             if (naam.indexOf('purmerend') !== -1) return '/frontend/assets/logos/logo_fcpurmerend_nieuw.png';
             if (naam.indexOf('monnickendam') !== -1) return '/frontend/assets/logos/logo-512-512.png';
-            if (naam.indexOf('graveland') !== -1) return '/frontend/assets/logos/images-3.png';
+            if (naam.indexOf('graveland') !== -1 || naam.indexOf('gaveland') !== -1) return '/frontend/assets/logos/images-3.png';
             return null;
         }
 

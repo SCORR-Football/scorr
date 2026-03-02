@@ -1526,6 +1526,11 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     document.getElementById('banner-datum').textContent = wedstrijd.datum;
     document.getElementById('banner-tijdstip').textContent = wedstrijd.tijdstip;
     document.getElementById('banner-klasse').textContent = wedstrijd.klasse;
+    document.getElementById('banner-score').textContent = homeScoreValue + ' - ' + awayScoreValue;
+    setInterval(() => {
+        var el = document.getElementById('banner-score');
+        if (el) el.textContent = homeScoreValue + ' - ' + awayScoreValue;
+    }, 2000);
 
     document.getElementById('banner-wijzig-btn').addEventListener('click', () => {
       document.getElementById('scorr-banner').style.display = 'none';
@@ -1618,6 +1623,8 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     <span style="font-size:12px; color:rgba(240,244,255,0.5);">·</span>
     <span id="banner-datum" style="font-size:12px; color:rgba(240,244,255,0.5);"></span>
     <span id="banner-tijdstip" style="font-size:12px; color:rgba(240,244,255,0.5);"></span>
+    <span style="font-size:12px; color:rgba(240,244,255,0.5);">·</span>
+<span id="banner-score" style="font-size:14px; font-weight:700; color:#00FF88;">0 - 0</span>
 <div style="display:flex; gap:8px;">
     <button id="banner-wijzig-btn" style="background:transparent; border:1px solid rgba(255,214,0,0.4); color:#FFD600; border-radius:6px; padding:6px 16px; font-size:12px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
         ✎ Wijzigen

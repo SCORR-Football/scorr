@@ -1411,7 +1411,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
       await auth.signOut();
       window.location.href = '/frontend/auth/login.html';
   });
-  
+
   async function toonSelectieScherm(teamNaam, user) {
     const snapshot = await get(ref(db, 'wedstrijden'));
     
@@ -1618,11 +1618,13 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     <span style="font-size:12px; color:rgba(240,244,255,0.5);">·</span>
     <span id="banner-datum" style="font-size:12px; color:rgba(240,244,255,0.5);"></span>
     <span id="banner-tijdstip" style="font-size:12px; color:rgba(240,244,255,0.5);"></span>
-  </div>
-
-  <button id="banner-wijzig-btn" style="background:transparent; border:1px solid rgba(255,214,0,0.4); color:#FFD600; border-radius:6px; padding:6px 16px; font-size:12px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
-    ✎ Wijzigen
-  </button>
+<div style="display:flex; gap:8px;">
+    <button id="banner-wijzig-btn" style="background:transparent; border:1px solid rgba(255,214,0,0.4); color:#FFD600; border-radius:6px; padding:6px 16px; font-size:12px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
+        ✎ Wijzigen
+    </button>
+    <button id="logoutBtn" style="background:transparent; border:1px solid rgba(255,59,92,0.4); color:#FF3B5C; border-radius:6px; padding:6px 16px; font-size:12px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
+        🚪 Uitloggen
+    </button>
 </div>
 
 <!-- Popup HTML -->

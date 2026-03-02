@@ -1364,7 +1364,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -1390,44 +1390,127 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   };
 
   let huidigWedstrijdId = null;
+  let huidigUser = null;
+  let huidigTeamNaam = null;
 
   window.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        const teamNaam = teamMapping[user.email] || "Onbekend Team";
-        checkBestaandeWedstrijd(teamNaam, user);
+        huidigUser = user;
+        huidigTeamNaam = teamMapping[user.email] || "Onbekend Team";
+        toonSelectieScherm(huidigTeamNaam, user);
       } else {
         window.location.href = '/frontend/auth/login.html';
       }
     });
   });
 
-  async function checkBestaandeWedstrijd(teamNaam, user) {
+  async function toonSelectieScherm(teamNaam, user) {
     const snapshot = await get(ref(db, 'wedstrijden'));
-
-    let gevondenWedstrijd = null;
-    let gevondenId = null;
+    
+    let bezig = [];
+    let gepland = [];
 
     if (snapshot.exists()) {
       snapshot.forEach((child) => {
         const data = child.val();
-        if (data.thuisteam === teamNaam && data.status === 'gepland') {
-          gevondenWedstrijd = data;
-          gevondenId = child.key;
+        if (data.thuisteam === teamNaam) {
+          const item = { id: child.key, ...data };
+          if (data.status === 'bezig' || data.status === 'rust') bezig.push(item);
+          else if (data.status === 'gepland') gepland.push(item);
         }
       });
     }
 
-    if (gevondenWedstrijd) {
-      huidigWedstrijdId = gevondenId;
-      localStorage.setItem('wedstrijdId', gevondenId);
-      localStorage.setItem('thuisteam', gevondenWedstrijd.thuisteam);
-      localStorage.setItem('uitteam', gevondenWedstrijd.uitteam);
-      toonBanner(gevondenWedstrijd, teamNaam, user);
-    } else {
-      toonPopup(teamNaam, user, null);
+    // Sorteer gepland op datum
+    gepland.sort((a, b) => (a.datum + a.tijdstip).localeCompare(b.datum + b.tijdstip));
+
+    const overlay = document.getElementById('scorr-selectie-overlay');
+    overlay.style.display = 'flex';
+
+    let html = `
+      <div style="background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:28px; width:100%; max-width:420px; font-family:'Lexend',sans-serif; max-height:90vh; overflow-y:auto;">
+        <div style="text-align:center; margin-bottom:24px;">
+          <div style="font-size:28px; font-weight:900; color:#00FF88; letter-spacing:-1px;">SCORR</div>
+          <div style="font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:4px;">${teamNaam}</div>
+        </div>`;
+
+    if (bezig.length > 0) {
+      html += `<div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:600; margin-bottom:10px;">🔴 Bezig</div>`;
+      bezig.forEach(w => {
+        html += wedstrijdKaart(w, true);
+      });
     }
+
+    if (gepland.length > 0) {
+      html += `<div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; margin-bottom:10px; margin-top:16px;">📅 Komende wedstrijden</div>`;
+      gepland.forEach(w => {
+        html += wedstrijdKaart(w, false);
+      });
+    }
+
+    if (bezig.length === 0 && gepland.length === 0) {
+      html += `<div style="text-align:center; color:rgba(240,244,255,0.3); padding:20px; font-size:13px;">Geen wedstrijden gevonden</div>`;
+    }
+
+    html += `
+        <button onclick="window._toonNieuweWedstrijd()" style="width:100%; margin-top:20px; background:rgba(0,255,136,0.1); color:#00FF88; border:1px solid rgba(0,255,136,0.3); border-radius:8px; padding:14px; font-size:14px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; letter-spacing:1px;">
+          + Nieuwe wedstrijd aanmaken
+        </button>
+      </div>`;
+
+    overlay.innerHTML = html;
   }
+
+  function wedstrijdKaart(w, isBezig) {
+    const borderColor = isBezig ? '#00FF88' : 'rgba(255,255,255,0.1)';
+    const badge = isBezig 
+      ? `<span style="background:#FF3B5C; color:white; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:1px;">LIVE</span>`
+      : `<span style="background:rgba(255,214,0,0.2); color:#FFD600; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; border:1px solid rgba(255,214,0,0.3);">${w.datum} · ${w.tijdstip}</span>`;
+
+    return `
+      <div style="background:rgba(255,255,255,0.04); border:1px solid ${borderColor}; border-radius:10px; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="flex:1; cursor:pointer;" onclick="window._kiesWedstrijd('${w.id}')">
+          ${badge}
+          <div style="font-size:14px; font-weight:700; color:#F0F4FF; margin-top:6px;">${w.uitteam}</div>
+          <div style="font-size:11px; color:rgba(240,244,255,0.4); margin-top:2px;">${w.klasse} · Veld ${w.veld || '?'}</div>
+        </div>
+        <button onclick="window._verwijderWedstrijd('${w.id}')" style="background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); color:#FF3B5C; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
+          🗑 Verwijder
+        </button>
+      </div>`;
+  }
+
+  window._kiesWedstrijd = function(wedstrijdId) {
+    get(ref(db, 'wedstrijden/' + wedstrijdId)).then((snap) => {
+      if (!snap.exists()) return;
+      const w = snap.val();
+      huidigWedstrijdId = wedstrijdId;
+      localStorage.setItem('wedstrijdId', wedstrijdId);
+      localStorage.setItem('thuisteam', w.thuisteam);
+      localStorage.setItem('uitteam', w.uitteam);
+      document.getElementById('homeTeamName').value = w.thuisteam;
+      document.getElementById('awayTeamName').value = w.uitteam;
+      if (w.helfttijd) halfDuration = w.helfttijd;
+      document.getElementById('scorr-selectie-overlay').style.display = 'none';
+      toonBanner(w, huidigTeamNaam, huidigUser);
+    });
+  };
+
+  window._verwijderWedstrijd = async function(wedstrijdId) {
+    if (!confirm('Weet je zeker dat je deze wedstrijd wilt verwijderen?')) return;
+    await remove(ref(db, 'wedstrijden/' + wedstrijdId));
+    if (localStorage.getItem('wedstrijdId') === wedstrijdId) {
+      localStorage.removeItem('wedstrijdId');
+    }
+    toonSelectieScherm(huidigTeamNaam, huidigUser);
+  };
+
+  window._toonNieuweWedstrijd = function() {
+    document.getElementById('scorr-selectie-overlay').style.display = 'none';
+    huidigWedstrijdId = null;
+    toonPopup(huidigTeamNaam, huidigUser, null);
+  };
 
   function toonBanner(wedstrijd, teamNaam, user) {
     document.getElementById('scorr-banner').style.display = 'flex';
@@ -1439,21 +1522,22 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
     document.getElementById('banner-wijzig-btn').addEventListener('click', () => {
       document.getElementById('scorr-banner').style.display = 'none';
-      toonPopup(teamNaam, user, wedstrijd);
+      toonSelectieScherm(teamNaam, user);
     });
-    var liveUrl = 'https://scorr-c604a.web.app/frontend/live/index.html?id=' + huidigWedstrijdId;
-var whatsappTekst = encodeURIComponent('⚽ Volg de wedstrijd live!\n' + wedstrijd.thuisteam + ' vs ' + wedstrijd.uitteam + '\n' + wedstrijd.datum + ' · ' + wedstrijd.tijdstip + '\n\n' + liveUrl);
 
-var bestaandeBtn = document.getElementById('banner-share-btn');
-if (!bestaandeBtn) {
-    var shareBtn = document.createElement('a');
-    shareBtn.id = 'banner-share-btn';
-    shareBtn.href = 'https://wa.me/?text=' + whatsappTekst;
-    shareBtn.target = '_blank';
-    shareBtn.textContent = '📲 Deel via WhatsApp';
-    shareBtn.style.cssText = 'display:inline-block; margin-top:10px; background:#25D366; color:white; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; letter-spacing:1px;';
-    document.getElementById('scorr-banner').appendChild(shareBtn);
-}
+    var liveUrl = 'https://scorr-c604a.web.app/frontend/live/index.html?id=' + huidigWedstrijdId;
+    var whatsappTekst = encodeURIComponent('⚽ Volg de wedstrijd live!\n' + wedstrijd.thuisteam + ' vs ' + wedstrijd.uitteam + '\n' + wedstrijd.datum + ' · ' + wedstrijd.tijdstip + '\n\n' + liveUrl);
+
+    var bestaandeBtn = document.getElementById('banner-share-btn');
+    if (!bestaandeBtn) {
+      var shareBtn = document.createElement('a');
+      shareBtn.id = 'banner-share-btn';
+      shareBtn.href = 'https://wa.me/?text=' + whatsappTekst;
+      shareBtn.target = '_blank';
+      shareBtn.textContent = '📲 Deel via WhatsApp';
+      shareBtn.style.cssText = 'display:inline-block; margin-top:10px; background:#25D366; color:white; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; letter-spacing:1px;';
+      document.getElementById('scorr-banner').appendChild(shareBtn);
+    }
   }
 
   function toonPopup(teamNaam, user, bestaandeData) {
@@ -1482,6 +1566,7 @@ if (!bestaandeBtn) {
       }
 
       const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
+      huidigWedstrijdId = wedstrijdId;
 
       set(ref(db, `wedstrijden/${wedstrijdId}`), {
         thuisteam: teamNaam,
@@ -1505,9 +1590,14 @@ if (!bestaandeBtn) {
       document.getElementById('awayTeamName').value = tegenstander;
       halfDuration = helfttijd;
       document.getElementById('scorr-popup-overlay').style.display = 'none';
+
+      toonBanner({ thuisteam: teamNaam, uitteam: tegenstander, klasse, datum, tijdstip }, teamNaam, user);
     };
   }
 </script>
+
+<div id="scorr-selectie-overlay" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.97); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
+</div>
 
 <!-- Banner: wedstrijd al gepland -->
 <div id="scorr-banner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9998; background:#1E2749; border-bottom:2px solid rgba(0,255,136,0.4); padding:14px 20px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-family:'Lexend',sans-serif;">

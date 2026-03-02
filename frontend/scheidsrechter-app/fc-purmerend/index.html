@@ -1626,26 +1626,23 @@ window._selecteerThuisUit('thuis');
 </div>
 
 <!-- Banner: wedstrijd al gepland -->
-<div id="scorr-banner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9998; background:#1E2749; border-bottom:2px solid rgba(0,255,136,0.4); padding:14px 20px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-family:'Lexend',sans-serif;">
-  <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-    <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:600;">✓ Wedstrijd geladen</span>
-    <span id="banner-team" style="font-size:14px; font-weight:700; color:#F0F4FF;"></span>
-    <span style="color:rgba(240,244,255,0.4)">vs</span>
-    <span id="banner-tegenstander" style="font-size:14px; font-weight:700; color:#F0F4FF;"></span>
-    <span style="font-size:12px; color:rgba(240,244,255,0.5);">·</span>
-    <span id="banner-klasse" style="font-size:12px; color:rgba(240,244,255,0.5);"></span>
-    <span style="font-size:12px; color:rgba(240,244,255,0.5);">·</span>
-    <span id="banner-datum" style="font-size:12px; color:rgba(240,244,255,0.5);"></span>
-    <span id="banner-tijdstip" style="font-size:12px; color:rgba(240,244,255,0.5);"></span>
-    <span style="font-size:12px; color:rgba(240,244,255,0.5);">·</span>
-<span id="banner-score" style="font-size:14px; font-weight:700; color:#00FF88;">0 - 0</span>
-<div style="display:flex; gap:8px;">
-    <button id="banner-wijzig-btn" style="background:transparent; border:1px solid rgba(255,214,0,0.4); color:#FFD600; border-radius:6px; padding:6px 16px; font-size:12px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
-        ✎ Wijzigen
-    </button>
-    <button id="logoutBtn" style="background:transparent; border:1px solid rgba(255,59,92,0.4); color:#FF3B5C; border-radius:6px; padding:6px 16px; font-size:12px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
-        🚪 Uitloggen
-    </button>
+<div id="scorr-banner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9998; background:#1E2749; border-bottom:2px solid rgba(0,255,136,0.4); padding:10px 16px; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; font-family:'Lexend',sans-serif;">
+  
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:1;">
+    <span style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:600;">✓ Geladen</span>
+    <span id="banner-team" style="font-size:13px; font-weight:700; color:#F0F4FF;"></span>
+    <span style="color:rgba(240,244,255,0.4); font-size:12px;">vs</span>
+    <span id="banner-tegenstander" style="font-size:13px; font-weight:700; color:#F0F4FF;"></span>
+    <span id="banner-score" style="font-size:15px; font-weight:900; color:#00FF88; margin-left:4px;">0 - 0</span>
+    <span style="font-size:11px; color:rgba(240,244,255,0.4);" id="banner-klasse"></span>
+    <span style="font-size:11px; color:rgba(240,244,255,0.4);" id="banner-datum"></span>
+    <span style="font-size:11px; color:rgba(240,244,255,0.4);" id="banner-tijdstip"></span>
+  </div>
+
+  <div style="display:flex; gap:6px; flex-shrink:0;">
+    <button id="banner-wijzig-btn" style="background:transparent; border:1px solid rgba(255,214,0,0.4); color:#FFD600; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">✎ Wijzigen</button>
+    <button id="logoutBtn" style="background:transparent; border:1px solid rgba(255,59,92,0.4); color:#FF3B5C; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">🚪 Uit</button>
+  </div>
 </div>
 
 <!-- Popup HTML -->

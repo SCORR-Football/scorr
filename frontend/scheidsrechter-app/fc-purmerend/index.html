@@ -1573,7 +1573,11 @@ window._selecteerThuisUit = function(keuze) {
     document.getElementById('popup-datum').value = bestaandeData ? bestaandeData.datum : vandaag;
     document.getElementById('popup-tijdstip').value = bestaandeData ? bestaandeData.tijdstip : huidigTijdstip;
     document.getElementById('popup-subtitel').textContent = bestaandeData ? 'Wedstrijd wijzigen' : 'Wedstrijd instellen';
-
+    document.getElementById('popup-error').style.display = 'none';
+document.getElementById('popup-tegenstander').value = bestaandeData ? bestaandeData.uitteam : '';
+document.getElementById('popup-klasse').value = bestaandeData ? bestaandeData.klasse : '';
+thuisOfUit = 'thuis';
+window._selecteerThuisUit('thuis');
     document.getElementById('popup-start-btn').onclick = () => {
       const tegenstander = document.getElementById('popup-tegenstander').value.trim();
       const klasse = document.getElementById('popup-klasse').value.trim();

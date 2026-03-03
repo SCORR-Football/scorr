@@ -908,9 +908,10 @@ var wId = localStorage.getItem('wedstrijdId');
 if (wId && window._firebaseDb) {
     import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
         m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
-            startTijd: Date.now(),
-            status: 'bezig'
-        });
+    startTijd: Date.now(),
+    accumulatedSeconds: accumulatedSeconds,
+    status: 'bezig'
+});
     });
 }
                 initAudioContext();
@@ -1084,23 +1085,6 @@ function changeScore(team, delta) {
                 thuisscore: homeScoreValue,
                 uitscore: awayScoreValue
             });
-
-            // Event opslaan bij doelpunt
-            if (delta > 0) {
-                var nu = Date.now();
-                var startTijd = parseInt(localStorage.getItem('startTijd') || nu);
-                var minuut = Math.floor((nu - startTijd) / 60000) + 1;
-                var ploeg = team === 'home'
-                    ? (localStorage.getItem('homeTeamName') || 'Thuis')
-                    : (localStorage.getItem('awayTeamName') || 'Uit');
-
-                push(ref(window._firebaseDb, `wedstrijden/${wedstrijdId}/events`), {
-                    type: 'goal',
-                    minuut: minuut,
-                    omschrijving: 'Doelpunt ' + ploeg + ' (' + homeScoreValue + '-' + awayScoreValue + ')',
-                    tijdstip: nu
-                });
-            }
         });
     }
 }

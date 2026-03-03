@@ -363,7 +363,7 @@
             function updateTimer() {
                 if (!huidigeData || !huidigeData.startTijd) return;
                 var nu = Date.now();
-                var verstreken = Math.floor((nu - huidigeData.startTijd) / 1000);
+                var verstreken = Math.floor((nu - huidigeData.startTijd) / 1000) + (huidigeData.accumulatedSeconds || 0);
                 var helfttijd = (huidigeData.helfttijd || 45) * 60;
                 var seconden = Math.min(verstreken, helfttijd);
                 var min = Math.floor(seconden / 60);

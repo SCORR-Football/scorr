@@ -306,16 +306,16 @@
             return naam.split(' ').map(function(w) { return w[0]; }).join('').substring(0, 3).toUpperCase();
         }
 
-        function getMinuut(w) {
-            if (!w.startTijd) return null;
-            var nu = Date.now();
-            var verstreken = Math.floor((nu - w.startTijd) / 60000);
-            var helfttijd = w.helfttijd || 45;
-            if (w.status === 'bezig') {
-                return Math.min(verstreken + 1, helfttijd) + "'";
-            }
-            return null;
-        }
+     function getMinuut(w) {
+    if (!w.startTijd) return null;
+    var nu = Date.now();
+    var verstreken = Math.floor((nu - w.startTijd) / 1000) + (w.accumulatedSeconds || 0);
+    var helfttijd = w.helfttijd || 45;
+    if (w.status === 'bezig') {
+        return Math.min(Math.floor(verstreken / 60) + 1, helfttijd) + "'";
+    }
+    return null;
+}
 
         function updateTimestamp() {
             var now = new Date();

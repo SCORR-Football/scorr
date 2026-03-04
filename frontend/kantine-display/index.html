@@ -389,11 +389,27 @@
                 html += '</div>';
                 html += '<div class="card-divider"></div>';
                 html += '<div class="teams-row">';
-                html += '<div class="team home">' + thuisLogoHtml + '<div class="team-name">' + (w.thuisteam || 'Thuis') + '</div></div>';
-                html += '<div class="score-block">' + scoreHtml + '</div>';
-                html += '<div class="team away">' + uitLogoHtml + '<div class="team-name">' + (w.uitteam || 'Uit') + '</div></div>';
-                html += '</div>';
-                html += veldBadge;
+                var thuisGeel = 0, thuisRood = 0, uitGeel = 0, uitRood = 0;
+                if (w.events) {
+                for (var ek in w.events) {
+                var ev = w.events[ek];
+                var isThuis = ev.omschrijving && ev.omschrijving.indexOf(w.thuisteam) !== -1;
+                if (ev.type === 'yellow-card') isThuis ? thuisGeel++ : uitGeel++;
+                if (ev.type === 'red-card') isThuis ? thuisRood++ : uitRood++;
+        }
+    }
+                var thuisKaarten = '';
+                for (var i = 0; i < thuisGeel; i++) thuisKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FFD600;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+                for (var i = 0; i < thuisRood; i++) thuisKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FF3B5C;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+                var uitKaarten = '';
+                for (var i = 0; i < uitGeel; i++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FFD600;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+                for (var i = 0; i < uitRood; i++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FF3B5C;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+
+            html += '<div class="team home">' + thuisLogoHtml + '<div class="team-name">' + (w.thuisteam || 'Thuis') + '</div>' + (thuisKaarten ? '<div style="margin-top:3px;">' + thuisKaarten + '</div>' : '') + '</div>';
+            html += '<div class="score-block">' + scoreHtml + '</div>';
+            html += '<div class="team away">' + uitLogoHtml + '<div class="team-name">' + (w.uitteam || 'Uit') + '</div>' + (uitKaarten ? '<div style="margin-top:3px;">' + uitKaarten + '</div>' : '') + '</div>';
+                            html += '</div>';
+                            html += veldBadge;
                 html += '</div>';
             }
 

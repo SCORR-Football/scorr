@@ -1304,10 +1304,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         document.getElementById('startBtn').addEventListener('click', startTimer);
         document.getElementById('pauseBtn').addEventListener('click', pauseTimer);
         document.getElementById('stopBtn').addEventListener('click', stopTimer);
-        document.getElementById('durationPlusBtn').addEventListener('click', () => changeDuration(5));
-        document.getElementById('durationMinusBtn').addEventListener('click', () => changeDuration(-5));
-        document.getElementById('injuryPlusBtn').addEventListener('click', () => changeInjuryTime(1));
-        document.getElementById('injuryMinusBtn').addEventListener('click', () => changeInjuryTime(-1));
+
 
         document.getElementById('homePlusBtn').addEventListener('click', () => {
             currentGoalTeam = 'home';
@@ -1447,7 +1444,7 @@ window._selecteerThuisUit = function(keuze) {
         html += wedstrijdKaart(w, false);
       });
     }
-
+    
     if (bezig.length === 0 && gepland.length === 0) {
       html += `<div style="text-align:center; color:rgba(240,244,255,0.3); padding:20px; font-size:13px;">Geen wedstrijden gevonden</div>`;
     }

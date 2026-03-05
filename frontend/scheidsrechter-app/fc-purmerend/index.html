@@ -1285,23 +1285,20 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
         // ===== SHARE =====
         async function shareApp() {
-            const inIframe = window.self !== window.top;
-            if (inIframe) {
-                prompt('📤 Kopieer link:', window.location.href);
-                return;
-            }
-            const shareData = { title: 'SCORR Scheidsrechter App', text: 'Live scores bijhouden!', url: window.location.href };
-            try {
-                if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-                    await navigator.share(shareData);
-                } else if (navigator.clipboard) {
-                    await navigator.clipboard.writeText(window.location.href);
-                    alert('📋 Link gekopieerd!');
-                } else {
-                    prompt('Kopieer link:', window.location.href);
-                }
-            } catch (err) { prompt('Kopieer link:', window.location.href); }
+    const wId = window._getWedstrijdId ? window._getWedstrijdId() : null;
+    if (wId) {
+        var liveUrl = 'https://scorr-c604a.web.app/frontend/live/index.html?id=' + wId;
+        var tekst = encodeURIComponent('⚽ Volg de wedstrijd live!\n\n' + liveUrl);
+        window.open('https://wa.me/?text=' + tekst, '_blank');
+    } else {
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(window.location.href);
+            alert('📋 Link gekopieerd!');
+        } else {
+            prompt('Kopieer link:', window.location.href);
         }
+    }
+}
 
         // ===== EVENT LISTENERS =====
         document.getElementById('startBtn').addEventListener('click', startTimer);
@@ -1375,6 +1372,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   };
 
   let huidigWedstrijdId = null;
+  window._getWedstrijdId = () => huidigWedstrijdId;
   let huidigUser = null;
   let huidigTeamNaam = null;
   var thuisOfUit = 'thuis';

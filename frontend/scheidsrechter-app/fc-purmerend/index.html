@@ -1495,6 +1495,18 @@ homeScoreValue = w.thuisscore || 0;
 awayScoreValue = w.uitscore || 0;
 document.getElementById('homeScore').textContent = homeScoreValue;
 document.getElementById('awayScore').textContent = awayScoreValue;
+
+// Events herladen uit Firebase
+events = [];
+if (w.events) {
+    const geladen = Object.values(w.events).sort((a, b) => b.tijdstip - a.tijdstip);
+    geladen.forEach(ev => {
+        const type = ev.type === 'yellow-card' ? 'yellow' : ev.type === 'red-card' ? 'red' : 'goal';
+        const team = ev.omschrijving && ev.omschrijving.indexOf(w.thuisteam) !== -1 ? 'home' : 'away';
+        events.push({ minute: ev.minuut, type, description: ev.omschrijving, team });
+    });
+    renderEvents();
+}
       document.getElementById('scorr-selectie-overlay').style.display = 'none';
       toonBanner(w, huidigTeamNaam, huidigUser);
     });

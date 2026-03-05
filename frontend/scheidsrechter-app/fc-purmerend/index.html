@@ -1551,15 +1551,9 @@ if (w.events) {
     var whatsappTekst = encodeURIComponent('⚽ Volg de wedstrijd live!\n' + wedstrijd.thuisteam + ' vs ' + wedstrijd.uitteam + '\n' + wedstrijd.datum + ' · ' + wedstrijd.tijdstip + '\n\n' + liveUrl);
 
 document.getElementById('banner-share-btn').href = 'https://wa.me/?text=' + whatsappTekst;
-      shareBtn.id = 'banner-share-btn';
-      shareBtn.href = 'https://wa.me/?text=' + whatsappTekst;
-      shareBtn.target = '_blank';
-      shareBtn.textContent = '📲 Deel via WhatsApp';
-      shareBtn.style.cssText = 'display:inline-block; margin-top:10px; background:#25D366; color:white; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; letter-spacing:1px;';
-      document.getElementById('scorr-banner').appendChild(shareBtn);
-    }
-  
+  }
 
+ 
   function toonPopup(teamNaam, user, bestaandeData) {
     const vandaag = new Date().toISOString().split('T')[0];
     const huidigTijdstip = new Date().toTimeString().slice(0,5);

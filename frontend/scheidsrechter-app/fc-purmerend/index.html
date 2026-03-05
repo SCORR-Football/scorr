@@ -1164,10 +1164,23 @@ if (currentHalf === 2) {
         }
 
         function removeLastGoal(team) {
-            const idx = events.findIndex(e => e.type === 'goal' && e.team === team);
-            if (idx === -1) { alert('Geen doelpunt gevonden'); return; }
-            deleteEvent(idx);
-        }
+    // Probeer eerst uit events array
+    const idx = events.findIndex(e => e.type === 'goal' && e.team === team);
+    if (idx !== -1) {
+        deleteEvent(idx);
+        return;
+    }
+    // Geen event gevonden maar score wel aanwezig: direct verlagen
+    if (team === 'home' && homeScoreValue > 0) {
+        if (!confirm('Doelpunt verwijderen uit score?')) return;
+        changeScore('home', -1);
+    } else if (team === 'away' && awayScoreValue > 0) {
+        if (!confirm('Doelpunt verwijderen uit score?')) return;
+        changeScore('away', -1);
+    } else {
+        alert('Geen doelpunt om te verwijderen');
+    }
+}
 
         function deleteEvent(index) {
             const event = events[index];

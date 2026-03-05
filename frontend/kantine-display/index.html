@@ -399,11 +399,11 @@
         }
     }
                 var thuisKaarten = '';
-                for (var i = 0; i < thuisGeel; i++) thuisKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FFD600;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
-                for (var i = 0; i < thuisRood; i++) thuisKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FF3B5C;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+                for (var j = 0; j < thuisGeel; j++) thuisKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FFD600;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+                for (var j = 0; j < thuisRood; j++) thuisKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FF3B5C;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
                 var uitKaarten = '';
-                for (var i = 0; i < uitGeel; i++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FFD600;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
-                for (var i = 0; i < uitRood; i++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FF3B5C;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+                for (var j = 0; j < uitGeel; j++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FFD600;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
+                for (var j = 0; j < uitRood; j++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FF3B5C;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
 
             html += '<div class="team home">' + thuisLogoHtml + '<div class="team-name">' + (w.thuisteam || 'Thuis') + '</div>' + (thuisKaarten ? '<div style="margin-top:3px;">' + thuisKaarten + '</div>' : '') + '</div>';
             html += '<div class="score-block">' + scoreHtml + '</div>';

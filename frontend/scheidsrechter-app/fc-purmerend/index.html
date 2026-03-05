@@ -1032,14 +1032,20 @@ saveTimerState();
         }
 
         async function stopTimer() {
-            if (!confirm('⚠️ Weet je zeker dat je de timer wilt resetten?\n\nDe timer wordt op 00:00 gezet.')) return;
-            await pauseTimer();
-            accumulatedSeconds = 0;
-            timerStartTime = null;
-            timerPausedAt = null;
-            saveTimerState();
-            updateDisplay();
-        }
+    if (!confirm('⚠️ Wil je de wedstrijd beëindigen?')) return;
+    await pauseTimer();
+    addEvent('end', null, null, 'Einde Wedstrijd');
+    document.getElementById('nextHalfBtn').style.display = 'none';
+
+    var wId = localStorage.getItem('wedstrijdId');
+    if (wId && window._firebaseDb) {
+        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
+            m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
+                status: 'afgelopen'
+            });
+        });
+    }
+}
 
         function nextHalf() {
             pauseTimer();
@@ -1054,16 +1060,9 @@ saveTimerState();
                 addEvent('half', null, null, 'Rust');
                 saveTimerState();
             } else {
-                if (confirm('Wil je de wedstrijd afsluiten?')) {
-                    addEvent('end', null, null, 'Einde Wedstrijd');
-                    currentHalf = 1;
-                    accumulatedSeconds = 0;
-                    timerStartTime = null;
-                    timerPausedAt = null;
-                    timeExpiredTriggered = false;
-                    saveTimerState();
-                }
-            }
+    // Doe niets, stop knop handelt dit af
+    return;
+}
             updateDisplay();
         }
 
@@ -1071,7 +1070,10 @@ saveTimerState();
 function changeScore(team, delta) {
     if (team === 'home') {
         homeScoreValue = Math.max(0, homeScoreValue + delta);
-        homeScore.textContent = homeScoreValue;
+        updateDisplay();
+if (currentHalf === 2) {
+    document.getElementById('nextHalfBtn').style.display = 'none';
+}
     } else if (team === 'away') {
         awayScoreValue = Math.max(0, awayScoreValue + delta);
         awayScore.textContent = awayScoreValue;

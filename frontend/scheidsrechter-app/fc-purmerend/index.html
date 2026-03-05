@@ -1534,9 +1534,7 @@ window._selecteerThuisUit = function(keuze) {
     var liveUrl = 'https://scorr-c604a.web.app/frontend/live/index.html?id=' + huidigWedstrijdId;
     var whatsappTekst = encodeURIComponent('⚽ Volg de wedstrijd live!\n' + wedstrijd.thuisteam + ' vs ' + wedstrijd.uitteam + '\n' + wedstrijd.datum + ' · ' + wedstrijd.tijdstip + '\n\n' + liveUrl);
 
-    var bestaandeBtn = document.getElementById('banner-share-btn');
-    if (!bestaandeBtn) {
-      var shareBtn = document.createElement('a');
+document.getElementById('banner-share-btn').href = 'https://wa.me/?text=' + whatsappTekst;
       shareBtn.id = 'banner-share-btn';
       shareBtn.href = 'https://wa.me/?text=' + whatsappTekst;
       shareBtn.target = '_blank';
@@ -1544,7 +1542,7 @@ window._selecteerThuisUit = function(keuze) {
       shareBtn.style.cssText = 'display:inline-block; margin-top:10px; background:#25D366; color:white; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; letter-spacing:1px;';
       document.getElementById('scorr-banner').appendChild(shareBtn);
     }
-  }
+  
 
   function toonPopup(teamNaam, user, bestaandeData) {
     const vandaag = new Date().toISOString().split('T')[0];
@@ -1627,7 +1625,12 @@ window._selecteerThuisUit('thuis');
     </div>
   </div>
   <div style="display:flex; gap:6px; flex-shrink:0; align-items:center;">
-    <a id="banner-share-btn" href="#" target="_blank" style="background:#25D366; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:16px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">📲</a>
+    <a id="banner-share-btn" href="#" target="_blank" style="background:#25D366; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:16px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.855L.057 23.428a.75.75 0 0 0 .916.916l5.573-1.475A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.92 0-3.716-.536-5.243-1.463l-.376-.224-3.892 1.029 1.03-3.772-.245-.389A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+  </svg>
+</a>
     <button id="banner-wijzig-btn" style="background:transparent; border:1px solid rgba(255,214,0,0.4); color:#FFD600; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">✎</button>
     <button id="logoutBtn" style="background:transparent; border:1px solid rgba(255,59,92,0.4); color:#FF3B5C; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">🚪</button>
   </div>

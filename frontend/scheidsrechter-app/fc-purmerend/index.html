@@ -1491,8 +1491,12 @@ window._selecteerThuisUit = function(keuze) {
       localStorage.setItem('thuisteam', w.thuisteam);
       localStorage.setItem('uitteam', w.uitteam);
       document.getElementById('homeTeamName').value = w.thuisteam;
-      document.getElementById('awayTeamName').value = w.uitteam;
-      if (w.helfttijd) halfDuration = w.helfttijd;
+document.getElementById('awayTeamName').value = w.uitteam;
+if (w.helfttijd) halfDuration = w.helfttijd;
+homeScoreValue = w.thuisscore || 0;
+awayScoreValue = w.uitscore || 0;
+document.getElementById('homeScore').textContent = homeScoreValue;
+document.getElementById('awayScore').textContent = awayScoreValue;
       document.getElementById('scorr-selectie-overlay').style.display = 'none';
       toonBanner(w, huidigTeamNaam, huidigUser);
     });

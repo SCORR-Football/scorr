@@ -165,6 +165,7 @@
         .status-badge.straks { background: var(--yellow); color: var(--dark); }
         .status-badge.morgen { background: var(--yellow); color: var(--dark); }
         .status-badge.afgelopen { background: var(--red); color: white; }
+        .status-badge.binnenkort { background: #4B6FBF; color: white; }
 
         .card-divider { width: 1px; height: 48px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
 
@@ -350,9 +351,16 @@
                 var isAfgelopen = w.status === 'afgelopen';
                 var isRust = w.status === 'rust';
 
-                var isVandaag = w.datum === vandaagStr;
-                var badgeClass = (isLive || isRust) ? 'live' : isAfgelopen ? 'afgelopen' : isVandaag ? 'straks' : 'morgen';
-                var badgeText = isLive ? 'LIVE' : isRust ? 'HT' : isAfgelopen ? 'FT' : isVandaag ? 'Vandaag' : 'Morgen';
+             var wedstrijdStart = new Date(w.datum + 'T' + (w.tijdstip || '12:00') + ':00');
+            var urenTot = (wedstrijdStart - nu) / (1000 * 60 * 60);
+
+            var badgeClass, badgeText;
+            if (isLive) { badgeClass = 'live'; badgeText = 'LIVE'; }
+            else if (isRust) { badgeClass = 'live'; badgeText = 'HT'; }
+            else if (isAfgelopen) { badgeClass = 'afgelopen'; badgeText = 'FT'; }
+            else if (urenTot <= 4) { badgeClass = 'straks'; badgeText = 'Straks'; }
+            else if (urenTot <= 24) { badgeClass = 'morgen'; badgeText = 'Morgen'; }
+            else { badgeClass = 'binnenkort'; badgeText = 'Binnenkort'; }
 
                 // Tijd display: minuut als live, anders tijdstip
                 var minutStr = getMinuut(w);

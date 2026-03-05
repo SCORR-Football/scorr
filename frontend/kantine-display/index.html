@@ -344,6 +344,7 @@
 
             var vandaagStr = new Date().toISOString().split('T')[0];
             var html = '';
+            var nu = new Date();
 
             for (var i = 0; i < wedstrijden.length; i++) {
                 var w = wedstrijden[i];
@@ -352,7 +353,7 @@
                 var isRust = w.status === 'rust';
 
              var wedstrijdStart = new Date(w.datum + 'T' + (w.tijdstip || '12:00') + ':00');
-            var urenTot = (wedstrijdStart - nu) / (1000 * 60 * 60);
+             var urenTot = (wedstrijdStart - nu) / (1000 * 60 * 60);
 
             var badgeClass, badgeText;
             if (isLive) { badgeClass = 'live'; badgeText = 'LIVE'; }

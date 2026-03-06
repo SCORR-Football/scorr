@@ -1065,10 +1065,7 @@ saveTimerState();
 function changeScore(team, delta) {
     if (team === 'home') {
         homeScoreValue = Math.max(0, homeScoreValue + delta);
-        updateDisplay();
-if (currentHalf === 2) {
-    document.getElementById('nextHalfBtn').style.display = 'none';
-}
+        homeScore.textContent = homeScoreValue;
     } else if (team === 'away') {
         awayScoreValue = Math.max(0, awayScoreValue + delta);
         awayScore.textContent = awayScoreValue;
@@ -1076,8 +1073,7 @@ if (currentHalf === 2) {
 
     var wedstrijdId = localStorage.getItem('wedstrijdId');
     if (wedstrijdId && window._firebaseDb) {
-        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update, push }) => {
-            // Score updaten
+        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update }) => {
             update(ref(window._firebaseDb, `wedstrijden/${wedstrijdId}`), {
                 thuisscore: homeScoreValue,
                 uitscore: awayScoreValue

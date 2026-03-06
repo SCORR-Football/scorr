@@ -1405,7 +1405,11 @@ window._selecteerThuisUit = function(keuze) {
       await auth.signOut();
       window.location.href = '/frontend/auth/login.html';
   });
-
+document.getElementById('logoutBtnBanner').addEventListener('click', async () => {
+    if (!confirm('Wil je uitloggen? De timer blijft doorlopen.')) return;
+    await auth.signOut();
+    window.location.href = '/frontend/auth/login.html';
+});
   async function toonSelectieScherm(teamNaam, user) {
     const snapshot = await get(ref(db, 'wedstrijden'));
     
@@ -1679,7 +1683,7 @@ awayScore.textContent = 0;
   </svg>
 </a>
     <button id="banner-wijzig-btn" style="background:transparent; border:1px solid rgba(255,214,0,0.4); color:#FFD600; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">✎</button>
-    <button id="logoutBtn" style="background:transparent; border:1px solid rgba(255,59,92,0.4); color:#FF3B5C; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">🚪</button>
+    <button id="logoutBtnBanner" style="background:transparent; border:1px solid rgba(255,59,92,0.4); color:#FF3B5C; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:600; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">🚪</button>
   </div>
 </div>
 

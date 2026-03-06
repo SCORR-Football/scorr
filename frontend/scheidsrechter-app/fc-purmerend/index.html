@@ -1141,7 +1141,7 @@ function changeScore(team, delta) {
         }
 
         function confirmEvent() {
-            const team = currentEventType === 'goal' ? currentGoalTeam : selectedTeam;
+            const team = currentEventType === 'goal' ? (currentGoalTeam || selectedTeam) : selectedTeam;
             const customNum = document.getElementById('customNumber').value;
             const playerNumber = customNum !== '' ? customNum : selectedNumber;
             const playerName = document.getElementById('modalPlayerName').value;

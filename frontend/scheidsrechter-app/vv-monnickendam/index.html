@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SCORR - VV Monnickendam Standen</title>
+    <title>SCORR - VV Monnickendam Scheidsrechter</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -675,7 +675,7 @@
 
         <!-- NEXT HALF / END MATCH -->
         <div class="next-half-bar">
-            <button class="next-half-btn" id="nextHalfBtn">⏭️ Volgende helft</button>
+            <button class="next-half-btn" id="nextHalfBtn">⏭️ Starten 2e helft</button>
         </div>
 
         <!-- EVENTS TIMELINE -->
@@ -1022,6 +1022,16 @@ saveTimerState();
     addEvent('end', null, null, 'Einde Wedstrijd');
     document.getElementById('nextHalfBtn').style.display = 'none';
 
+    // Timer reset:
+    accumulatedSeconds = 0;
+    timerStartTime = null;
+    timerPausedAt = null;
+    isRunning = false;
+    currentHalf = 1;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    localStorage.removeItem('scorr_timer_state');
+    updateDisplay();
+
     var wId = localStorage.getItem('wedstrijdId');
     if (wId && window._firebaseDb) {
         import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
@@ -1055,10 +1065,7 @@ saveTimerState();
 function changeScore(team, delta) {
     if (team === 'home') {
         homeScoreValue = Math.max(0, homeScoreValue + delta);
-        updateDisplay();
-if (currentHalf === 2) {
-    document.getElementById('nextHalfBtn').style.display = 'none';
-}
+       document.getElementById('homeScore').textContent = homeScoreValue;
     } else if (team === 'away') {
         awayScoreValue = Math.max(0, awayScoreValue + delta);
         awayScore.textContent = awayScoreValue;
@@ -1066,8 +1073,7 @@ if (currentHalf === 2) {
 
     var wedstrijdId = localStorage.getItem('wedstrijdId');
     if (wedstrijdId && window._firebaseDb) {
-        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update, push }) => {
-            // Score updaten
+        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update }) => {
             update(ref(window._firebaseDb, `wedstrijden/${wedstrijdId}`), {
                 thuisscore: homeScoreValue,
                 uitscore: awayScoreValue
@@ -1135,7 +1141,7 @@ if (currentHalf === 2) {
         }
 
         function confirmEvent() {
-            const team = currentEventType === 'goal' ? currentGoalTeam : selectedTeam;
+            const team = currentEventType === 'goal' ? (currentGoalTeam || selectedTeam) : selectedTeam;
             const customNum = document.getElementById('customNumber').value;
             const playerNumber = customNum !== '' ? customNum : selectedNumber;
             const playerName = document.getElementById('modalPlayerName').value;
@@ -1267,7 +1273,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 <div class="header"><h1>${homeTeam} vs ${awayTeam}</h1><div class="score-big">${homeScoreValue} - ${awayScoreValue}</div><div class="meta">${currentDate} | ${currentTime} | Speelduur: ${halfDuration} min per helft</div></div>
 <div class="body"><h3 style="margin-bottom:12px;font-size:16px;">Wedstrijdverloop</h3>
 <table><thead><tr><th>Min</th><th></th><th>Gebeurtenis</th></tr></thead><tbody>${eventsHTML}</tbody></table></div>
-<div class="footer">SCORR — VV Monnickendam App | ${currentDate} ${currentTime}</div></div>
+<div class="footer">SCORR — VV Monnickendam Scheidsrechter App | ${currentDate} ${currentTime}</div></div>
 <div style="text-align:center;padding:20px;background:#eee"><button onclick="window.print()" style="background:#0A0E27;color:#00FF88;border:none;padding:14px 40px;font-size:16px;font-weight:600;border-radius:8px;cursor:pointer">🖨️ OPSLAAN ALS PDF</button></div>
 </body></html>`;
 
@@ -1361,11 +1367,11 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   window._firebaseDb = db;
   const auth = getAuth(app);
 
- const teamMapping = {
+  const teamMapping = {
     "team1@vvm.nl": "VV Monnickendam 1",
     "team2@vvm.nl": "VV Monnickendam 2",
-    "team3@vvm.nl": "VV Monnickendam 3"
-};
+    "team3@vvm.nl": "VV Monnickendam O19-1",
+  };
 
   let huidigWedstrijdId = null;
   window._getWedstrijdId = () => huidigWedstrijdId;
@@ -1504,6 +1510,16 @@ if (w.events) {
         events.push({ minute: ev.minuut, type, description: ev.omschrijving, team });
     });
     renderEvents();
+    accumulatedSeconds = 0;
+timerStartTime = null;
+timerPausedAt = null;
+isRunning = false;
+currentHalf = 1;
+if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+localStorage.removeItem('scorr_timer_state');
+updateDisplay();
+document.getElementById('nextHalfBtn').style.display = 'block';
+document.getElementById('nextHalfBtn').textContent = '⏭️ Starten 2e helft';
 }
       document.getElementById('scorr-selectie-overlay').style.display = 'none';
       toonBanner(w, huidigTeamNaam, huidigUser);
@@ -1581,6 +1597,19 @@ window._selecteerThuisUit('thuis');
 
       const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
       huidigWedstrijdId = wedstrijdId;
+        // Timer reset:
+        accumulatedSeconds = 0;
+        timerStartTime = null;
+        timerPausedAt = null;
+        isRunning = false;
+        currentHalf = 1;
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+       localStorage.removeItem('scorr_timer_state');
+        events = [];
+        events = [];
+        renderEvents();
+
+
 
       set(ref(db, `wedstrijden/${wedstrijdId}`), {
         thuisteam: thuisOfUit === 'thuis' ? teamNaam : tegenstander,
@@ -1599,6 +1628,18 @@ window._selecteerThuisUit('thuis');
       localStorage.setItem('wedstrijdId', wedstrijdId);
       localStorage.setItem('thuisteam', teamNaam);
       localStorage.setItem('uitteam', tegenstander);
+
+      accumulatedSeconds = 0;
+timerStartTime = null;
+timerPausedAt = null;
+isRunning = false;
+currentHalf = 1;
+if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+localStorage.removeItem('scorr_timer_state');
+homeScoreValue = 0;
+awayScoreValue = 0;
+homeScore.textContent = 0;
+awayScore.textContent = 0;
 
         document.getElementById('homeTeamName').value = thuisOfUit === 'thuis' ? teamNaam : tegenstander;
         document.getElementById('awayTeamName').value = thuisOfUit === 'thuis' ? tegenstander : teamNaam;

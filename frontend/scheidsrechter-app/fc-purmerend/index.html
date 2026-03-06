@@ -1022,6 +1022,16 @@ saveTimerState();
     addEvent('end', null, null, 'Einde Wedstrijd');
     document.getElementById('nextHalfBtn').style.display = 'none';
 
+    // Timer reset:
+    accumulatedSeconds = 0;
+    timerStartTime = null;
+    timerPausedAt = null;
+    isRunning = false;
+    currentHalf = 1;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    localStorage.removeItem('scorr_timer_state');
+    updateDisplay();
+
     var wId = localStorage.getItem('wedstrijdId');
     if (wId && window._firebaseDb) {
         import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {

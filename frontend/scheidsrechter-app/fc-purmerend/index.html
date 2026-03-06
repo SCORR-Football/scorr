@@ -1582,6 +1582,15 @@ window._selecteerThuisUit('thuis');
 
       const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
       huidigWedstrijdId = wedstrijdId;
+        // Timer reset:
+        accumulatedSeconds = 0;
+        timerStartTime = null;
+        timerPausedAt = null;
+        isRunning = false;
+        currentHalf = 1;
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        localStorage.removeItem('scorr_timer_state');
+
 
       set(ref(db, `wedstrijden/${wedstrijdId}`), {
         thuisteam: thuisOfUit === 'thuis' ? teamNaam : tegenstander,
@@ -1600,6 +1609,14 @@ window._selecteerThuisUit('thuis');
       localStorage.setItem('wedstrijdId', wedstrijdId);
       localStorage.setItem('thuisteam', teamNaam);
       localStorage.setItem('uitteam', tegenstander);
+
+      accumulatedSeconds = 0;
+timerStartTime = null;
+timerPausedAt = null;
+isRunning = false;
+currentHalf = 1;
+if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+localStorage.removeItem('scorr_timer_state');
 
         document.getElementById('homeTeamName').value = thuisOfUit === 'thuis' ? teamNaam : tegenstander;
         document.getElementById('awayTeamName').value = thuisOfUit === 'thuis' ? tegenstander : teamNaam;

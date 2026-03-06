@@ -1605,7 +1605,11 @@ window._selecteerThuisUit('thuis');
         isRunning = false;
         currentHalf = 1;
         if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-        localStorage.removeItem('scorr_timer_state');
+       localStorage.removeItem('scorr_timer_state');
+        events = [];
+        events = [];
+        renderEvents();
+
 
 
       set(ref(db, `wedstrijden/${wedstrijdId}`), {

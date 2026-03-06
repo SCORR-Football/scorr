@@ -1623,6 +1623,10 @@ isRunning = false;
 currentHalf = 1;
 if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 localStorage.removeItem('scorr_timer_state');
+homeScoreValue = 0;
+awayScoreValue = 0;
+homeScore.textContent = 0;
+awayScore.textContent = 0;
 
         document.getElementById('homeTeamName').value = thuisOfUit === 'thuis' ? teamNaam : tegenstander;
         document.getElementById('awayTeamName').value = thuisOfUit === 'thuis' ? tegenstander : teamNaam;

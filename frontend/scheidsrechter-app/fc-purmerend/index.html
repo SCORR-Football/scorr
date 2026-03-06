@@ -1364,8 +1364,8 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   const teamMapping = {
     "team1@fcpurmerend.nl": "Fc Purmerend 1",
     "team2@fcpurmerend.nl": "Fc Purmerend VR 1",
-    "team3@fcpurmerend.nl": "Fc Purmerend O14-1",
-    "team4@fcpurmerend.nl": "Fc Purmerend O16-1"
+    "team3@fcpurmerend.nl": "Fc Purmerend O16-1",
+    "team4@fcpurmerend.nl": "Fc Purmerend O13-1"
   };
 
   let huidigWedstrijdId = null;
@@ -1444,7 +1444,7 @@ window._selecteerThuisUit = function(keuze) {
         html += wedstrijdKaart(w, false);
       });
     }
-    
+
     if (bezig.length === 0 && gepland.length === 0) {
       html += `<div style="text-align:center; color:rgba(240,244,255,0.3); padding:20px; font-size:13px;">Geen wedstrijden gevonden</div>`;
     }

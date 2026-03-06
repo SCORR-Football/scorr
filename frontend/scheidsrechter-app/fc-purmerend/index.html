@@ -1065,7 +1065,7 @@ saveTimerState();
 function changeScore(team, delta) {
     if (team === 'home') {
         homeScoreValue = Math.max(0, homeScoreValue + delta);
-        homeScore.textContent = homeScoreValue;
+       document.getElementById('homeScore').textContent = homeScoreValue;
     } else if (team === 'away') {
         awayScoreValue = Math.max(0, awayScoreValue + delta);
         awayScore.textContent = awayScoreValue;

@@ -1042,8 +1042,8 @@ saveTimerState();
     }
 }
 
-        function nextHalf() {
-            pauseTimer();
+        async function nextHalf() {
+        await pauseTimer();
             if (currentHalf === 1) {
                 currentHalf = 2;
                 accumulatedSeconds = halfDuration * 60;
@@ -1054,6 +1054,7 @@ saveTimerState();
                 updateInjuryTimeDisplay();
                 addEvent('half', null, null, 'Rust');
                 saveTimerState();
+                document.getElementById('nextHalfBtn').style.display = 'none';
             } else {
     // Doe niets, stop knop handelt dit af
     return;

@@ -1042,8 +1042,8 @@ saveTimerState();
     }
 }
 
-        function nextHalf() {
-            pauseTimer();
+        async function nextHalf() {
+        await pauseTimer();
             if (currentHalf === 1) {
                 currentHalf = 2;
                 accumulatedSeconds = halfDuration * 60;
@@ -1153,7 +1153,7 @@ function changeScore(team, delta) {
             addEvent(currentEventType, team, playerNumber, playerName);
             closeModal();
         }
-
+document.getElementById('nextHalfBtn').style.display = 'none';
         function removeLastGoal(team) {
     // Probeer eerst uit events array
     const idx = events.findIndex(e => e.type === 'goal' && e.team === team);

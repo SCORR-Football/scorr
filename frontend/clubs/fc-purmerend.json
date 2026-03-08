@@ -1,0 +1,12 @@
+{
+  "clubId": "fc-purmerend",
+  "naam": "FC Purmerend",
+  "kleur": "#00FF88",
+  "firebaseClub": "fc-purmerend",
+  "teams": {
+    "team1@fcpurmerend.nl": "Fc Purmerend 1",
+    "team2@fcpurmerend.nl": "Fc Purmerend VR 1",
+    "team3@fcpurmerend.nl": "Fc Purmerend O19-1",
+    "team4@fcpurmerend.nl": "Fc Purmerend O13-1"
+  }
+}

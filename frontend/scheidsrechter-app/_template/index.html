@@ -507,8 +507,12 @@
         }
     }
 
+    let nextHalfBusy = false;
     async function nextHalf() {
-        const btn = document.getElementById('nextHalfBtn');
+    if (nextHalfBusy) return;
+    nextHalfBusy = true;
+    setTimeout(() => { nextHalfBusy = false; }, 1000);
+    const btn = document.getElementById('nextHalfBtn');
         if (currentHalf === 0) {
             // Starten wedstrijd → 1e helft
             currentHalf = 1;

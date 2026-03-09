@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SCORR - Scheidsrechter</title>
-    <link id="manifest-link" rel="manifest" href="/frontend/clubs/manifests/fc-purmerend.json">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -155,7 +154,6 @@
         <div class="timer-row">
             <div class="timer-display" id="timerDisplay">00:00</div>
             <div class="timer-controls-inline">
-                <button class="timer-btn-small play" id="startBtn">▶</button>
                 <button class="timer-btn-small pause" id="pauseBtn">⏸</button>
             </div>
         </div>
@@ -164,7 +162,7 @@
 
     <!-- NEXT HALF -->
     <div class="next-half-bar">
-        <button class="next-half-btn" id="nextHalfBtn">⏭️ Einde 1e helft</button>
+        <button class="next-half-btn" id="nextHalfBtn">▶ STARTEN WEDSTRIJD</button>
     </div>
 
     <!-- EVENTS -->
@@ -176,7 +174,7 @@
     <div class="bottom-toolbar">
         <button class="toolbar-btn yellow-card" id="yellowBtn">🟨</button>
         <button class="toolbar-btn red-card" id="redBtn">🟥</button>
-        <button class="toolbar-btn" id="stopBtn">⏹<span class="btn-label">STOP</span></button>
+        <button class="toolbar-btn" id="resetBtn">↺<span class="btn-label">RESET</span></button>
         <button class="toolbar-btn download-btn" id="downloadBtn">📄<span class="btn-label">PDF</span></button>
     </div>
 </div>
@@ -296,10 +294,6 @@
             const res = await fetch(`/frontend/clubs/${clubId}.json`);
             clubConfig = await res.json();
             pasClubToe(clubConfig);
-            const manifestLink = document.getElementById('manifest-link');
-        if (manifestLink) {
-            manifestLink.href = `/frontend/clubs/manifests/${clubId}.json`;
-        }
         } catch(e) {
             console.error('Club config niet gevonden:', clubId);
         } finally {
@@ -322,7 +316,7 @@
 
     // ===== STATE =====
     let timerStartTime = null, timerPausedAt = null, accumulatedSeconds = 0;
-    let timerInterval = null, isRunning = false, currentHalf = 1;
+    let timerInterval = null, isRunning = false, currentHalf = 0;
     let homeScoreValue = 0, awayScoreValue = 0;
     let events = [], currentEventType = '', currentGoalTeam = '', selectedTeam = '', selectedNumber = '';
     let injuryTime = 0, halfDuration = 45, wakeLock = null;
@@ -398,7 +392,9 @@
 
     function updateDisplay() {
         timerDisplay.textContent = formatTime(getCurrentSeconds());
-        halfIndicator.textContent = currentHalf === 1 ? '1e Helft' : '2e Helft';
+        if (currentHalf === 0) halfIndicator.textContent = 'Klaar om te starten';
+        else if (currentHalf === 1) halfIndicator.textContent = '1e Helft';
+        else halfIndicator.textContent = '2e Helft';
     }
 
     // ===== TIMER =====
@@ -512,27 +508,53 @@
     }
 
     async function nextHalf() {
-        await pauseTimer();
-        if (currentHalf === 1) {
+        const btn = document.getElementById('nextHalfBtn');
+        if (currentHalf === 0) {
+            // Starten wedstrijd → 1e helft
+            currentHalf = 1;
+            await startTimer();
+            btn.textContent = '⏭️ EINDE 1E HELFT';
+        } else if (currentHalf === 1) {
+            // Einde 1e helft → rust
+            await pauseTimer();
             currentHalf = 2;
             accumulatedSeconds = halfDuration * 60;
-            timerStartTime = null; timerPausedAt = null; injuryTime = 0; timeExpiredTriggered = false;
+            timerStartTime = null; timerPausedAt = null;
+            injuryTime = 0; timeExpiredTriggered = false;
             addEvent('half', null, null, 'Rust');
             saveTimerState();
-            document.getElementById('nextHalfBtn').style.display = 'none';
-            // Firebase: status naar rust + helft opslaan
+            btn.textContent = '▶ STARTEN 2E HELFT';
+            updateDisplay();
             const wId = localStorage.getItem('wedstrijdId');
             if (wId && window._firebaseDb) {
                 import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(m => {
                     m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
-                        status: 'rust',
-                        currentHalf: 2,
-                        accumulatedSeconds: halfDuration * 60
+                        status: 'rust', currentHalf: 2, accumulatedSeconds: halfDuration * 60
                     });
                 });
             }
+        } else if (currentHalf === 2 && !isRunning) {
+            // Starten 2e helft
+            await startTimer();
+            btn.textContent = '⏹ EINDE WEDSTRIJD';
+        } else if (currentHalf === 2 && isRunning) {
+            // Einde wedstrijd
+            if (!confirm('⚠️ Wil je de wedstrijd beëindigen?')) return;
+            await pauseTimer();
+            addEvent('end', null, null, 'Einde Wedstrijd');
+            btn.style.display = 'none';
+            accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
+            isRunning = false; currentHalf = 0;
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+            localStorage.removeItem('scorr_timer_state');
+            updateDisplay();
+            const wId = localStorage.getItem('wedstrijdId');
+            if (wId && window._firebaseDb) {
+                import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(m => {
+                    m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), { status: 'afgelopen' });
+                });
+            }
         }
-        updateDisplay();
     }
 
     // ===== SCORE =====
@@ -683,9 +705,19 @@
     }
 
     // ===== EVENT LISTENERS =====
-    document.getElementById('startBtn').addEventListener('click', startTimer);
     document.getElementById('pauseBtn').addEventListener('click', pauseTimer);
-    document.getElementById('stopBtn').addEventListener('click', stopTimer);
+    document.getElementById('resetBtn').addEventListener('click', async () => {
+        if (!confirm('⚠️ Timer resetten? De wedstrijd blijft bewaard.')) return;
+        await pauseTimer();
+        accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
+        isRunning = false; currentHalf = 0;
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        localStorage.removeItem('scorr_timer_state');
+        const btn = document.getElementById('nextHalfBtn');
+        btn.style.display = 'block';
+        btn.textContent = '▶ STARTEN WEDSTRIJD';
+        updateDisplay();
+    });
     document.getElementById('homePlusBtn').addEventListener('click', () => { currentGoalTeam = 'home'; showEventModal('goal'); });
     document.getElementById('homeMinusBtn').addEventListener('click', () => removeLastGoal('home'));
     document.getElementById('awayPlusBtn').addEventListener('click', () => { currentGoalTeam = 'away'; showEventModal('goal'); });
@@ -705,15 +737,6 @@
     loadTimerState();
     updateDisplay();
     laadClubConfig();
-
-    // ===== SERVICE WORKER =====
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/frontend/scheidsrechter-app/_template/sw.js')
-                .then(reg => console.log('✅ Service Worker geregistreerd'))
-                .catch(err => console.log('❌ Service Worker fout:', err));
-        });
-    }
 </script>
 
 <script type="module">
@@ -857,7 +880,7 @@
             localStorage.removeItem('scorr_timer_state');
             updateDisplay();
             document.getElementById('nextHalfBtn').style.display = 'block';
-            document.getElementById('nextHalfBtn').textContent = '⏭️ Einde 1e helft';
+            document.getElementById('nextHalfBtn').textContent = '▶ STARTEN WEDSTRIJD';
             document.getElementById('scorr-selectie-overlay').style.display = 'none';
             toonBanner(w, huidigTeamNaam, huidigUser);
         });
@@ -921,7 +944,7 @@
             const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
             huidigWedstrijdId = wedstrijdId;
             accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
-            isRunning = false; currentHalf = 1;
+            isRunning = false; currentHalf = 0;
             if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
             localStorage.removeItem('scorr_timer_state');
             events = []; renderEvents();
@@ -938,6 +961,8 @@
             document.getElementById('homeTeamName').value = thuisTeam;
             document.getElementById('awayTeamName').value = uitTeam;
             halfDuration = helfttijd;
+            document.getElementById('nextHalfBtn').style.display = 'block';
+            document.getElementById('nextHalfBtn').textContent = '▶ STARTEN WEDSTRIJD';
             document.getElementById('scorr-popup-overlay').style.display = 'none';
             toonBanner({ thuisteam: thuisTeam, uitteam: uitTeam, klasse, datum, tijdstip }, teamNaam, user);
         };

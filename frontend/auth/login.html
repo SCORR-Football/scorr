@@ -339,11 +339,11 @@
     try {
       await signInWithEmailAndPassword(auth, email, password);
       
-      // Redirect op basis van club
+      // Redirect naar nieuwe template op basis van club
       if (purmerendTeams.includes(email)) {
-        window.location.href = '/frontend/scheidsrechter-app/fc-purmerend/index.html';
+        window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=fc-purmerend';
       } else {
-        window.location.href = '/frontend/scheidsrechter-app/vv-monnickendam/index.html';
+        window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=vv-monnickendam';
       }
     } catch (error) {
       if (errorEl) errorEl.textContent = 'Verkeerd e-mailadres of wachtwoord.';

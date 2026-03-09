@@ -1,0 +1,17 @@
+{
+  "name": "SCORR - FC Purmerend",
+  "short_name": "SCORR FCP",
+  "description": "Live scheidsrechter app voor FC Purmerend",
+  "start_url": "/frontend/scheidsrechter-app/_template/index.html?club=fc-purmerend",
+  "display": "standalone",
+  "background_color": "#0A0E27",
+  "theme_color": "#00FF88",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/frontend/clubs/icons/fc-purmerend-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

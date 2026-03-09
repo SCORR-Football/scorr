@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SCORR - Scheidsrechter</title>
+    <link id="manifest-link" rel="manifest" href="/frontend/clubs/manifests/fc-purmerend.json">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -295,6 +296,10 @@
             const res = await fetch(`/frontend/clubs/${clubId}.json`);
             clubConfig = await res.json();
             pasClubToe(clubConfig);
+            const manifestLink = document.getElementById('manifest-link');
+        if (manifestLink) {
+            manifestLink.href = `/frontend/clubs/manifests/${clubId}.json`;
+        }
         } catch(e) {
             console.error('Club config niet gevonden:', clubId);
         } finally {
@@ -700,6 +705,15 @@
     loadTimerState();
     updateDisplay();
     laadClubConfig();
+
+    // ===== SERVICE WORKER =====
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/frontend/scheidsrechter-app/_template/sw.js')
+                .then(reg => console.log('✅ Service Worker geregistreerd'))
+                .catch(err => console.log('❌ Service Worker fout:', err));
+        });
+    }
 </script>
 
 <script type="module">

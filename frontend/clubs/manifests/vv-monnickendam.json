@@ -1,0 +1,17 @@
+{
+  "name": "SCORR - VV Monnickendam",
+  "short_name": "SCORR VVM",
+  "description": "Live scheidsrechter app voor VV Monnickendam",
+  "start_url": "/frontend/scheidsrechter-app/_template/index.html?club=vv-monnickendam",
+  "display": "standalone",
+  "background_color": "#0A0E27",
+  "theme_color": "#00FF88",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/frontend/clubs/icons/vv-monnickendam-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

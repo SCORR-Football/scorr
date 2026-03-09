@@ -365,7 +365,8 @@
                 var nu = Date.now();
                 var verstreken = Math.floor((nu - huidigeData.startTijd) / 1000) + (huidigeData.accumulatedSeconds || 0);
                 var helfttijd = (huidigeData.helfttijd || 45) * 60;
-                var seconden = Math.min(verstreken, helfttijd);
+                var maxTijd = (huidigeData.currentHalf || 1) === 1 ? helfttijd : helfttijd * 2;
+                var seconden = Math.min(verstreken, maxTijd);
                 var min = Math.floor(seconden / 60);
                 var sec = seconden % 60;
                 var display = (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
@@ -433,7 +434,7 @@
             var timerDisplay = document.getElementById('timerDisplay');
 
             if (data.status === 'bezig') {
-                halfIndicator.textContent = '1e Helft';
+                halfIndicator.textContent = (data.currentHalf || 1) === 1 ? '1e Helft' : '2e Helft';
                 liveBadge.className = 'live-badge';
                 liveBadge.innerHTML = '<div class="live-dot"></div> LIVE';
                 startLiveTimer(data);

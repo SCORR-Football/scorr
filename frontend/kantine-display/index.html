@@ -312,8 +312,11 @@
     var nu = Date.now();
     var verstreken = Math.floor((nu - w.startTijd) / 1000) + (w.accumulatedSeconds || 0);
     var helfttijd = w.helfttijd || 45;
+    var currentHalf = w.currentHalf || 1;
     if (w.status === 'bezig') {
-        return Math.min(Math.floor(verstreken / 60) + 1, helfttijd) + "'";
+        var minuut = Math.floor(verstreken / 60) + 1;
+        var maxMinuut = currentHalf === 1 ? helfttijd : helfttijd * 2;
+        return Math.min(minuut, maxMinuut) + "'";
     }
     return null;
 }
@@ -394,6 +397,8 @@
                 html += '<div class="match-status">';
                 html += '<div class="match-time ' + (isLive ? 'live' : '') + '">' + tijdText + '</div>';
                 html += '<div class="status-badge ' + badgeClass + '">' + badgeText + '</div>';
+                var helftText = (isLive || isRust) ? ((w.currentHalf || 1) === 1 ? '1e helft' : '2e helft') : '';
+                html += '<div style="font-size:10px;color:rgba(0,255,136,0.6);margin-top:2px;text-align:center;font-weight:600;">' + helftText + '</div>';
                 html += '<div style="font-size:11px;color:rgba(240,244,255,0.35);margin-top:4px;text-align:center;">' + datumStr + '</div>';
                 html += '</div>';
                 html += '<div class="card-divider"></div>';

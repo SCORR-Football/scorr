@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCORR — Superadmin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00FF88;
+            --dark: #0A0E27;
+            --dark2: #1E2749;
+            --red: #FF3B5C;
+            --yellow: #FFD600;
+            --white: #F0F4FF;
+            --blue: #4B6FBF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--dark);
+            min-height: 100vh;
+            color: var(--white);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 240px; background: var(--dark2);
+            border-right: 1px solid rgba(0,255,136,0.15);
+            display: flex; flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-logo .scorr { font-size: 32px; font-weight: 900; color: var(--green); letter-spacing: -2px; }
+        .sidebar-logo .sub { font-size: 10px; color: rgba(240,244,255,0.4); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+
+        .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+
+        .nav-section { padding: 8px 16px 4px; font-size: 10px; color: rgba(240,244,255,0.3); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 20px; cursor: pointer;
+            font-size: 14px; font-weight: 500; color: rgba(240,244,255,0.6);
+            transition: all 0.2s; border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+
+        .nav-item:hover { background: rgba(0,255,136,0.05); color: var(--white); }
+        .nav-item.active { background: rgba(0,255,136,0.08); color: var(--green); border-left-color: var(--green); font-weight: 700; }
+        .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .user-avatar { width: 36px; height: 36px; background: rgba(0,255,136,0.15); border: 2px solid rgba(0,255,136,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--green); flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 700; color: var(--white); }
+        .user-role { font-size: 10px; color: var(--green); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        .logout-btn {
+            width: 100%; padding: 8px; background: rgba(255,59,92,0.1);
+            border: 1px solid rgba(255,59,92,0.3); border-radius: 8px;
+            color: var(--red); font-size: 13px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+        }
+
+        /* MAIN */
+        .main { margin-left: 240px; min-height: 100vh; }
+
+        .topbar {
+            background: rgba(10,14,39,0.9); border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px);
+        }
+
+        .topbar-title { font-size: 20px; font-weight: 700; color: var(--white); }
+        .topbar-sub { font-size: 12px; color: rgba(240,244,255,0.4); margin-top: 2px; }
+
+        .live-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--green); font-weight: 600; }
+        .live-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        .content { padding: 32px; }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+
+        .stat-card {
+            background: var(--dark2); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px; padding: 20px;
+        }
+
+        .stat-label { font-size: 11px; color: rgba(240,244,255,0.4); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 8px; }
+        .stat-value { font-size: 36px; font-weight: 900; color: var(--white); line-height: 1; }
+        .stat-value.green { color: var(--green); }
+        .stat-value.red { color: var(--red); }
+        .stat-value.yellow { color: var(--yellow); }
+        .stat-sub { font-size: 11px; color: rgba(240,244,255,0.3); margin-top: 6px; }
+
+        /* SECTIONS */
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .section-title { font-size: 16px; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 8px; }
+        .section-action { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--green); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .section-action:hover { background: rgba(0,255,136,0.2); }
+
+        /* WEDSTRIJD CARDS */
+        .wedstrijd-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+        .wedstrijd-card {
+            background: var(--dark2); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px; padding: 16px 20px;
+        }
+
+        .wedstrijd-card.live { border-color: rgba(0,255,136,0.3); background: linear-gradient(135deg, var(--dark2) 0%, rgba(0,255,136,0.04) 100%); }
+        .wedstrijd-card.rust { border-color: rgba(255,214,0,0.3); }
+        .wedstrijd-card.afgelopen { opacity: 0.6; }
+
+        .wc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .wc-club { font-size: 10px; color: rgba(240,244,255,0.4); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .wc-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+        .wc-badge.live { background: var(--red); color: white; }
+        .wc-badge.rust { background: var(--yellow); color: var(--dark); }
+        .wc-badge.gepland { background: rgba(75,111,191,0.3); color: #8BA4E8; }
+        .wc-badge.afgelopen { background: rgba(255,59,92,0.2); color: var(--red); }
+
+        .wc-teams { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .wc-team { flex: 1; font-size: 13px; font-weight: 700; color: var(--white); }
+        .wc-team.away { text-align: right; }
+        .wc-score { font-size: 20px; font-weight: 900; color: var(--green); min-width: 48px; text-align: center; }
+        .wc-score.gepland { color: rgba(240,244,255,0.3); font-size: 14px; }
+
+        .wc-meta { font-size: 11px; color: rgba(240,244,255,0.3); display: flex; gap: 8px; }
+
+        /* CLUBS TABLE */
+        .clubs-table { width: 100%; border-collapse: collapse; }
+        .clubs-table th { text-align: left; padding: 10px 16px; font-size: 11px; color: rgba(240,244,255,0.4); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .clubs-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; color: var(--white); }
+        .clubs-table tr:last-child td { border-bottom: none; }
+        .clubs-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .club-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+        .club-status.actief { color: var(--green); }
+        .club-status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .table-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--white); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; margin-right: 6px; }
+        .table-btn:hover { background: rgba(255,255,255,0.1); }
+        .table-btn.danger { background: rgba(255,59,92,0.1); border-color: rgba(255,59,92,0.3); color: var(--red); }
+
+        /* GEBRUIKERS */
+        .gebruiker-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .gebruiker-row:last-child { border-bottom: none; }
+        .gebruiker-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+        .gebruiker-avatar.superadmin { background: rgba(0,255,136,0.15); color: var(--green); border: 2px solid rgba(0,255,136,0.3); }
+        .gebruiker-avatar.clubadmin { background: rgba(75,111,191,0.2); color: #8BA4E8; border: 2px solid rgba(75,111,191,0.3); }
+        .gebruiker-avatar.team { background: rgba(255,255,255,0.08); color: rgba(240,244,255,0.6); border: 2px solid rgba(255,255,255,0.1); }
+        .gebruiker-info { flex: 1; }
+        .gebruiker-naam { font-size: 14px; font-weight: 600; color: var(--white); }
+        .gebruiker-email { font-size: 12px; color: rgba(240,244,255,0.4); }
+        .gebruiker-rol { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .gebruiker-rol.superadmin { background: rgba(0,255,136,0.15); color: var(--green); }
+        .gebruiker-rol.clubadmin { background: rgba(75,111,191,0.2); color: #8BA4E8; }
+        .gebruiker-rol.team { background: rgba(255,255,255,0.08); color: rgba(240,244,255,0.5); }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--dark2); border: 1px solid rgba(0,255,136,0.2); border-radius: 16px; padding: 32px; width: 100%; max-width: 440px; }
+        .modal h3 { font-size: 20px; font-weight: 700; color: var(--white); margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { font-size: 12px; font-weight: 600; color: rgba(240,244,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+        .form-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--white); font-family: inherit; outline: none; }
+        .form-input:focus { border-color: var(--green); }
+        .form-select { width: 100%; background: var(--dark2); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--white); font-family: inherit; outline: none; appearance: none; }
+        .form-select:focus { border-color: var(--green); }
+        .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+        .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-cancel { background: rgba(255,255,255,0.08); color: rgba(240,244,255,0.6); }
+        .btn-save { background: var(--green); color: var(--dark); }
+
+        /* TABS */
+        .tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; margin-bottom: 20px; width: fit-content; }
+        .tab { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: rgba(240,244,255,0.5); transition: all 0.2s; }
+        .tab.active { background: var(--dark2); color: var(--white); }
+
+        /* CARD */
+        .card { background: var(--dark2); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; }
+
+        .empty-state { text-align: center; padding: 40px; color: rgba(240,244,255,0.25); font-size: 14px; }
+
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .wedstrijd-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <div class="scorr">SCORR</div>
+        <div class="sub">Superadmin</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Overzicht</div>
+        <a class="nav-item active" onclick="showSection('dashboard')">
+            <span class="icon">📊</span> Dashboard
+        </a>
+        <a class="nav-item" onclick="showSection('wedstrijden')">
+            <span class="icon">⚽</span> Wedstrijden
+        </a>
+        <div class="nav-section">Beheer</div>
+        <a class="nav-item" onclick="showSection('clubs')">
+            <span class="icon">🏟️</span> Clubs
+        </a>
+        <a class="nav-item" onclick="showSection('gebruikers')">
+            <span class="icon">👥</span> Gebruikers
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar" id="userInitials">?</div>
+            <div>
+                <div class="user-name" id="userName">Laden...</div>
+                <div class="user-role">Superadmin</div>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">🚪 Uitloggen</button>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title" id="pageTitle">Dashboard</div>
+            <div class="topbar-sub" id="pageSubtitle">Overzicht van alle clubs en wedstrijden</div>
+        </div>
+        <div class="live-indicator"><div class="live-dot"></div> Live updates</div>
+    </div>
+
+    <div class="content">
+
+        <!-- DASHBOARD -->
+        <div id="section-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Actieve clubs</div>
+                    <div class="stat-value green" id="stat-clubs">—</div>
+                    <div class="stat-sub">In de pilot</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Live wedstrijden</div>
+                    <div class="stat-value red" id="stat-live">—</div>
+                    <div class="stat-sub">Op dit moment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Wedstrijden vandaag</div>
+                    <div class="stat-value yellow" id="stat-vandaag">—</div>
+                    <div class="stat-sub">Gepland + bezig</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Totaal gebruikers</div>
+                    <div class="stat-value" id="stat-gebruikers">—</div>
+                    <div class="stat-sub">Alle rollen</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">⚽ Live & Komende wedstrijden</div>
+                </div>
+                <div class="wedstrijd-grid" id="dashboard-wedstrijden">
+                    <div class="empty-state">Wedstrijden laden...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">🏟️ Clubs overzicht</div>
+                </div>
+                <div class="card">
+                    <table class="clubs-table">
+                        <thead>
+                            <tr>
+                                <th>Club</th>
+                                <th>Admin</th>
+                                <th>Teams</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-clubs">
+                            <tr><td colspan="4" class="empty-state">Laden...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- WEDSTRIJDEN -->
+        <div id="section-wedstrijden" style="display:none;">
+            <div class="tabs">
+                <div class="tab active" onclick="filterWedstrijden('alle')">Alle</div>
+                <div class="tab" onclick="filterWedstrijden('bezig')">Live</div>
+                <div class="tab" onclick="filterWedstrijden('gepland')">Gepland</div>
+                <div class="tab" onclick="filterWedstrijden('afgelopen')">Afgelopen</div>
+            </div>
+            <div class="wedstrijd-grid" id="wedstrijden-grid">
+                <div class="empty-state">Laden...</div>
+            </div>
+        </div>
+
+        <!-- CLUBS -->
+        <div id="section-clubs" style="display:none;">
+            <div class="section-header">
+                <div class="section-title">🏟️ Clubs beheren</div>
+                <button class="section-action" onclick="openModal('club')">+ Club toevoegen</button>
+            </div>
+            <div class="card">
+                <table class="clubs-table">
+                    <thead>
+                        <tr>
+                            <th>Club</th>
+                            <th>Club ID</th>
+                            <th>Admin</th>
+                            <th>Teams</th>
+                            <th>Status</th>
+                            <th>Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clubs-table-body">
+                        <tr><td colspan="6" class="empty-state">Laden...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- GEBRUIKERS -->
+        <div id="section-gebruikers" style="display:none;">
+            <div class="section-header">
+                <div class="section-title">👥 Gebruikers beheren</div>
+                <button class="section-action" onclick="openModal('gebruiker')">+ Gebruiker toevoegen</button>
+            </div>
+            <div class="card" id="gebruikers-list">
+                <div class="empty-state">Laden...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL: GEBRUIKER TOEVOEGEN -->
+<div class="modal-overlay" id="modal-gebruiker">
+    <div class="modal">
+        <h3>👤 Gebruiker toevoegen</h3>
+        <div class="form-group">
+            <label class="form-label">Naam</label>
+            <input type="text" class="form-input" id="new-naam" placeholder="Volledige naam">
+        </div>
+        <div class="form-group">
+            <label class="form-label">E-mailadres</label>
+            <input type="email" class="form-input" id="new-email" placeholder="naam@club.nl">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Wachtwoord</label>
+            <input type="password" class="form-input" id="new-password" placeholder="Minimaal 6 tekens">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Rol</label>
+            <select class="form-select" id="new-rol">
+                <option value="clubadmin">Clubadmin</option>
+                <option value="team">Team</option>
+                <option value="superadmin">Superadmin</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Club</label>
+            <select class="form-select" id="new-club">
+                <option value="fc-purmerend">FC Purmerend</option>
+                <option value="vv-monnickendam">VV Monnickendam</option>
+            </select>
+        </div>
+        <div id="modal-error" style="display:none; color:#FF3B5C; font-size:13px; margin-top:8px;"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('gebruiker')">Annuleren</button>
+            <button class="btn-save" onclick="slaGebruikerOp()">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CLUB TOEVOEGEN -->
+<div class="modal-overlay" id="modal-club">
+    <div class="modal">
+        <h3>🏟️ Club toevoegen</h3>
+        <div class="form-group">
+            <label class="form-label">Clubnaam</label>
+            <input type="text" class="form-input" id="new-clubnaam" placeholder="bijv. FC Amsterdam">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Club ID</label>
+            <input type="text" class="form-input" id="new-clubid" placeholder="bijv. fc-amsterdam">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Clubkleur</label>
+            <input type="color" class="form-input" id="new-clubkleur" value="#00FF88" style="height:48px; padding:4px;">
+        </div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('club')">Annuleren</button>
+            <button class="btn-save" onclick="slaClubOp()">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
+        authDomain: "scorr-c604a.firebaseapp.com",
+        databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "scorr-c604a",
+        storageBucket: "scorr-c604a.firebasestorage.app",
+        messagingSenderId: "413840042688",
+        appId: "1:413840042688:web:3183c36fd20f27ac925b25"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    window._db = db;
+    window._auth = auth;
+    window._createUser = createUserWithEmailAndPassword;
+
+    // ===== AUTH CHECK =====
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
+        const emailKey = user.email.replace(/\./g, ',');
+        const snap = await get(ref(db, 'gebruikers/' + emailKey));
+        if (!snap.exists() || snap.val().rol !== 'superadmin') {
+            window.location.href = '/frontend/auth/login.html'; return;
+        }
+        const naam = snap.val().naam || user.email;
+        document.getElementById('userName').textContent = naam;
+        document.getElementById('userInitials').textContent = naam.charAt(0).toUpperCase();
+        laadAlles();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        if (!confirm('Uitloggen?')) return;
+        await signOut(auth);
+        window.location.href = '/frontend/auth/login.html';
+    });
+
+    // ===== DATA LADEN =====
+    let alleWedstrijden = [], alleGebruikers = {}, huidigFilter = 'alle';
+
+    function laadAlles() {
+        // Live wedstrijden
+        onValue(ref(db, 'wedstrijden'), (snap) => {
+            alleWedstrijden = [];
+            if (snap.exists()) {
+                snap.forEach(child => { alleWedstrijden.push({ id: child.key, ...child.val() }); });
+            }
+            updateStats();
+            renderDashboardWedstrijden();
+            renderWedstrijdenGrid();
+        });
+
+        // Gebruikers
+        onValue(ref(db, 'gebruikers'), (snap) => {
+            alleGebruikers = snap.exists() ? snap.val() : {};
+            updateStats();
+            renderGebruikers();
+            renderClubs();
+        });
+    }
+
+    function updateStats() {
+        const vandaag = new Date().toISOString().split('T')[0];
+        const live = alleWedstrijden.filter(w => w.status === 'bezig' || w.status === 'rust').length;
+        const vandaagW = alleWedstrijden.filter(w => w.datum === vandaag).length;
+        const clubs = new Set(alleWedstrijden.map(w => w.club).filter(Boolean)).size;
+        const gebruikers = Object.keys(alleGebruikers).length;
+        document.getElementById('stat-clubs').textContent = Math.max(clubs, 2);
+        document.getElementById('stat-live').textContent = live;
+        document.getElementById('stat-vandaag').textContent = vandaagW;
+        document.getElementById('stat-gebruikers').textContent = gebruikers;
+    }
+
+    // ===== WEDSTRIJDEN =====
+    function wedstrijdKaartHTML(w) {
+        const isLive = w.status === 'bezig';
+        const isRust = w.status === 'rust';
+        const isAfgelopen = w.status === 'afgelopen';
+        const cardClass = isLive ? 'live' : isRust ? 'rust' : isAfgelopen ? 'afgelopen' : '';
+        const badgeClass = isLive ? 'live' : isRust ? 'rust' : isAfgelopen ? 'afgelopen' : 'gepland';
+        const badgeText = isLive ? '🔴 LIVE' : isRust ? '⏸ RUST' : isAfgelopen ? 'FT' : '📅 ' + (w.tijdstip || '');
+        const scoreClass = (!isLive && !isRust && !isAfgelopen) ? 'gepland' : '';
+        const scoreText = (!isLive && !isRust && !isAfgelopen) ? 'vs' : `${w.thuisscore || 0} - ${w.uitscore || 0}`;
+        const clubNaam = w.club === 'fc-purmerend' ? 'FC Purmerend' : w.club === 'vv-monnickendam' ? 'VV Monnickendam' : (w.club || '');
+
+        return `<div class="wedstrijd-card ${cardClass}">
+            <div class="wc-header">
+                <div class="wc-club">${clubNaam} · ${w.klasse || ''}</div>
+                <div class="wc-badge ${badgeClass}">${badgeText}</div>
+            </div>
+            <div class="wc-teams">
+                <div class="wc-team">${w.thuisteam || 'Thuis'}</div>
+                <div class="wc-score ${scoreClass}">${scoreText}</div>
+                <div class="wc-team away">${w.uitteam || 'Uit'}</div>
+            </div>
+            <div class="wc-meta">
+                <span>📅 ${w.datum || ''}</span>
+                <span>🕐 ${w.tijdstip || ''}</span>
+                ${w.veld ? `<span>📍 Veld ${w.veld}</span>` : ''}
+            </div>
+        </div>`;
+    }
+
+    function renderDashboardWedstrijden() {
+        const container = document.getElementById('dashboard-wedstrijden');
+        const vandaag = new Date().toISOString().split('T')[0];
+        const relevant = alleWedstrijden
+            .filter(w => w.status === 'bezig' || w.status === 'rust' || w.datum === vandaag)
+            .sort((a, b) => {
+                if ((a.status === 'bezig' || a.status === 'rust') && !(b.status === 'bezig' || b.status === 'rust')) return -1;
+                if ((b.status === 'bezig' || b.status === 'rust') && !(a.status === 'bezig' || a.status === 'rust')) return 1;
+                return (a.tijdstip || '').localeCompare(b.tijdstip || '');
+            });
+        container.innerHTML = relevant.length ? relevant.map(wedstrijdKaartHTML).join('') : '<div class="empty-state">Geen wedstrijden vandaag</div>';
+    }
+
+    window.filterWedstrijden = function(filter) {
+        huidigFilter = filter;
+        document.querySelectorAll('#section-wedstrijden .tab').forEach((t, i) => {
+            t.classList.toggle('active', ['alle','bezig','gepland','afgelopen'][i] === filter);
+        });
+        renderWedstrijdenGrid();
+    };
+
+    function renderWedstrijdenGrid() {
+        const container = document.getElementById('wedstrijden-grid');
+        let gefilterd = alleWedstrijden;
+        if (huidigFilter === 'bezig') gefilterd = alleWedstrijden.filter(w => w.status === 'bezig' || w.status === 'rust');
+        else if (huidigFilter === 'gepland') gefilterd = alleWedstrijden.filter(w => w.status === 'gepland');
+        else if (huidigFilter === 'afgelopen') gefilterd = alleWedstrijden.filter(w => w.status === 'afgelopen');
+        gefilterd.sort((a, b) => (b.datum + (b.tijdstip || '')).localeCompare(a.datum + (a.tijdstip || '')));
+        container.innerHTML = gefilterd.length ? gefilterd.map(wedstrijdKaartHTML).join('') : '<div class="empty-state">Geen wedstrijden gevonden</div>';
+    }
+
+    // ===== CLUBS =====
+    const clubsData = {
+        'fc-purmerend': { naam: 'FC Purmerend', admin: 'admin@fcpurmerend.nl' },
+        'vv-monnickendam': { naam: 'VV Monnickendam', admin: 'admin@vv-monnickendam.nl' }
+    };
+
+    function renderClubs() {
+        const tbody = document.getElementById('clubs-table-body');
+        const dashClubs = document.getElementById('dashboard-clubs');
+        let html = '', dashHtml = '';
+
+        for (const [clubId, club] of Object.entries(clubsData)) {
+            const teams = Object.values(alleGebruikers).filter(g => g.club === clubId && g.rol === 'team').length;
+            const adminEntry = Object.values(alleGebruikers).find(g => g.club === clubId && g.rol === 'clubadmin');
+            const adminNaam = adminEntry ? adminEntry.naam : '—';
+
+            html += `<tr>
+                <td><strong>${club.naam}</strong></td>
+                <td><span style="color:rgba(240,244,255,0.4); font-size:12px;">${clubId}</span></td>
+                <td>${adminNaam}</td>
+                <td>${teams} teams</td>
+                <td><span class="club-status actief"><span class="club-status-dot"></span> Actief</span></td>
+                <td><button class="table-btn" onclick="window.openModal('gebruiker')">+ Gebruiker</button></td>
+            </tr>`;
+
+            dashHtml += `<tr>
+                <td><strong>${club.naam}</strong></td>
+                <td>${adminNaam}</td>
+                <td>${teams} teams</td>
+                <td><span class="club-status actief"><span class="club-status-dot"></span> Actief</span></td>
+            </tr>`;
+        }
+        tbody.innerHTML = html;
+        if (dashClubs) dashClubs.innerHTML = dashHtml;
+    }
+
+    // ===== GEBRUIKERS =====
+    function renderGebruikers() {
+        const container = document.getElementById('gebruikers-list');
+        const entries = Object.entries(alleGebruikers);
+        if (!entries.length) { container.innerHTML = '<div class="empty-state">Geen gebruikers gevonden</div>'; return; }
+
+        const volgorde = { superadmin: 0, clubadmin: 1, team: 2 };
+        entries.sort((a, b) => (volgorde[a[1].rol] || 3) - (volgorde[b[1].rol] || 3));
+
+        container.innerHTML = entries.map(([key, g]) => {
+            const initials = (g.naam || g.email || '?').charAt(0).toUpperCase();
+            const clubNaam = g.club === 'fc-purmerend' ? 'FC Purmerend' : g.club === 'vv-monnickendam' ? 'VV Monnickendam' : (g.club || '');
+            return `<div class="gebruiker-row">
+                <div class="gebruiker-avatar ${g.rol || 'team'}">${initials}</div>
+                <div class="gebruiker-info">
+                    <div class="gebruiker-naam">${g.naam || '—'}</div>
+                    <div class="gebruiker-email">${g.email || ''} ${clubNaam ? '· ' + clubNaam : ''}</div>
+                </div>
+                <span class="gebruiker-rol ${g.rol || 'team'}">${g.rol || 'team'}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // ===== MODALS =====
+    window.openModal = function(type) {
+        document.getElementById('modal-' + type).classList.add('open');
+    };
+    window.closeModal = function(type) {
+        document.getElementById('modal-' + type).classList.remove('open');
+    };
+
+    window.slaGebruikerOp = async function() {
+        const naam = document.getElementById('new-naam').value.trim();
+        const email = document.getElementById('new-email').value.trim();
+        const password = document.getElementById('new-password').value;
+        const rol = document.getElementById('new-rol').value;
+        const club = document.getElementById('new-club').value;
+        const errorEl = document.getElementById('modal-error');
+
+        if (!naam || !email || !password) { errorEl.textContent = 'Vul alle velden in.'; errorEl.style.display = 'block'; return; }
+        if (password.length < 6) { errorEl.textContent = 'Wachtwoord minimaal 6 tekens.'; errorEl.style.display = 'block'; return; }
+
+        try {
+            // Maak Firebase Auth account aan
+            await window._createUser(window._auth, email, password);
+            // Sla op in database
+            const emailKey = email.replace(/\./g, ',');
+            await set(ref(db, 'gebruikers/' + emailKey), { naam, email, rol, club });
+            closeModal('gebruiker');
+            errorEl.style.display = 'none';
+            document.getElementById('new-naam').value = '';
+            document.getElementById('new-email').value = '';
+            document.getElementById('new-password').value = '';
+            alert('✅ Gebruiker ' + naam + ' aangemaakt!');
+        } catch(e) {
+            errorEl.textContent = '❌ Fout: ' + e.message;
+            errorEl.style.display = 'block';
+        }
+    };
+
+    window.slaClubOp = async function() {
+        const naam = document.getElementById('new-clubnaam').value.trim();
+        const id = document.getElementById('new-clubid').value.trim();
+        const kleur = document.getElementById('new-clubkleur').value;
+        if (!naam || !id) { alert('Vul clubnaam en ID in.'); return; }
+        await set(ref(window._db, 'clubs/' + id), { naam, kleur, actief: true });
+        closeModal('club');
+        alert('✅ Club ' + naam + ' toegevoegd!');
+    };
+</script>
+
+<script>
+    // ===== NAVIGATIE =====
+    function showSection(naam) {
+        ['dashboard', 'wedstrijden', 'clubs', 'gebruikers'].forEach(s => {
+            document.getElementById('section-' + s).style.display = s === naam ? 'block' : 'none';
+        });
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        const titels = {
+            dashboard: ['Dashboard', 'Overzicht van alle clubs en wedstrijden'],
+            wedstrijden: ['Wedstrijden', 'Alle wedstrijden in het systeem'],
+            clubs: ['Clubs', 'Clubs beheren en toevoegen'],
+            gebruikers: ['Gebruikers', 'Accounts aanmaken en beheren']
+        };
+        document.getElementById('pageTitle').textContent = titels[naam][0];
+        document.getElementById('pageSubtitle').textContent = titels[naam][1];
+    }
+</script>
+</body>
+</html>

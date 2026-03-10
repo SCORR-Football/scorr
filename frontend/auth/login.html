@@ -343,8 +343,15 @@
     try {
       await signInWithEmailAndPassword(auth, email, password);
       
-      // Redirect naar nieuwe template op basis van club
-      if (purmerendTeams.includes(email)) {
+     // Check rol in database
+      const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
+      const db = getDatabase(app);
+      const emailKey = email.replace(/\./g, ',');
+      const snapshot = await get(ref(db, 'gebruikers/' + emailKey));
+      
+      if (snapshot.exists() && snapshot.val().rol === 'superadmin') {
+        window.location.href = '/frontend/admin/superadmin.html';
+      } else if (purmerendTeams.includes(email)) {
         window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=fc-purmerend';
       } else {
         window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=vv-monnickendam';

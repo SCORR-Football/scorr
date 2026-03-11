@@ -170,10 +170,10 @@
         .card-divider { width: 1px; height: 48px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
 
         /* Teams */
-        .teams-row { flex: 1; display: flex; align-items: center; gap: 16px; }
+        .teams-row { flex: 1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0; }
 
-        .team { flex: 1; display: flex; align-items: center; gap: 14px; min-width: 0; }
-        .team.away { flex-direction: row-reverse; }
+        .team { display: flex; align-items: center; gap: 14px; min-width: 0; overflow: hidden; }
+        .team.away { flex-direction: row-reverse; justify-content: flex-start; }
 
         /* Logo - geen zwarte rand */
 .team-logo img {

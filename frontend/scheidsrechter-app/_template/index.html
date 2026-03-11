@@ -1044,8 +1044,15 @@ saveTimerState();
 }
 
         async function nextHalf() {
-    await pauseTimer();
-            if (currentHalf === 1) {
+            const btn = document.getElementById('nextHalfBtn');
+            if (currentHalf === 0) {
+                // Starten wedstrijd → 1e helft
+                currentHalf = 1;
+                await startTimer();
+                btn.textContent = '⏭️ EINDE 1E HELFT';
+            } else if (currentHalf === 1) {
+                // Einde 1e helft → rust
+                await pauseTimer();
                 currentHalf = 2;
                 accumulatedSeconds = halfDuration * 60;
                 timerStartTime = null;
@@ -1055,12 +1062,30 @@ saveTimerState();
                 updateInjuryTimeDisplay();
                 addEvent('half', null, null, 'Rust');
                 saveTimerState();
-                document.getElementById('nextHalfBtn').style.display = 'none';
-            } else {
-    // Doe niets, stop knop handelt dit af
-    return;
-}
-            updateDisplay();
+                btn.textContent = '▶ STARTEN 2E HELFT';
+                updateDisplay();
+            } else if (currentHalf === 2 && !isRunning) {
+                // Starten 2e helft
+                await startTimer();
+                btn.textContent = '⏹ EINDE WEDSTRIJD';
+            } else if (currentHalf === 2 && isRunning) {
+                // Einde wedstrijd
+                if (!confirm('⚠️ Wil je de wedstrijd beëindigen?')) return;
+                await pauseTimer();
+                addEvent('end', null, null, 'Einde Wedstrijd');
+                btn.style.display = 'none';
+                accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
+                isRunning = false; currentHalf = 0;
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                localStorage.removeItem('scorr_timer_state');
+                updateDisplay();
+                var wId = localStorage.getItem('wedstrijdId');
+                if (wId && window._firebaseDb) {
+                    import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(m => {
+                        m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), { status: 'afgelopen' });
+                    });
+                }
+            }
         }
 
         // ===== SCORE =====

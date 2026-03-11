@@ -518,7 +518,7 @@
 
             if (!bewerkTeamKey) {
                 // Nieuw team — sla clubadmin credentials op voor re-login
-                const adminEmail = huidigUser.email;
+                const adminEmail = auth.currentUser.email;
                 const adminWw = sessionStorage.getItem('scorr_admin_ww');
                 bezigtMetTeamAanmaken = true;
                 await createUserWithEmailAndPassword(auth, fakeEmail, wachtwoord);

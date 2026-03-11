@@ -675,7 +675,7 @@
 
         <!-- NEXT HALF / END MATCH -->
         <div class="next-half-bar">
-            <button class="next-half-btn" id="nextHalfBtn">⏭️ Einde 1e helft</button>
+            <button class="next-half-btn" id="nextHalfBtn">▶ STARTEN WEDSTRIJD</button>
         </div>
 
         <!-- EVENTS TIMELINE -->
@@ -693,9 +693,9 @@
             <button class="toolbar-btn red-card" id="redBtn" title="Rode kaart">
                 🟥
             </button>
-            <button class="toolbar-btn" id="stopBtn" title="Timer reset">
-                ⏹
-                <span class="btn-label">STOP</span>
+            <button class="toolbar-btn" id="resetBtn" title="Reset">
+                ↺
+                <span class="btn-label">RESET</span>
             </button>
             <button class="toolbar-btn download-btn" id="downloadBtn" title="Verslag">
                 📄
@@ -752,7 +752,7 @@
         let accumulatedSeconds = 0;
         let timerInterval = null;
         let isRunning = false;
-        let currentHalf = 1;
+        let currentHalf = 0;
         let homeScoreValue = 0;
         let awayScoreValue = 0;
         let events = [];
@@ -868,7 +868,9 @@
 
         function updateDisplay() {
             timerDisplay.textContent = formatTime(getCurrentSeconds());
-            halfIndicator.textContent = currentHalf === 1 ? '1e Helft' : '2e Helft';
+            if (currentHalf === 0) halfIndicator.textContent = 'Klaar om te starten';
+        else if (currentHalf === 1) halfIndicator.textContent = '1e Helft';
+        else halfIndicator.textContent = '2e Helft';
         }
 
         // ===== TIMER =====
@@ -1308,10 +1310,20 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 }
 
         // ===== EVENT LISTENERS =====
-        document.getElementById('startBtn').addEventListener('click', startTimer);
+        // ===== EVENT LISTENERS =====
         document.getElementById('pauseBtn').addEventListener('click', pauseTimer);
-        document.getElementById('stopBtn').addEventListener('click', stopTimer);
-
+        document.getElementById('resetBtn').addEventListener('click', async () => {
+        if (!confirm('⚠️ Timer resetten? De wedstrijd blijft bewaard.')) return;
+        await pauseTimer();
+        accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
+        isRunning = false; currentHalf = 0;
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        localStorage.removeItem('scorr_timer_state');
+        const btn = document.getElementById('nextHalfBtn');
+        btn.style.display = 'block';
+        btn.textContent = '▶ STARTEN WEDSTRIJD';
+        updateDisplay();
+    });
 
         document.getElementById('homePlusBtn').addEventListener('click', () => {
             currentGoalTeam = 'home';

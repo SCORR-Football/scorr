@@ -1378,7 +1378,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
   let huidigWedstrijdId = null;
   window._getWedstrijdId = () => huidigWedstrijdId;
   let huidigUser = null;
-  let huidigTeamNaam = null;
+  let huidigTeamNaam = null, huidigTeamId = null;
   var thuisOfUit = 'thuis';
 window._selecteerThuisUit = function(keuze) {
     thuisOfUit = keuze;
@@ -1394,7 +1394,17 @@ window._selecteerThuisUit = function(keuze) {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         huidigUser = user;
-        huidigTeamNaam = teamMapping[user.email] || "Onbekend Team";
+        huidigTeamId = user.email.split('@')[0];
+        try {
+            const teamSnap = await get(ref(db, 'teams/' + huidigTeamId));
+            if (teamSnap.exists()) {
+                const teamData = teamSnap.val();
+                huidigTeamNaam = teamData.naam || huidigTeamId;
+                if (teamData.helfttijd) halfDuration = teamData.helfttijd;
+            } else {
+                huidigTeamNaam = teamMapping[user.email] || huidigTeamId;
+            }
+        } catch(e) { huidigTeamNaam = teamMapping[user.email] || huidigTeamId; }
         toonSelectieScherm(huidigTeamNaam, user);
       } else {
         window.location.href = '/frontend/auth/login.html';
@@ -1421,7 +1431,9 @@ document.getElementById('logoutBtnBanner').addEventListener('click', async () =>
     if (snapshot.exists()) {
       snapshot.forEach((child) => {
         const data = child.val();
-        if (data.thuisteam === teamNaam || data.uitteam === teamNaam) {
+        const matchOpTeamId = data.teamId && data.teamId === huidigTeamId;
+                const matchOpNaam = !data.teamId && (data.thuisteam === teamNaam || data.uitteam === teamNaam);
+                if (matchOpTeamId || matchOpNaam) {
     const item = { id: child.key, ...data };
     if (data.status === 'bezig' || data.status === 'rust') bezig.push(item);
     else if (data.status === 'gepland') gepland.push(item);

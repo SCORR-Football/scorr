@@ -162,6 +162,7 @@
         errorEl.style.display = 'none';
         try {
             await signInWithEmailAndPassword(auth, email, wachtwoord);
+            sessionStorage.setItem('scorr_admin_ww', wachtwoord);
             const emailKey = email.replace(/\./g, ',');
             const snap = await get(ref(db, 'gebruikers/' + emailKey));
             if (snap.exists()) {

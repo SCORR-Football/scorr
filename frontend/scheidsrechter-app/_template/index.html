@@ -9,21 +9,17 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-appearance: none; appearance: none; font-family: inherit; }
         html, body { height: 100%; overflow: hidden; }
-        body { font-family: 'Lexend', -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0E27; height: 100dvh; display: flex; flex-direction: column; }
+        body { font-family: "Lexend", -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0E27; height: 100dvh; display: flex; flex-direction: column; }
         .app-shell { max-width: 500px; width: 100%; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; background: linear-gradient(180deg, #0A0E27 0%, #1E2749 100%); position: relative; overflow: hidden; }
-
-        /* HEADER */
         .header-bar { display: flex; align-items: center; justify-content: center; padding: 8px 16px; background: rgba(0,0,0,0.4); flex-shrink: 0; gap: 8px; position: relative; }
         .header-bar .logo-text { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #00FF88 0%, #00DDFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .header-bar .club-badge { width: 34px; height: 34px; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3)); border-radius: 50%; }
-        .header-bar .share-btn { position: absolute; right: 12px; width: 36px; height: 36px; background: #1E2749; color: #00FF88; border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .header-bar .share-btn { position: absolute; right: 12px; width: 36px; height: 36px; background: #1E2749; color: #00FF88; border: 1px solid rgba(0,255,136,0.3); border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .header-bar .logout-btn { position: absolute; left: 12px; width: 36px; height: 36px; background: #1E2749; color: #FF3D71; border: 1px solid rgba(255,61,113,0.3); border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-        /* SCORE */
         .score-panel { padding: 12px 20px 8px; flex-shrink: 0; }
         .teams-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
         .team-col { text-align: center; }
-        .team-name-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(0, 255, 136, 0.25); color: white; font-family: inherit; font-size: 13px; font-weight: 700; text-align: center; padding: 4px 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .team-name-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(0,255,136,0.25); color: white; font-family: inherit; font-size: 13px; font-weight: 700; text-align: center; padding: 4px 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .team-name-input:focus { outline: none; border-bottom-color: #00FF88; }
         .team-name-input::placeholder { color: rgba(255,255,255,0.4); }
         .score-number { font-size: 72px; font-weight: 900; color: white; line-height: 1; margin: 4px 0; cursor: pointer; user-select: none; text-shadow: 0 2px 12px rgba(0,0,0,0.3); }
@@ -34,24 +30,17 @@
         .score-btn.minus { background: #1E2749; color: rgba(255,255,255,0.7); }
         .score-btn.minus:active { background: #2A3460; transform: scale(0.92); }
         .score-separator { font-size: 40px; font-weight: 900; color: #00FF88; padding-top: 28px; }
-
-        /* TIMER */
-        .timer-strip { padding: 8px 20px; text-align: center; flex-shrink: 0; border-top: 1px solid rgba(0, 255, 136, 0.15); border-bottom: 1px solid rgba(0, 255, 136, 0.15); }
+        .timer-strip { padding: 8px 20px; text-align: center; flex-shrink: 0; border-top: 1px solid rgba(0,255,136,0.15); border-bottom: 1px solid rgba(0,255,136,0.15); }
         .timer-meta { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
         .timer-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
-        .timer-display { font-size: 48px; font-weight: 900; font-family: 'Courier New', monospace; color: #00FF88; letter-spacing: 3px; line-height: 1.1; text-shadow: 0 2px 16px rgba(0, 255, 136, 0.3); }
+        .timer-display { font-size: 48px; font-weight: 900; font-family: "Courier New", monospace; color: #00FF88; letter-spacing: 3px; line-height: 1.1; text-shadow: 0 2px 16px rgba(0,255,136,0.3); }
         .timer-controls-inline { display: flex; flex-direction: column; gap: 4px; }
         .timer-btn-small { width: 40px; height: 32px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-        .timer-btn-small.play { background: #00FF88; color: #0A0E27; }
-        .timer-btn-small.pause { background: #1E2749; color: #00FF88; border: 1px solid rgba(0, 255, 136, 0.3); }
-        #wakeLockStatus { font-size: 10px; color: rgba(0, 255, 136, 0.5); margin-top: 2px; }
-
-        /* NEXT HALF */
+        .timer-btn-small.pause { background: #1E2749; color: #00FF88; border: 1px solid rgba(0,255,136,0.3); }
+        #wakeLockStatus { font-size: 10px; color: rgba(0,255,136,0.5); margin-top: 2px; }
         .next-half-bar { padding: 8px 20px; flex-shrink: 0; }
         .next-half-btn { width: 100%; padding: 12px; background: #FF3D71; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
         .next-half-btn:active { transform: scale(0.98); background: #E6345E; }
-
-        /* EVENTS */
         .events-area { flex: 1; overflow-y: auto; padding: 12px 20px; -webkit-overflow-scrolling: touch; min-height: 0; }
         .events-area::-webkit-scrollbar { width: 3px; }
         .events-area::-webkit-scrollbar-thumb { background: #00FF88; border-radius: 3px; }
@@ -59,24 +48,19 @@
         .event-item:last-child { border-bottom: none; }
         .event-minute { font-size: 13px; font-weight: 700; color: #00FF88; min-width: 30px; text-align: right; padding-top: 1px; }
         .event-text { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.4; flex: 1; }
-        .event-item.event-goal .event-minute { color: #00FF88; }
         .event-item.event-yellow .event-minute { color: #FFB800; }
         .event-item.event-red .event-minute { color: #FF3D71; }
         .event-item.event-half .event-text, .event-item.event-end .event-text { color: rgba(255,255,255,0.5); font-style: italic; }
         .event-delete { background: none; border: none; color: rgba(255,255,255,0.2); font-size: 14px; cursor: pointer; padding: 2px 4px; }
         .event-delete:active { color: #FF3D71; }
         .no-events { text-align: center; color: rgba(255,255,255,0.25); padding: 20px; font-size: 13px; font-style: italic; }
-
-        /* TOOLBAR */
         .bottom-toolbar { display: flex; align-items: center; justify-content: space-around; padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); background: #0A0E27; flex-shrink: 0; border-top: 2px solid #00FF88; }
         .toolbar-btn { width: 52px; height: 52px; border: none; border-radius: 12px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: #1E2749; color: white; position: relative; }
         .toolbar-btn:active { transform: scale(0.9); }
-        .toolbar-btn.yellow-card { background: rgba(255, 184, 0, 0.2); color: #FFB800; border: 2px solid rgba(255, 184, 0, 0.3); }
-        .toolbar-btn.red-card { background: rgba(255, 61, 113, 0.2); color: #FF3D71; border: 2px solid rgba(255, 61, 113, 0.3); }
-        .toolbar-btn.download-btn { background: rgba(0, 255, 136, 0.15); color: #00FF88; border: 2px solid rgba(0, 255, 136, 0.3); }
+        .toolbar-btn.yellow-card { background: rgba(255,184,0,0.2); color: #FFB800; border: 2px solid rgba(255,184,0,0.3); }
+        .toolbar-btn.red-card { background: rgba(255,61,113,0.2); color: #FF3D71; border: 2px solid rgba(255,61,113,0.3); }
+        .toolbar-btn.download-btn { background: rgba(0,255,136,0.15); color: #00FF88; border: 2px solid rgba(0,255,136,0.3); }
         .toolbar-btn .btn-label { position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; opacity: 0.7; }
-
-        /* MODAL */
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: white; padding: 24px; border-radius: 16px; max-width: 380px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border-top: 4px solid #00FF88; }
         .modal-content h3 { color: #0A0E27; margin-bottom: 16px; font-size: 20px; font-weight: 700; text-align: center; }
@@ -97,11 +81,8 @@
         .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
         .btn-cancel { background: #666; color: white; }
         .btn-confirm { background: #00FF88; color: #0A0E27; }
-
         @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         #teamDropdownContainer { display: none !important; }
-
-        /* LOADING */
         .loading-screen { position: fixed; inset: 0; background: #0A0E27; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
         .loading-logo { font-size: 48px; font-weight: 900; letter-spacing: 4px; background: linear-gradient(135deg, #00FF88 0%, #00DDFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .loading-spinner { width: 32px; height: 32px; border: 3px solid rgba(0,255,136,0.2); border-top-color: #00FF88; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -109,23 +90,17 @@
     </style>
 </head>
 <body>
-
-<!-- LOADING SCREEN -->
 <div class="loading-screen" id="loadingScreen">
     <div class="loading-logo">SCORR</div>
     <div class="loading-spinner"></div>
 </div>
-
 <div class="app-shell">
-    <!-- HEADER -->
     <div class="header-bar">
         <button class="logout-btn" id="logoutBtnHeader">🚪</button>
         <img id="clubLogo" class="club-badge" alt="" style="display:none;">
         <span class="logo-text">SCORR</span>
         <button class="share-btn" onclick="shareApp()">📤</button>
     </div>
-
-    <!-- SCORE -->
     <div class="score-panel">
         <div class="teams-row">
             <div class="team-col">
@@ -147,8 +122,6 @@
             </div>
         </div>
     </div>
-
-    <!-- TIMER -->
     <div class="timer-strip">
         <div class="timer-meta" id="halfIndicator">1e Helft</div>
         <div class="timer-row">
@@ -159,18 +132,12 @@
         </div>
         <div id="wakeLockStatus"></div>
     </div>
-
-    <!-- NEXT HALF -->
     <div class="next-half-bar">
         <button class="next-half-btn" id="nextHalfBtn">▶ STARTEN WEDSTRIJD</button>
     </div>
-
-    <!-- EVENTS -->
     <div class="events-area">
         <div id="eventsList"><div class="no-events">Nog geen gebeurtenissen</div></div>
     </div>
-
-    <!-- TOOLBAR -->
     <div class="bottom-toolbar">
         <button class="toolbar-btn yellow-card" id="yellowBtn">🟨</button>
         <button class="toolbar-btn red-card" id="redBtn">🟥</button>
@@ -179,7 +146,6 @@
     </div>
 </div>
 
-<!-- EVENT MODAL -->
 <div id="eventModal" class="modal">
     <div class="modal-content">
         <h3 id="modalTitle">Gebeurtenis toevoegen</h3>
@@ -202,8 +168,9 @@
     </div>
 </div>
 
-<!-- OVERLAYS (ingeladen vanuit JS) -->
+<!-- OVERLAYS -->
 <div id="scorr-selectie-overlay" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.97); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto;"></div>
+
 <div id="scorr-banner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9998; background:#1E2749; border-bottom:2px solid rgba(0,255,136,0.4); padding:8px 12px; align-items:center; justify-content:space-between; gap:6px; font-family:'Lexend',sans-serif;">
     <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
         <div style="display:flex; align-items:center; gap:6px; flex-wrap:nowrap;">
@@ -229,7 +196,7 @@
     </div>
 </div>
 
-<!-- POPUP -->
+<!-- POPUP: vereenvoudigd — helfttijd uit teamprofiel -->
 <div id="scorr-popup-overlay" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px;">
     <div style="background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:32px; width:100%; max-width:420px; font-family:'Lexend',sans-serif;">
         <div style="text-align:center; margin-bottom:28px;">
@@ -252,10 +219,6 @@
             <input id="popup-tegenstander" type="text" placeholder="bijv. Ajax O14-3" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
         </div>
         <div style="margin-bottom:16px;">
-            <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Klasse *</label>
-            <input id="popup-klasse" type="text" placeholder="bijv. 4e klasse district" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
-        </div>
-        <div style="margin-bottom:16px;">
             <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Veld</label>
             <select id="popup-veld" style="width:100%; background:#1E2749; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none; appearance:none;">
                 <option value="A">Veld A</option><option value="B">Veld B</option><option value="C">Veld C</option>
@@ -263,11 +226,7 @@
                 <option value="n.v.t.">n.v.t.</option>
             </select>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:24px;">
-            <div>
-                <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Min per helft</label>
-                <input id="popup-helfttijd" type="number" value="45" min="10" max="90" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
-            </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
             <div>
                 <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Datum</label>
                 <input id="popup-datum" type="date" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:14px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
@@ -277,21 +236,23 @@
                 <input id="popup-tijdstip" type="time" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:14px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
             </div>
         </div>
-        <div id="popup-error" style="display:none; background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); border-radius:8px; padding:10px 16px; font-size:13px; color:#FF3B5C; margin-bottom:16px;">Vul tegenstander en klasse in om te starten.</div>
+        <div style="background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.15); border-radius:8px; padding:10px 16px; font-size:12px; color:rgba(240,244,255,0.5); margin-bottom:16px; display:flex; align-items:center; gap:6px;">
+            <span style="color:#00FF88;">⏱</span>
+            <span id="popup-helfttijd-info">Helfttijd: 45 min (uit teamprofiel)</span>
+        </div>
+        <div id="popup-error" style="display:none; background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); border-radius:8px; padding:10px 16px; font-size:13px; color:#FF3B5C; margin-bottom:16px;">Vul tegenstander in om te starten.</div>
         <button id="popup-start-btn" style="width:100%; background:#00FF88; color:#0A0E27; border:none; border-radius:8px; padding:16px; font-size:16px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; letter-spacing:1px;">▶ START WEDSTRIJD</button>
     </div>
 </div>
 
 <script>
-    // ===== CLUB CONFIG LADEN =====
-    // URL: /scheidsrechter-app/_template/index.html?club=fc-purmerend
     const urlParams = new URLSearchParams(window.location.search);
     const clubId = urlParams.get('club') || 'fc-purmerend';
     let clubConfig = null;
 
     async function laadClubConfig() {
         try {
-            const res = await fetch(`/frontend/clubs/${clubId}.json`);
+            const res = await fetch('/frontend/clubs/' + clubId + '.json');
             clubConfig = await res.json();
             pasClubToe(clubConfig);
         } catch(e) {
@@ -302,26 +263,20 @@
     }
 
     function pasClubToe(config) {
-        document.title = `SCORR - ${config.naam}`;
+        document.title = 'SCORR - ' + config.naam;
         if (config.logo) {
             const logo = document.getElementById('clubLogo');
             logo.src = config.logo;
             logo.style.display = 'block';
         }
-        // Kleur toepassen
-        if (config.kleur && config.kleur !== '#00FF88') {
-            document.documentElement.style.setProperty('--club-kleur', config.kleur);
-        }
     }
 
-    // ===== STATE =====
     let timerStartTime = null, timerPausedAt = null, accumulatedSeconds = 0;
     let timerInterval = null, isRunning = false, currentHalf = 0;
     let homeScoreValue = 0, awayScoreValue = 0;
     let events = [], currentEventType = '', currentGoalTeam = '', selectedTeam = '', selectedNumber = '';
     let injuryTime = 0, halfDuration = 45, wakeLock = null;
 
-    // ===== TIMER STATE =====
     function loadTimerState() {
         const saved = localStorage.getItem('scorr_timer_state');
         if (saved) {
@@ -350,7 +305,6 @@
         return accumulatedSeconds;
     }
 
-    // ===== WAKE LOCK =====
     async function requestWakeLock() {
         try {
             if ('wakeLock' in navigator) {
@@ -373,7 +327,6 @@
 
     document.addEventListener('visibilitychange', async () => { if (wakeLock && document.visibilityState === 'visible' && isRunning) await requestWakeLock(); });
 
-    // ===== ELEMENTS =====
     const timerDisplay = document.getElementById('timerDisplay');
     const halfIndicator = document.getElementById('halfIndicator');
     const homeScore = document.getElementById('homeScore');
@@ -382,10 +335,9 @@
     const eventModal = document.getElementById('eventModal');
     const modalTitle = document.getElementById('modalTitle');
 
-    // ===== DISPLAY =====
     function formatTime(totalSeconds) {
         const mins = Math.floor(totalSeconds / 60), secs = totalSeconds % 60;
-        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        return String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
     }
 
     function getCurrentMinute() { return Math.floor(getCurrentSeconds() / 60) + 1; }
@@ -397,7 +349,6 @@
         else halfIndicator.textContent = '2e Helft';
     }
 
-    // ===== TIMER =====
     let audioCtx = null, audioInitialized = false, timeExpiredTriggered = false;
 
     function initAudioContext() {
@@ -463,10 +414,10 @@
         timerDisplay.style.animation = 'flash 0.6s ease-in-out 4';
         const isHalftime = currentHalf === 1;
         const title = isHalftime ? '📣 RUSTSIGNAAL!' : '🏆 EINDSIGNAAL!';
-        const message = isHalftime ? `1e helft afgelopen.\n(${halfDuration}+${injuryTime} min)\n\nDruk op Einde 1e helft.` : `Wedstrijd afgelopen!\n(${halfDuration}+${injuryTime} min)`;
+        const message = isHalftime ? '1e helft afgelopen.\n(' + halfDuration + '+' + injuryTime + ' min)\n\nDruk op Einde 1e helft.' : 'Wedstrijd afgelopen!\n(' + halfDuration + '+' + injuryTime + ' min)';
         setTimeout(() => {
             timerDisplay.style.animation = '';
-            alert(`${title}\n\n${message}`);
+            alert(title + '\n\n' + message);
             pauseTimer();
             if (!isHalftime) {
                 const wId = localStorage.getItem('wedstrijdId');
@@ -489,40 +440,18 @@
         }
     }
 
-    async function stopTimer() {
-        if (!confirm('⚠️ Wil je de wedstrijd beëindigen?')) return;
-        await pauseTimer();
-        addEvent('end', null, null, 'Einde Wedstrijd');
-        document.getElementById('nextHalfBtn').style.display = 'none';
-        accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
-        isRunning = false; currentHalf = 1;
-        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-        localStorage.removeItem('scorr_timer_state');
-        updateDisplay();
-        const wId = localStorage.getItem('wedstrijdId');
-        if (wId && window._firebaseDb) {
-            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(m => {
-                m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), { status: 'afgelopen' });
-            });
-        }
-    }
-
     let nextHalfBusy = false;
     async function nextHalf() {
-    if (nextHalfBusy) return;
-    nextHalfBusy = true;
-    setTimeout(() => { nextHalfBusy = false; }, 1000);
-    const btn = document.getElementById('nextHalfBtn');
+        if (nextHalfBusy) return;
+        nextHalfBusy = true;
+        setTimeout(() => { nextHalfBusy = false; }, 1000);
+        const btn = document.getElementById('nextHalfBtn');
         if (currentHalf === 0) {
-            // Starten wedstrijd → 1e helft
-            currentHalf = 1;
-            await startTimer();
+            currentHalf = 1; await startTimer();
             btn.textContent = '⏭️ EINDE 1E HELFT';
         } else if (currentHalf === 1) {
-            // Einde 1e helft → rust
             await pauseTimer();
-            currentHalf = 2;
-            accumulatedSeconds = halfDuration * 60;
+            currentHalf = 2; accumulatedSeconds = halfDuration * 60;
             timerStartTime = null; timerPausedAt = null;
             injuryTime = 0; timeExpiredTriggered = false;
             addEvent('half', null, null, 'Rust');
@@ -532,17 +461,13 @@
             const wId = localStorage.getItem('wedstrijdId');
             if (wId && window._firebaseDb) {
                 import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(m => {
-                    m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
-                        status: 'rust', currentHalf: 2, accumulatedSeconds: halfDuration * 60
-                    });
+                    m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), { status: 'rust', currentHalf: 2, accumulatedSeconds: halfDuration * 60 });
                 });
             }
         } else if (currentHalf === 2 && !isRunning) {
-            // Starten 2e helft
             await startTimer();
             btn.textContent = '⏹ EINDE WEDSTRIJD';
         } else if (currentHalf === 2 && isRunning) {
-            // Einde wedstrijd
             if (!confirm('⚠️ Wil je de wedstrijd beëindigen?')) return;
             await pauseTimer();
             addEvent('end', null, null, 'Einde Wedstrijd');
@@ -561,20 +486,18 @@
         }
     }
 
-    // ===== SCORE =====
     function changeScore(team, delta) {
         if (team === 'home') { homeScoreValue = Math.max(0, homeScoreValue + delta); document.getElementById('homeScore').textContent = homeScoreValue; }
         else if (team === 'away') { awayScoreValue = Math.max(0, awayScoreValue + delta); awayScore.textContent = awayScoreValue; }
         const wedstrijdId = localStorage.getItem('wedstrijdId');
         if (wedstrijdId && window._firebaseDb) {
-            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(({ ref, update }) => {
-                update(ref(window._firebaseDb, `wedstrijden/${wedstrijdId}`), { thuisscore: homeScoreValue, uitscore: awayScoreValue });
+            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
+                m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wedstrijdId), { thuisscore: homeScoreValue, uitscore: awayScoreValue });
             });
         }
     }
 
-    // ===== EVENTS =====
-    function showEventModal(eventType, team = null) {
+    function showEventModal(eventType, team) {
         currentEventType = eventType;
         if (team) selectedTeam = team;
         else if (eventType === 'goal' && currentGoalTeam) selectedTeam = currentGoalTeam;
@@ -590,7 +513,7 @@
         for (let i = 0; i <= 16; i++) {
             const btn = document.createElement('button');
             btn.className = 'number-btn'; btn.textContent = i; btn.type = 'button';
-            btn.addEventListener('click', () => selectNumber(i));
+            btn.addEventListener('click', function() { selectNumber(i); });
             numberGrid.appendChild(btn);
         }
         selectedNumber = ''; document.getElementById('customNumber').value = ''; document.getElementById('modalPlayerName').value = '';
@@ -605,7 +528,7 @@
 
     function selectNumber(number) {
         selectedNumber = number; document.getElementById('customNumber').value = '';
-        document.querySelectorAll('.number-btn').forEach(btn => { btn.classList.toggle('selected', parseInt(btn.textContent) === number); });
+        document.querySelectorAll('.number-btn').forEach(function(btn) { btn.classList.toggle('selected', parseInt(btn.textContent) === number); });
     }
 
     function closeModal() { eventModal.style.display = 'none'; selectedTeam = ''; selectedNumber = ''; }
@@ -623,7 +546,7 @@
     }
 
     function removeLastGoal(team) {
-        const idx = events.findIndex(e => e.type === 'goal' && e.team === team);
+        const idx = events.findIndex(function(e) { return e.type === 'goal' && e.team === team; });
         if (idx !== -1) { deleteEvent(idx); return; }
         if (team === 'home' && homeScoreValue > 0) { if (!confirm('Doelpunt verwijderen uit score?')) return; changeScore('home', -1); }
         else if (team === 'away' && awayScoreValue > 0) { if (!confirm('Doelpunt verwijderen uit score?')) return; changeScore('away', -1); }
@@ -642,15 +565,15 @@
         const minute = getCurrentMinute();
         const teamName = team === 'home' ? document.getElementById('homeTeamName').value : team === 'away' ? document.getElementById('awayTeamName').value : '';
         let description = '';
-        if (type === 'goal') { description = `⚽ DOELPUNT! ${teamName} - #${playerNumber}`; if (playerName) description += ` (${playerName})`; }
-        else if (type === 'yellow') { description = `🟨 Gele kaart ${teamName} - #${playerNumber}`; if (playerName) description += ` (${playerName})`; }
-        else if (type === 'red') { description = `🟥 Rode kaart ${teamName} - #${playerNumber}`; if (playerName) description += ` (${playerName})`; }
+        if (type === 'goal') { description = '⚽ DOELPUNT! ' + teamName + ' - #' + playerNumber; if (playerName) description += ' (' + playerName + ')'; }
+        else if (type === 'yellow') { description = '🟨 Gele kaart ' + teamName + ' - #' + playerNumber; if (playerName) description += ' (' + playerName + ')'; }
+        else if (type === 'red') { description = '🟥 Rode kaart ' + teamName + ' - #' + playerNumber; if (playerName) description += ' (' + playerName + ')'; }
         else if (type === 'half') { description = playerName; }
-        else if (type === 'end') { description = `${playerName} - Stand: ${homeScoreValue} - ${awayScoreValue}`; }
+        else if (type === 'end') { description = playerName + ' - Stand: ' + homeScoreValue + ' - ' + awayScoreValue; }
         events.unshift({ minute, type, description, team }); renderEvents();
         const wId = localStorage.getItem('wedstrijdId');
         if (wId && window._firebaseDb && type !== 'half' && type !== 'end') {
-            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(m => {
+            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
                 m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
                     type: type === 'yellow' ? 'yellow-card' : type === 'red' ? 'red-card' : 'goal',
                     minuut: minute, omschrijving: description, tijdstip: Date.now()
@@ -662,14 +585,13 @@
     function renderEvents() {
         if (events.length === 0) { eventsList.innerHTML = '<div class="no-events">Nog geen gebeurtenissen</div>'; return; }
         let html = '';
-        events.forEach((event, index) => {
+        events.forEach(function(event, index) {
             const canDelete = ['goal', 'yellow', 'red'].includes(event.type);
-            html += `<div class="event-item event-${event.type}"><div class="event-minute">${event.minute}'</div><div class="event-text">${event.description}</div>${canDelete ? `<button class="event-delete" onclick="window.deleteEvent(${index})">✕</button>` : ''}</div>`;
+            html += '<div class="event-item event-' + event.type + '"><div class="event-minute">' + event.minute + "'</div><div class=\"event-text\">" + event.description + '</div>' + (canDelete ? '<button class="event-delete" onclick="window.deleteEvent(' + index + ')">✕</button>' : '') + '</div>';
         });
         eventsList.innerHTML = html;
     }
 
-    // ===== PDF =====
     function downloadMatchReport() {
         const homeTeam = document.getElementById('homeTeamName').value || 'Thuisploeg';
         const awayTeam = document.getElementById('awayTeamName').value || 'Uitploeg';
@@ -678,24 +600,23 @@
         let eventsHTML = '';
         if (events.length === 0) { eventsHTML = '<p style="text-align:center;color:#999;padding:20px;">Geen gebeurtenissen</p>'; }
         else {
-            events.slice().forEach(event => {
+            events.slice().forEach(function(event) {
                 let icon = '', rowClass = '';
                 if (event.type === 'goal') { icon = '⚽'; rowClass = 'row-goal'; }
                 if (event.type === 'yellow') { icon = '🟨'; rowClass = 'row-yellow'; }
                 if (event.type === 'red') { icon = '🟥'; rowClass = 'row-red'; }
                 if (event.type === 'half') { icon = '⏸'; rowClass = 'row-half'; }
                 if (event.type === 'end') { icon = '🏁'; rowClass = 'row-end'; }
-                eventsHTML += `<tr class="${rowClass}"><td style="width:50px;font-weight:700;">${event.minute}'</td><td style="width:35px;">${icon}</td><td>${event.description}</td></tr>`;
+                eventsHTML += '<tr class="' + rowClass + '"><td style="width:50px;font-weight:700;">' + event.minute + "'</td><td style=\"width:35px;\">" + icon + '</td><td>' + event.description + '</td></tr>';
             });
         }
         const clubNaam = clubConfig ? clubConfig.naam : 'SCORR';
-        const reportHTML = `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Verslag ${homeTeam} vs ${awayTeam}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:#f5f5f5}.page{max-width:800px;margin:0 auto;background:white}.header{background:#0A0E27;color:white;padding:30px;text-align:center}.header h1{font-size:28px;margin-bottom:8px}.score-big{font-size:52px;font-weight:900;color:#00FF88;margin:10px 0}.meta{font-size:12px;color:#888;margin-top:10px}.body{padding:25px}table{width:100%;border-collapse:collapse}th{background:#0A0E27;color:white;padding:10px;text-align:left;font-size:12px;text-transform:uppercase}td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-left:4px solid #00FF88}.row-yellow{border-left:4px solid #FFB800}.row-red{border-left:4px solid #FF3D71}.row-half{background:#f5f5f5;border-left:4px solid #999}.row-end{background:#0A0E27;border-left:4px solid #00FF88}.row-end td{color:#00FF88;font-weight:700}.footer{text-align:center;padding:20px;color:#999;font-size:11px;border-top:2px solid #00FF88}</style></head><body><div class="page"><div class="header"><h1>${homeTeam} vs ${awayTeam}</h1><div class="score-big">${homeScoreValue} - ${awayScoreValue}</div><div class="meta">${currentDate} | ${currentTime} | Speelduur: ${halfDuration} min per helft</div></div><div class="body"><h3 style="margin-bottom:12px;font-size:16px;">Wedstrijdverloop</h3><table><thead><tr><th>Min</th><th></th><th>Gebeurtenis</th></tr></thead><tbody>${eventsHTML}</tbody></table></div><div class="footer">SCORR — ${clubNaam} | ${currentDate} ${currentTime}</div></div><div style="text-align:center;padding:20px;background:#eee"><button onclick="window.print()" style="background:#0A0E27;color:#00FF88;border:none;padding:14px 40px;font-size:16px;font-weight:600;border-radius:8px;cursor:pointer">🖨️ OPSLAAN ALS PDF</button></div></body></html>`;
+        const reportHTML = '<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Verslag ' + homeTeam + ' vs ' + awayTeam + '</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:#f5f5f5}.page{max-width:800px;margin:0 auto;background:white}.header{background:#0A0E27;color:white;padding:30px;text-align:center}.header h1{font-size:28px;margin-bottom:8px}.score-big{font-size:52px;font-weight:900;color:#00FF88;margin:10px 0}.meta{font-size:12px;color:#888;margin-top:10px}.body{padding:25px}table{width:100%;border-collapse:collapse}th{background:#0A0E27;color:white;padding:10px;text-align:left;font-size:12px;text-transform:uppercase}td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-left:4px solid #00FF88}.row-yellow{border-left:4px solid #FFB800}.row-red{border-left:4px solid #FF3D71}.row-half{background:#f5f5f5;border-left:4px solid #999}.row-end{background:#0A0E27;border-left:4px solid #00FF88}.row-end td{color:#00FF88;font-weight:700}.footer{text-align:center;padding:20px;color:#999;font-size:11px;border-top:2px solid #00FF88}</style></head><body><div class="page"><div class="header"><h1>' + homeTeam + ' vs ' + awayTeam + '</h1><div class="score-big">' + homeScoreValue + ' - ' + awayScoreValue + '</div><div class="meta">' + currentDate + ' | ' + currentTime + ' | Speelduur: ' + halfDuration + ' min per helft</div></div><div class="body"><h3 style="margin-bottom:12px;font-size:16px;">Wedstrijdverloop</h3><table><thead><tr><th>Min</th><th></th><th>Gebeurtenis</th></tr></thead><tbody>' + eventsHTML + '</tbody></table></div><div class="footer">SCORR — ' + clubNaam + ' | ' + currentDate + ' ' + currentTime + '</div></div><div style="text-align:center;padding:20px;background:#eee"><button onclick="window.print()" style="background:#0A0E27;color:#00FF88;border:none;padding:14px 40px;font-size:16px;font-weight:600;border-radius:8px;cursor:pointer">🖨️ OPSLAAN ALS PDF</button></div></body></html>';
         const printWindow = window.open('', '_blank');
         if (printWindow) { printWindow.document.write(reportHTML); printWindow.document.close(); }
         else { alert('❌ Pop-up geblokkeerd! Sta pop-ups toe.'); }
     }
 
-    // ===== SHARE =====
     async function shareApp() {
         const wId = window._getWedstrijdId ? window._getWedstrijdId() : null;
         if (wId) {
@@ -708,9 +629,8 @@
         }
     }
 
-    // ===== EVENT LISTENERS =====
     document.getElementById('pauseBtn').addEventListener('click', pauseTimer);
-    document.getElementById('resetBtn').addEventListener('click', async () => {
+    document.getElementById('resetBtn').addEventListener('click', async function() {
         if (!confirm('⚠️ Timer resetten? De wedstrijd blijft bewaard.')) return;
         await pauseTimer();
         accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
@@ -722,22 +642,21 @@
         btn.textContent = '▶ STARTEN WEDSTRIJD';
         updateDisplay();
     });
-    document.getElementById('homePlusBtn').addEventListener('click', () => { currentGoalTeam = 'home'; showEventModal('goal'); });
-    document.getElementById('homeMinusBtn').addEventListener('click', () => removeLastGoal('home'));
-    document.getElementById('awayPlusBtn').addEventListener('click', () => { currentGoalTeam = 'away'; showEventModal('goal'); });
-    document.getElementById('awayMinusBtn').addEventListener('click', () => removeLastGoal('away'));
-    document.getElementById('yellowBtn').addEventListener('click', () => showEventModal('yellow'));
-    document.getElementById('redBtn').addEventListener('click', () => showEventModal('red'));
+    document.getElementById('homePlusBtn').addEventListener('click', function() { currentGoalTeam = 'home'; showEventModal('goal'); });
+    document.getElementById('homeMinusBtn').addEventListener('click', function() { removeLastGoal('home'); });
+    document.getElementById('awayPlusBtn').addEventListener('click', function() { currentGoalTeam = 'away'; showEventModal('goal'); });
+    document.getElementById('awayMinusBtn').addEventListener('click', function() { removeLastGoal('away'); });
+    document.getElementById('yellowBtn').addEventListener('click', function() { showEventModal('yellow'); });
+    document.getElementById('redBtn').addEventListener('click', function() { showEventModal('red'); });
     document.getElementById('nextHalfBtn').addEventListener('click', nextHalf);
     document.getElementById('cancelBtn').addEventListener('click', closeModal);
     document.getElementById('confirmBtn').addEventListener('click', confirmEvent);
-    document.getElementById('homeTeamBtn').addEventListener('click', () => selectTeam('home'));
-    document.getElementById('awayTeamBtn').addEventListener('click', () => selectTeam('away'));
+    document.getElementById('homeTeamBtn').addEventListener('click', function() { selectTeam('home'); });
+    document.getElementById('awayTeamBtn').addEventListener('click', function() { selectTeam('away'); });
     document.getElementById('downloadBtn').addEventListener('click', downloadMatchReport);
-    document.body.addEventListener('input', function(e) { if (e.target.id === 'customNumber' && e.target.value) { document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected')); selectedNumber = ''; } });
-    document.getElementById('logoutBtnHeader').addEventListener('click', async () => { if (!confirm('Wil je uitloggen?')) return; if (window._auth) await window._auth.signOut(); window.location.href = '/frontend/auth/login.html'; });
+    document.body.addEventListener('input', function(e) { if (e.target.id === 'customNumber' && e.target.value) { document.querySelectorAll('.number-btn').forEach(function(btn) { btn.classList.remove('selected'); }); selectedNumber = ''; } });
+    document.getElementById('logoutBtnHeader').addEventListener('click', async function() { if (!confirm('Wil je uitloggen?')) return; if (window._auth) await window._auth.signOut(); window.location.href = '/frontend/auth/login.html'; });
 
-    // ===== INIT =====
     loadTimerState();
     updateDisplay();
     laadClubConfig();
@@ -766,7 +685,7 @@
 
     let huidigWedstrijdId = null;
     window._getWedstrijdId = () => huidigWedstrijdId;
-    let huidigUser = null, huidigTeamNaam = null;
+    let huidigUser = null, huidigTeamNaam = null, huidigTeamId = null;
     var thuisOfUit = 'thuis';
 
     window._selecteerThuisUit = function(keuze) {
@@ -783,15 +702,38 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 huidigUser = user;
-                // Laad teamMapping uit club config
-                const clubId = new URLSearchParams(window.location.search).get('club') || 'fc-purmerend';
+
+                // =====================================================
+                // NIEUW: Team data laden uit Firebase teams/{teamId}
+                // teamId = gebruikersnaam = deel voor @ in fake-email
+                // bijv. fcp-o14@fc-purmerend.scorr => teamId = fcp-o14
+                // =====================================================
+                huidigTeamId = user.email.split('@')[0];
+
                 try {
-                    const res = await fetch(`/frontend/clubs/${clubId}.json`);
-                    const config = await res.json();
-                    huidigTeamNaam = config.teams[user.email] || 'Onbekend Team';
+                    const teamSnap = await get(ref(db, 'teams/' + huidigTeamId));
+                    if (teamSnap.exists()) {
+                        const teamData = teamSnap.val();
+                        huidigTeamNaam = teamData.naam || huidigTeamId;
+                        // Helfttijd automatisch instellen vanuit teamprofiel
+                        if (teamData.helfttijd) {
+                            halfDuration = teamData.helfttijd;
+                        }
+                    } else {
+                        // Fallback voor backwards-compatibiliteit: club JSON
+                        const clubId = new URLSearchParams(window.location.search).get('club') || 'fc-purmerend';
+                        try {
+                            const res = await fetch('/frontend/clubs/' + clubId + '.json');
+                            const config = await res.json();
+                            huidigTeamNaam = (config.teams && config.teams[user.email]) || huidigTeamId;
+                        } catch(e2) {
+                            huidigTeamNaam = huidigTeamId;
+                        }
+                    }
                 } catch(e) {
-                    huidigTeamNaam = 'Onbekend Team';
+                    huidigTeamNaam = huidigTeamId;
                 }
+
                 toonSelectieScherm(huidigTeamNaam, user);
             } else {
                 window.location.href = '/frontend/auth/login.html';
@@ -808,52 +750,72 @@
     async function toonSelectieScherm(teamNaam, user) {
         const snapshot = await get(ref(db, 'wedstrijden'));
         let bezig = [], gepland = [];
+
         if (snapshot.exists()) {
             snapshot.forEach((child) => {
                 const data = child.val();
-                if (data.thuisteam === teamNaam || data.uitteam === teamNaam) {
+                // =====================================================
+                // NIEUW: Filter op teamId (door admin aangemaakt)
+                // Fallback op teamnaam voor oudere wedstrijden
+                // =====================================================
+                const matchOpTeamId = data.teamId && data.teamId === huidigTeamId;
+                const matchOpNaam = !data.teamId && (data.thuisteam === teamNaam || data.uitteam === teamNaam);
+
+                if (matchOpTeamId || matchOpNaam) {
                     const item = { id: child.key, ...data };
                     if (data.status === 'bezig' || data.status === 'rust') bezig.push(item);
                     else if (data.status === 'gepland') gepland.push(item);
                 }
             });
         }
+
         gepland.sort((a, b) => (a.datum + a.tijdstip).localeCompare(b.datum + b.tijdstip));
         const overlay = document.getElementById('scorr-selectie-overlay');
         overlay.style.display = 'flex';
-        let html = `<div style="background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:28px; width:100%; max-width:420px; font-family:'Lexend',sans-serif; max-height:90vh; overflow-y:auto;">
-            <div style="text-align:center; margin-bottom:24px;">
-                <div style="font-size:28px; font-weight:900; color:#00FF88; letter-spacing:-1px;">SCORR</div>
-                <div style="font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:4px;">${teamNaam}</div>
-            </div>`;
+
+        let html = '<div style="background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:28px; width:100%; max-width:420px; font-family:\'Lexend\',sans-serif; max-height:90vh; overflow-y:auto;">'
+            + '<div style="text-align:center; margin-bottom:24px;">'
+            + '<div style="font-size:28px; font-weight:900; color:#00FF88; letter-spacing:-1px;">SCORR</div>'
+            + '<div style="font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:4px;">' + teamNaam + '</div>'
+            + '</div>';
+
         if (bezig.length > 0) {
-            html += `<div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:600; margin-bottom:10px;">🔴 Bezig</div>`;
-            bezig.forEach(w => { html += wedstrijdKaart(w, true); });
+            html += '<div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:600; margin-bottom:10px;">🔴 Bezig</div>';
+            bezig.forEach(w => { html += wedstrijdKaart(w, teamNaam, true); });
         }
         if (gepland.length > 0) {
-            html += `<div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; margin-bottom:10px; margin-top:16px;">📅 Komende wedstrijden</div>`;
-            gepland.forEach(w => { html += wedstrijdKaart(w, false); });
+            html += '<div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; margin-bottom:10px; margin-top:16px;">📅 Komende wedstrijden</div>';
+            gepland.forEach(w => { html += wedstrijdKaart(w, teamNaam, false); });
         }
         if (bezig.length === 0 && gepland.length === 0) {
-            html += `<div style="text-align:center; color:rgba(240,244,255,0.3); padding:20px; font-size:13px;">Geen wedstrijden gevonden</div>`;
+            html += '<div style="text-align:center; color:rgba(240,244,255,0.3); padding:20px; font-size:13px; line-height:1.6;">Geen wedstrijden gepland.<br><span style="font-size:11px; color:rgba(240,244,255,0.2);">Vraag je clubadmin om een wedstrijd aan te maken.</span></div>';
         }
-        html += `<button onclick="window._toonNieuweWedstrijd()" style="width:100%; margin-top:20px; background:rgba(0,255,136,0.1); color:#00FF88; border:1px solid rgba(0,255,136,0.3); border-radius:8px; padding:14px; font-size:14px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; letter-spacing:1px;">+ Nieuwe wedstrijd aanmaken</button></div>`;
+
+        html += '<button onclick="window._toonNieuweWedstrijd()" style="width:100%; margin-top:20px; background:rgba(255,255,255,0.03); color:rgba(240,244,255,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; font-size:13px; font-weight:600; font-family:\'Lexend\',sans-serif; cursor:pointer;">+ Zelf wedstrijd aanmaken</button></div>';
         overlay.innerHTML = html;
     }
 
-    function wedstrijdKaart(w, isBezig) {
+    function wedstrijdKaart(w, teamNaam, isBezig) {
         const borderColor = isBezig ? '#00FF88' : 'rgba(255,255,255,0.1)';
         const badge = isBezig
-            ? `<span style="background:#FF3B5C; color:white; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:1px;">LIVE</span>`
-            : `<span style="background:rgba(255,214,0,0.2); color:#FFD600; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; border:1px solid rgba(255,214,0,0.3);">${w.datum} · ${w.tijdstip}</span>`;
-        return `<div style="background:rgba(255,255,255,0.04); border:1px solid ${borderColor}; border-radius:10px; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="flex:1; cursor:pointer;" onclick="window._kiesWedstrijd('${w.id}')">
-                ${badge}
-                <div style="font-size:14px; font-weight:700; color:#F0F4FF; margin-top:6px;">${w.uitteam}</div>
-                <div style="font-size:11px; color:rgba(240,244,255,0.4); margin-top:2px;">${w.klasse} · Veld ${w.veld || '?'}</div>
-            </div>
-            <button onclick="window._verwijderWedstrijd('${w.id}')" style="background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); color:#FF3B5C; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">🗑 Verwijder</button>
-        </div>`;
+            ? '<span style="background:#FF3B5C; color:white; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:1px;">LIVE</span>'
+            : '<span style="background:rgba(255,214,0,0.2); color:#FFD600; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; border:1px solid rgba(255,214,0,0.3);">' + (w.datum || '') + ' · ' + (w.tijdstip || '') + '</span>';
+
+        // Toon juiste tegenstander relatief aan ingelogd team
+        const isThuis = w.thuisteam === teamNaam;
+        const tegenstander = isThuis ? w.uitteam : w.thuisteam;
+        const locatieBadge = isThuis
+            ? '<span style="font-size:10px; color:rgba(0,255,136,0.6); font-weight:600;">🏠 Thuis</span>'
+            : '<span style="font-size:10px; color:rgba(240,244,255,0.4); font-weight:600;">✈️ Uit</span>';
+
+        return '<div style="background:rgba(255,255,255,0.04); border:1px solid ' + borderColor + '; border-radius:10px; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">'
+            + '<div style="flex:1; cursor:pointer;" onclick="window._kiesWedstrijd(\'' + w.id + '\')">'
+            + '<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">' + badge + ' ' + locatieBadge + '</div>'
+            + '<div style="font-size:14px; font-weight:700; color:#F0F4FF; margin-top:4px;">vs ' + tegenstander + '</div>'
+            + '<div style="font-size:11px; color:rgba(240,244,255,0.4); margin-top:2px;">' + (w.klasse || '') + ' · Veld ' + (w.veld || '?') + ' · ' + (w.helfttijd || halfDuration) + ' min</div>'
+            + '</div>'
+            + '<button onclick="window._verwijderWedstrijd(\'' + w.id + '\')" style="background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); color:#FF3B5C; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; font-family:\'Lexend\',sans-serif; cursor:pointer; white-space:nowrap;">🗑</button>'
+            + '</div>';
     }
 
     window._kiesWedstrijd = function(wedstrijdId) {
@@ -930,22 +892,21 @@
         document.getElementById('scorr-popup-overlay').style.display = 'flex';
         document.getElementById('popup-team-naam').textContent = teamNaam;
         document.getElementById('popup-tegenstander').value = bestaandeData ? bestaandeData.uitteam : '';
-        document.getElementById('popup-klasse').value = bestaandeData ? bestaandeData.klasse : '';
         document.getElementById('popup-datum').value = bestaandeData ? bestaandeData.datum : vandaag;
         document.getElementById('popup-tijdstip').value = bestaandeData ? bestaandeData.tijdstip : huidigTijdstip;
         document.getElementById('popup-subtitel').textContent = bestaandeData ? 'Wedstrijd wijzigen' : 'Wedstrijd instellen';
+        // Helfttijd info tonen (read-only, uit teamprofiel)
+        document.getElementById('popup-helfttijd-info').textContent = 'Helfttijd: ' + halfDuration + ' min per helft (uit teamprofiel)';
         document.getElementById('popup-error').style.display = 'none';
         thuisOfUit = 'thuis'; window._selecteerThuisUit('thuis');
 
         document.getElementById('popup-start-btn').onclick = () => {
             const tegenstander = document.getElementById('popup-tegenstander').value.trim();
-            const klasse = document.getElementById('popup-klasse').value.trim();
             const datum = document.getElementById('popup-datum').value;
             const tijdstip = document.getElementById('popup-tijdstip').value;
-            const helfttijd = parseInt(document.getElementById('popup-helfttijd').value) || 45;
             const veld = document.getElementById('popup-veld').value;
-            if (!tegenstander || !klasse) { document.getElementById('popup-error').style.display = 'block'; return; }
-            const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
+            if (!tegenstander) { document.getElementById('popup-error').style.display = 'block'; return; }
+            const wedstrijdId = huidigWedstrijdId || (user.uid + '_' + datum + '_' + tijdstip.replace(':',''));
             huidigWedstrijdId = wedstrijdId;
             accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
             isRunning = false; currentHalf = 0;
@@ -956,19 +917,21 @@
             homeScore.textContent = 0; awayScore.textContent = 0;
             const thuisTeam = thuisOfUit === 'thuis' ? teamNaam : tegenstander;
             const uitTeam = thuisOfUit === 'thuis' ? tegenstander : teamNaam;
-            set(ref(db, `wedstrijden/${wedstrijdId}`), {
-                thuisteam: thuisTeam, uitteam: uitTeam, klasse, datum, tijdstip,
-                helfttijd, veld, thuisscore: 0, uitscore: 0, status: 'gepland',
+            set(ref(db, 'wedstrijden/' + wedstrijdId), {
+                thuisteam: thuisTeam, uitteam: uitTeam,
+                klasse: (bestaandeData && bestaandeData.klasse) || '',
+                datum, tijdstip, helfttijd: halfDuration, veld,
+                thuisscore: 0, uitscore: 0, status: 'gepland',
+                teamId: huidigTeamId, teamNaam: teamNaam,
                 club: new URLSearchParams(window.location.search).get('club') || 'fc-purmerend'
             });
             localStorage.setItem('wedstrijdId', wedstrijdId);
             document.getElementById('homeTeamName').value = thuisTeam;
             document.getElementById('awayTeamName').value = uitTeam;
-            halfDuration = helfttijd;
             document.getElementById('nextHalfBtn').style.display = 'block';
             document.getElementById('nextHalfBtn').textContent = '▶ STARTEN WEDSTRIJD';
             document.getElementById('scorr-popup-overlay').style.display = 'none';
-            toonBanner({ thuisteam: thuisTeam, uitteam: uitTeam, klasse, datum, tijdstip }, teamNaam, user);
+            toonBanner({ thuisteam: thuisTeam, uitteam: uitTeam, klasse: (bestaandeData && bestaandeData.klasse) || '', datum, tijdstip }, teamNaam, user);
         };
     }
 </script>

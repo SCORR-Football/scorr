@@ -766,14 +766,16 @@
         // ===== LOCAL STORAGE =====
         function loadTimerState() {
             const saved = localStorage.getItem('scorr_timer_state');
-            if (saved) {
+            const savedWedstrijdId = localStorage.getItem('scorr_timer_wedstrijdId');
+            const huidigId = localStorage.getItem('wedstrijdId');
+            if (saved && savedWedstrijdId === huidigId) {
                 try {
                     const state = JSON.parse(saved);
                     timerStartTime = state.startTime;
                     timerPausedAt = state.pausedAt;
                     accumulatedSeconds = state.accumulated || 0;
                     isRunning = state.isRunning || false;
-                    currentHalf = state.half || 1;
+                    currentHalf = (state.half !== undefined) ? state.half : 0;
                     if (isRunning && timerStartTime) {
                         const now = Date.now();
                         const elapsed = Math.floor((now - timerStartTime) / 1000);
@@ -786,6 +788,7 @@
         }
 
         function saveTimerState() {
+            localStorage.setItem('scorr_timer_wedstrijdId', localStorage.getItem('wedstrijdId') || '');
             localStorage.setItem('scorr_timer_state', JSON.stringify({
                 startTime: timerStartTime,
                 pausedAt: timerPausedAt,
@@ -869,7 +872,7 @@
             timerDisplay.textContent = formatTime(getCurrentSeconds());
             if (currentHalf === 0) halfIndicator.textContent = 'Klaar om te starten';
         else if (currentHalf === 1) halfIndicator.textContent = '1e Helft';
-        else halfIndicator.textContent = '2e Helft';
+        else halfIndicator.textConxtent = '2e Helft';
         }
 
         // ===== TIMER =====

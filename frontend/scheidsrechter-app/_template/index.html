@@ -843,7 +843,7 @@
 
         // ===== DISPLAY =====
         function updateDurationDisplay() { durationDisplay.textContent = halfDuration; }
-        function updateInjuryTimeDisplay() { injuryDisplay.textContent = injuryTime; }
+        function updateInjuryTimeDisplay() { if (injuryDisplay) injuryDisplay.textContent = injuryTime; }
 
         function changeDuration(delta) {
             halfDuration = Math.max(10, Math.min(45, halfDuration + delta));

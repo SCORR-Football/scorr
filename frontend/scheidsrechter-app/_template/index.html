@@ -1651,17 +1651,20 @@ window._selecteerThuisUit('thuis');
 
       const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
       huidigWedstrijdId = wedstrijdId;
-        // Timer reset:
+        // Reset alles:
         accumulatedSeconds = 0;
         timerStartTime = null;
         timerPausedAt = null;
         isRunning = false;
-        currentHalf = 1;
+        currentHalf = 0;
         if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-       localStorage.removeItem('scorr_timer_state');
-        events = [];
+        localStorage.removeItem('scorr_timer_state');
         events = [];
         renderEvents();
+        const btn = document.getElementById('nextHalfBtn');
+        btn.style.display = 'block';
+        btn.textContent = '▶ STARTEN WEDSTRIJD';
+        updateDisplay();
 
 
 

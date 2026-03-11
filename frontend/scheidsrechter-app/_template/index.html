@@ -1403,7 +1403,7 @@ window._selecteerThuisUit = function(keuze) {
 };
 
   window.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         huidigUser = user;
         huidigTeamId = user.email.split('@')[0];

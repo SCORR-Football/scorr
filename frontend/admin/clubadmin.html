@@ -521,8 +521,7 @@
                 // Sla ook op in gebruikers node voor login redirect
                 const emailKey = fakeEmail.replace(/\./g, ',');
                 await set(ref(db, 'gebruikers/' + emailKey), { naam, email: fakeEmail, rol: 'team', club: mijnClub, gebruikersnaam });
-                const nieuwRef = push(ref(db, 'teams'));
-                await set(nieuwRef, { ...teamData, firebaseEmail: fakeEmail });
+                await set(ref(db, 'teams/' + gebruikersnaam), { ...teamData, firebaseEmail: fakeEmail });
             } else {
                 // Bewerken
                 await update(ref(db, 'teams/' + bewerkTeamKey), teamData);

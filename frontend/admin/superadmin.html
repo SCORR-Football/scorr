@@ -33,10 +33,9 @@
         .live-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--green); font-weight: 600; white-space: nowrap; }
         .live-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-        .club-filter { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .club-filter-btn { padding: 7px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(240,244,255,0.5); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
-        .club-filter-btn:hover { border-color: rgba(0,255,136,0.4); color: var(--white); }
-        .club-filter-btn.active { background: rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.5); color: var(--green); }
+        .club-filter { display: flex; gap: 8px; align-items: center; }
+        .club-filter-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: var(--white); font-size: 13px; font-weight: 600; padding: 8px 32px 8px 12px; font-family: inherit; cursor: pointer; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300FF88' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; min-width: 180px; }
+        .club-filter-select:focus { border-color: rgba(0,255,136,0.5); }
         .content { padding: 32px; }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
         .stat-card { background: var(--dark2); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; }
@@ -145,9 +144,11 @@
             <div class="topbar-sub" id="pageSubtitle">Overzicht van alle clubs en wedstrijden</div>
         </div>
         <div class="club-filter" id="clubFilter">
-            <button class="club-filter-btn active" onclick="setClubFilter('alle',this)">Alle clubs</button>
-            <button class="club-filter-btn" onclick="setClubFilter('fc-purmerend',this)">FC Purmerend</button>
-            <button class="club-filter-btn" onclick="setClubFilter('vv-monnickendam',this)">VV Monnickendam</button>
+            <select class="club-filter-select" id="clubFilterSelect" onchange="setClubFilter(this.value)">
+                <option value="alle">🏟️ Alle clubs</option>
+                <option value="fc-purmerend">FC Purmerend</option>
+                <option value="vv-monnickendam">VV Monnickendam</option>
+            </select>
         </div>
         <div class="live-indicator"><div class="live-dot"></div> Live</div>
     </div>
@@ -294,10 +295,8 @@
         });
     }
 
-    window.setClubFilter = function(club, btn) {
+    window.setClubFilter = function(club) {
         huidigClubFilter = club;
-        document.querySelectorAll('.club-filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
         updateStats(); renderDashboardWedstrijden(); renderWedstrijdenGrid();
     };
 

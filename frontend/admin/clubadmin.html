@@ -360,12 +360,13 @@
     let mijnClub = null, mijnClubNaam = null, alleTeams = {}, alleWedstrijden = [], bewerkTeamKey = null, bewerkWedstrijdKey = null;
 
     // ===== AUTH =====
+    let bezigtMetTeamAanmaken = false;
     onAuthStateChanged(auth, async (user) => {
-        if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
+        if (!user) { if (!bezigtMetTeamAanmaken) window.location.href = '/frontend/auth/login.html'; return; }
         const emailKey = user.email.replace(/\./g, ',');
         const snap = await get(ref(db, 'gebruikers/' + emailKey));
         if (!snap.exists() || (snap.val().rol !== 'clubadmin' && snap.val().rol !== 'superadmin')) {
-            window.location.href = '/frontend/auth/login.html'; return;
+            if (!bezigtMetTeamAanmaken) { window.location.href = '/frontend/auth/login.html'; return; }
         }
         const data = snap.val();
         mijnClub = data.club;
@@ -519,6 +520,7 @@
                 // Nieuw team — sla clubadmin credentials op voor re-login
                 const adminEmail = huidigUser.email;
                 const adminWw = sessionStorage.getItem('scorr_admin_ww');
+                bezigtMetTeamAanmaken = true;
                 await createUserWithEmailAndPassword(auth, fakeEmail, wachtwoord);
                 // Sla op in gebruikers node
                 const emailKey = fakeEmail.replace(/\./g, ',');
@@ -526,6 +528,7 @@
                 await set(ref(db, 'teams/' + gebruikersnaam), { ...teamData, firebaseEmail: fakeEmail });
                 // Re-login als clubadmin
                 if (adminWw) await signInWithEmailAndPassword(auth, adminEmail, adminWw);
+                bezigtMetTeamAanmaken = false;
             } else {
                 // Bewerken
                 await update(ref(db, 'teams/' + bewerkTeamKey), teamData);

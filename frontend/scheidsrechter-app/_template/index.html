@@ -1568,12 +1568,12 @@ if (w.events) {
 timerStartTime = null;
 timerPausedAt = null;
 isRunning = false;
-currentHalf = 1;
+currentHalf = 0;
 if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 localStorage.removeItem('scorr_timer_state');
 updateDisplay();
 document.getElementById('nextHalfBtn').style.display = 'block';
-document.getElementById('nextHalfBtn').textContent = '⏭️ Einde 1e Helft';
+document.getElementById('nextHalfBtn').textContent = '▶ STARTEN WEDSTRIJD';
 }
       document.getElementById('scorr-selectie-overlay').style.display = 'none';
       toonBanner(w, huidigTeamNaam, huidigUser);

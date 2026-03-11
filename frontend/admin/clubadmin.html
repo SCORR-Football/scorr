@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCORR — Clubadmin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --green: #00FF88; --dark: #0A0E27; --dark2: #1E2749; --red: #FF3B5C; --yellow: #FFD600; --white: #F0F4FF; --blue: #4B6FBF; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lexend', sans-serif; background: var(--dark); min-height: 100vh; color: var(--white); }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: var(--dark2); border-right: 1px solid rgba(0,255,136,0.15); display: flex; flex-direction: column; z-index: 100; }
+        .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-logo .scorr { font-size: 32px; font-weight: 900; color: var(--green); letter-spacing: -2px; }
+        .sidebar-logo .sub { font-size: 10px; color: rgba(240,244,255,0.4); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+        .sidebar-logo .club-naam { font-size: 13px; font-weight: 700; color: var(--white); margin-top: 8px; }
+        .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+        .nav-section { padding: 8px 16px 4px; font-size: 10px; color: rgba(240,244,255,0.3); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; font-size: 14px; font-weight: 500; color: rgba(240,244,255,0.6); transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-item:hover { background: rgba(0,255,136,0.05); color: var(--white); }
+        .nav-item.active { background: rgba(0,255,136,0.08); color: var(--green); border-left-color: var(--green); font-weight: 700; }
+        .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+        .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .user-avatar { width: 36px; height: 36px; background: rgba(75,111,191,0.2); border: 2px solid rgba(75,111,191,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #8BA4E8; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 700; color: var(--white); }
+        .user-role { font-size: 10px; color: #8BA4E8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .logout-btn { width: 100%; padding: 8px; background: rgba(255,59,92,0.1); border: 1px solid rgba(255,59,92,0.3); border-radius: 8px; color: var(--red); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .main { margin-left: 240px; min-height: 100vh; }
+        .topbar { background: rgba(10,14,39,0.9); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); }
+        .topbar-title { font-size: 20px; font-weight: 700; color: var(--white); }
+        .topbar-sub { font-size: 12px; color: rgba(240,244,255,0.4); margin-top: 2px; }
+        .live-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--green); font-weight: 600; }
+        .live-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+        .content { padding: 32px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: var(--dark2); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; }
+        .stat-label { font-size: 11px; color: rgba(240,244,255,0.4); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 8px; }
+        .stat-value { font-size: 36px; font-weight: 900; color: var(--white); line-height: 1; }
+        .stat-value.green { color: var(--green); } .stat-value.red { color: var(--red); } .stat-value.yellow { color: var(--yellow); }
+        .stat-sub { font-size: 11px; color: rgba(240,244,255,0.3); margin-top: 6px; }
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+        .section-title { font-size: 16px; font-weight: 700; color: var(--white); }
+        .section-action { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--green); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .section-action:hover { background: rgba(0,255,136,0.2); }
+        .card { background: var(--dark2); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; }
+        .empty-state { text-align: center; padding: 40px; color: rgba(240,244,255,0.25); font-size: 14px; }
+
+        /* TEAMS TABLE */
+        .teams-table { width: 100%; border-collapse: collapse; }
+        .teams-table th { text-align: left; padding: 10px 16px; font-size: 11px; color: rgba(240,244,255,0.4); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; }
+        .teams-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; color: var(--white); vertical-align: middle; }
+        .teams-table tr:last-child td { border-bottom: none; }
+        .teams-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .ww-cell { display: flex; align-items: center; gap: 8px; }
+        .ww-val { font-family: monospace; font-size: 13px; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 4px; color: var(--green); letter-spacing: 1px; }
+        .ww-toggle { background: none; border: none; cursor: pointer; font-size: 14px; color: rgba(240,244,255,0.4); padding: 2px; }
+        .ww-hidden { filter: blur(4px); user-select: none; }
+        .badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+        .badge.team { background: rgba(255,255,255,0.08); color: rgba(240,244,255,0.5); }
+        .table-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--white); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; margin-right: 4px; white-space: nowrap; }
+        .table-btn:hover { background: rgba(255,255,255,0.1); }
+        .table-btn.danger { background: rgba(255,59,92,0.1); border-color: rgba(255,59,92,0.3); color: var(--red); }
+        .table-btn.primary { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3); color: var(--green); }
+
+        /* WEDSTRIJDEN */
+        .wedstrijd-lijst { display: flex; flex-direction: column; gap: 0; }
+        .wedstrijd-rij { display: grid; grid-template-columns: 140px 1fr 80px 80px 60px auto; gap: 12px; align-items: center; padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+        .wedstrijd-rij:last-child { border-bottom: none; }
+        .wedstrijd-rij:hover { background: rgba(255,255,255,0.02); }
+        .wedstrijd-rij-header { font-size: 10px; color: rgba(240,244,255,0.4); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: grid; grid-template-columns: 140px 1fr 80px 80px 60px auto; gap: 12px; }
+        .w-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-align: center; }
+        .w-status.gepland { background: rgba(75,111,191,0.3); color: #8BA4E8; }
+        .w-status.bezig { background: var(--red); color: white; }
+        .w-status.rust { background: var(--yellow); color: var(--dark); }
+        .w-status.afgelopen { background: rgba(255,59,92,0.15); color: var(--red); }
+        .w-team { font-weight: 600; color: var(--green); font-size: 12px; }
+        .w-wedstrijd { font-weight: 600; }
+        .w-datum { color: rgba(240,244,255,0.5); font-size: 12px; }
+        .w-tijd { color: rgba(240,244,255,0.5); font-size: 12px; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--dark2); border: 1px solid rgba(0,255,136,0.2); border-radius: 16px; padding: 32px; width: 100%; max-width: 500px; margin: auto; }
+        .modal h3 { font-size: 20px; font-weight: 700; color: var(--white); margin-bottom: 24px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { font-size: 12px; font-weight: 600; color: rgba(240,244,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+        .form-label span { color: rgba(240,244,255,0.3); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; }
+        .form-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--white); font-family: inherit; outline: none; }
+        .form-input:focus { border-color: var(--green); }
+        .form-input:disabled { opacity: 0.4; cursor: not-allowed; }
+        .form-select { width: 100%; background: var(--dark); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--white); font-family: inherit; outline: none; appearance: none; }
+        .form-select:focus { border-color: var(--green); }
+        .form-hint { font-size: 11px; color: rgba(240,244,255,0.35); margin-top: 4px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+        .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-cancel { background: rgba(255,255,255,0.08); color: rgba(240,244,255,0.6); }
+        .btn-save { background: var(--green); color: var(--dark); }
+        .modal-error { display: none; color: var(--red); font-size: 13px; margin-top: 8px; }
+        .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 20px 0; }
+        .modal-section { font-size: 12px; font-weight: 700; color: rgba(240,244,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <div class="scorr">SCORR</div>
+        <div class="sub">Clubadmin</div>
+        <div class="club-naam" id="sidebarClubNaam">Laden...</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Beheer</div>
+        <a class="nav-item active" onclick="showSection('teams',this)"><span class="icon">👥</span> Teams</a>
+        <a class="nav-item" onclick="showSection('wedstrijden',this)"><span class="icon">⚽</span> Wedstrijden</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar" id="userInitials">?</div>
+            <div><div class="user-name" id="userName">Laden...</div><div class="user-role">Clubadmin</div></div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">🚪 Uitloggen</button>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title" id="pageTitle">Teams</div>
+            <div class="topbar-sub" id="pageSubtitle">Teambeheer en inloggegevens</div>
+        </div>
+        <div class="live-indicator"><div class="live-dot"></div> Live</div>
+    </div>
+
+    <div class="content">
+
+        <!-- TEAMS -->
+        <div id="section-teams">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Totaal teams</div><div class="stat-value green" id="stat-teams">—</div><div class="stat-sub">Actieve teams</div></div>
+                <div class="stat-card"><div class="stat-label">Wedstrijden deze week</div><div class="stat-value yellow" id="stat-week">—</div><div class="stat-sub">Gepland</div></div>
+                <div class="stat-card"><div class="stat-label">Live nu</div><div class="stat-value red" id="stat-live">—</div><div class="stat-sub">Bezig of rust</div></div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">👥 Teams beheren</div>
+                    <button class="section-action" onclick="openTeamModal()">+ Team toevoegen</button>
+                </div>
+                <div class="card">
+                    <div style="overflow-x:auto;">
+                        <table class="teams-table">
+                            <thead><tr>
+                                <th>Teamnaam</th>
+                                <th>Gebruikersnaam</th>
+                                <th>Wachtwoord</th>
+                                <th>Categorie</th>
+                                <th>Helft</th>
+                                <th>Klasse</th>
+                                <th>Acties</th>
+                            </tr></thead>
+                            <tbody id="teams-tbody"><tr><td colspan="7" class="empty-state">Laden...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WEDSTRIJDEN -->
+        <div id="section-wedstrijden" style="display:none;">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">⚽ Wedstrijden programma</div>
+                    <button class="section-action" onclick="openWedstrijdModal()">+ Wedstrijd toevoegen</button>
+                </div>
+                <div class="card">
+                    <div class="wedstrijd-rij-header">
+                        <span>Team</span><span>Wedstrijd</span><span>Datum</span><span>Tijd</span><span>Veld</span><span>Status</span>
+                    </div>
+                    <div id="wedstrijden-lijst"><div class="empty-state">Laden...</div></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL: TEAM -->
+<div class="modal-overlay" id="modal-team">
+    <div class="modal">
+        <h3 id="team-modal-titel">👥 Team toevoegen</h3>
+
+        <div class="modal-section">Teamgegevens</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Teamnaam</label>
+                <input type="text" class="form-input" id="t-naam" placeholder="bijv. FC Purmerend O14">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Categorie</label>
+                <select class="form-select" id="t-categorie" onchange="vulHelfttijdIn()">
+                    <option value="">— Selecteer —</option>
+                    <option value="O8">O8</option>
+                    <option value="O9">O9</option>
+                    <option value="O10">O10</option>
+                    <option value="O11">O11</option>
+                    <option value="O12">O12</option>
+                    <option value="O13">O13</option>
+                    <option value="O14">O14</option>
+                    <option value="O15">O15</option>
+                    <option value="O16">O16</option>
+                    <option value="O17">O17</option>
+                    <option value="O18">O18</option>
+                    <option value="O19">O19</option>
+                    <option value="Senioren">Senioren</option>
+                    <option value="Veteranen">Veteranen</option>
+                    <option value="Dames">Dames</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Speelduur per helft <span>(minuten)</span></label>
+                <input type="number" class="form-input" id="t-helfttijd" placeholder="bijv. 35" min="10" max="45">
+                <div class="form-hint" id="t-helfttijd-hint">Wordt automatisch ingevuld op basis van categorie</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Klasse</label>
+                <input type="text" class="form-input" id="t-klasse" placeholder="bijv. 3e klasse">
+                <div class="form-hint">Aanpasbaar per seizoen</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="modal-section">Inloggegevens</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Gebruikersnaam</label>
+                <input type="text" class="form-input" id="t-gebruikersnaam" placeholder="bijv. fcp-o14" autocomplete="off">
+                <div class="form-hint">Kleine letters, geen spaties</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Wachtwoord</label>
+                <input type="text" class="form-input" id="t-wachtwoord" placeholder="bijv. Scorr2024!" autocomplete="off">
+                <div class="form-hint">Minimaal 6 tekens</div>
+            </div>
+        </div>
+
+        <div class="modal-error" id="team-modal-error"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('team')">Annuleren</button>
+            <button class="btn-save" id="team-modal-save" onclick="slaTeamOp()">Team opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: WEDSTRIJD -->
+<div class="modal-overlay" id="modal-wedstrijd">
+    <div class="modal">
+        <h3 id="wedstrijd-modal-titel">⚽ Wedstrijd toevoegen</h3>
+
+        <div class="form-group">
+            <label class="form-label">Team</label>
+            <select class="form-select" id="w-team" onchange="vulWedstrijdTeamIn()">
+                <option value="">— Selecteer team —</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Speelduur per helft <span>(min)</span></label>
+                <input type="number" class="form-input" id="w-helfttijd" placeholder="45" min="10" max="45" disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Klasse</label>
+                <input type="text" class="form-input" id="w-klasse" placeholder="3e klasse" disabled>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Datum</label>
+                <input type="date" class="form-input" id="w-datum">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tijd</label>
+                <input type="time" class="form-input" id="w-tijd">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Thuis of Uit?</label>
+                <select class="form-select" id="w-thuisof">
+                    <option value="thuis">Thuis</option>
+                    <option value="uit">Uit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tegenstander</label>
+                <input type="text" class="form-input" id="w-tegenstander" placeholder="bijv. Ajax O14">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Veld <span>(optioneel)</span></label>
+                <input type="text" class="form-input" id="w-veld" placeholder="bijv. 3">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Thuis/Uit namen</label>
+                <div class="form-hint" id="w-namen-hint" style="margin-top:8px; font-size:12px; color:rgba(240,244,255,0.4);">Selecteer eerst een team</div>
+            </div>
+        </div>
+
+        <div class="modal-error" id="wedstrijd-modal-error"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('wedstrijd')">Annuleren</button>
+            <button class="btn-save" onclick="slaWedstrijdOp()">Wedstrijd opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: WACHTWOORD WIJZIGEN -->
+<div class="modal-overlay" id="modal-wachtwoord">
+    <div class="modal" style="max-width:380px;">
+        <h3>🔑 Wachtwoord wijzigen</h3>
+        <div class="form-group">
+            <label class="form-label">Nieuw wachtwoord</label>
+            <input type="text" class="form-input" id="nieuw-wachtwoord" placeholder="Minimaal 6 tekens">
+        </div>
+        <input type="hidden" id="ww-team-key">
+        <div class="modal-error" id="ww-modal-error"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('wachtwoord')">Annuleren</button>
+            <button class="btn-save" onclick="slaWachtwoordOp()">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getDatabase, ref, get, set, remove, push, onValue, update } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, updatePassword, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+    const app = initializeApp({ apiKey:"AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U", authDomain:"scorr-c604a.firebaseapp.com", databaseURL:"https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app", projectId:"scorr-c604a", storageBucket:"scorr-c604a.firebasestorage.app", messagingSenderId:"413840042688", appId:"1:413840042688:web:3183c36fd20f27ac925b25" });
+    const db = getDatabase(app), auth = getAuth(app);
+
+    // Standaard helfttijden per categorie
+    const helfttijden = { 'O8':20,'O9':20,'O10':25,'O11':25,'O12':30,'O13':30,'O14':35,'O15':35,'O16':40,'O17':40,'O18':45,'O19':45,'Senioren':45,'Veteranen':45,'Dames':45 };
+
+    let mijnClub = null, mijnClubNaam = null, alleTeams = {}, alleWedstrijden = [], bewerkTeamKey = null, bewerkWedstrijdKey = null;
+
+    // ===== AUTH =====
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
+        const emailKey = user.email.replace(/\./g, ',');
+        const snap = await get(ref(db, 'gebruikers/' + emailKey));
+        if (!snap.exists() || (snap.val().rol !== 'clubadmin' && snap.val().rol !== 'superadmin')) {
+            window.location.href = '/frontend/auth/login.html'; return;
+        }
+        const data = snap.val();
+        mijnClub = data.club;
+        const clubNamen = { 'fc-purmerend': 'FC Purmerend', 'vv-monnickendam': 'VV Monnickendam' };
+        mijnClubNaam = clubNamen[mijnClub] || mijnClub;
+        document.getElementById('userName').textContent = data.naam || user.email;
+        document.getElementById('userInitials').textContent = (data.naam || user.email).charAt(0).toUpperCase();
+        document.getElementById('sidebarClubNaam').textContent = mijnClubNaam;
+        laadAlles();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        if (!confirm('Uitloggen?')) return;
+        await signOut(auth); window.location.href = '/frontend/auth/login.html';
+    });
+
+    // ===== DATA =====
+    function laadAlles() {
+        onValue(ref(db, 'teams'), (snap) => {
+            alleTeams = {};
+            if (snap.exists()) snap.forEach(c => { if (c.val().club === mijnClub) alleTeams[c.key] = c.val(); });
+            updateStats(); renderTeams(); vulTeamSelectIn();
+        });
+        onValue(ref(db, 'wedstrijden'), (snap) => {
+            alleWedstrijden = [];
+            if (snap.exists()) snap.forEach(c => { if (c.val().club === mijnClub) alleWedstrijden.push({ id: c.key, ...c.val() }); });
+            updateStats(); renderWedstrijden();
+        });
+    }
+
+    function updateStats() {
+        const nu = new Date();
+        const weekStart = new Date(nu); weekStart.setDate(nu.getDate() - nu.getDay() + 1);
+        const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+        const weekW = alleWedstrijden.filter(w => {
+            if (!w.datum) return false;
+            const d = new Date(w.datum);
+            return d >= weekStart && d <= weekEnd;
+        }).length;
+        document.getElementById('stat-teams').textContent = Object.keys(alleTeams).length;
+        document.getElementById('stat-week').textContent = weekW;
+        document.getElementById('stat-live').textContent = alleWedstrijden.filter(w=>w.status==='bezig'||w.status==='rust').length;
+    }
+
+    // ===== TEAMS =====
+    function renderTeams() {
+        const tbody = document.getElementById('teams-tbody');
+        const entries = Object.entries(alleTeams);
+        if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nog geen teams aangemaakt</td></tr>'; return; }
+        entries.sort((a,b)=>(a[1].naam||'').localeCompare(b[1].naam||''));
+        tbody.innerHTML = entries.map(([key, t]) => `<tr>
+            <td><strong>${t.naam||'—'}</strong></td>
+            <td><span style="font-family:monospace;color:rgba(240,244,255,0.7);">${t.gebruikersnaam||'—'}</span></td>
+            <td><div class="ww-cell">
+                <span class="ww-val ww-hidden" id="ww-${key}">${t.wachtwoord||'—'}</span>
+                <button class="ww-toggle" onclick="toggleWW('${key}')" title="Toon/verberg">👁</button>
+            </div></td>
+            <td><span class="badge team">${t.categorie||'—'}</span></td>
+            <td style="color:var(--green);font-weight:700;">${t.helfttijd||'—'} min</td>
+            <td style="color:rgba(240,244,255,0.6);">${t.klasse||'—'}</td>
+            <td>
+                <button class="table-btn primary" onclick="openTeamModalBewerken('${key}')">✏️</button>
+                <button class="table-btn" onclick="openWachtwoordModal('${key}')">🔑</button>
+                <button class="table-btn danger" onclick="verwijderTeam('${key}')">🗑</button>
+            </td>
+        </tr>`).join('');
+    }
+
+    window.toggleWW = function(key) {
+        const el = document.getElementById('ww-' + key);
+        el.classList.toggle('ww-hidden');
+    };
+
+    // ===== WEDSTRIJDEN =====
+    function renderWedstrijden() {
+        const container = document.getElementById('wedstrijden-lijst');
+        if (!alleWedstrijden.length) { container.innerHTML = '<div class="empty-state">Nog geen wedstrijden ingepland</div>'; return; }
+        const gesorteerd = [...alleWedstrijden].sort((a,b)=>(a.datum+(a.tijdstip||'')).localeCompare(b.datum+(b.tijdstip||'')));
+        container.innerHTML = gesorteerd.map(w => {
+            const team = Object.values(alleTeams).find(t=>t.gebruikersnaam===w.teamId) || {};
+            const teamNaam = w.teamNaam || team.naam || w.teamId || '—';
+            const statusClass = w.status || 'gepland';
+            const statusText = w.status==='bezig'?'🔴 LIVE':w.status==='rust'?'⏸ RUST':w.status==='afgelopen'?'FT':'📅';
+            return `<div class="wedstrijd-rij">
+                <span class="w-team">${teamNaam}</span>
+                <span class="w-wedstrijd">${w.thuisteam||'—'} vs ${w.uitteam||'—'}</span>
+                <span class="w-datum">${w.datum||'—'}</span>
+                <span class="w-tijd">${w.tijdstip||'—'}</span>
+                <span style="color:rgba(240,244,255,0.5);font-size:12px;">${w.veld?'Veld '+w.veld:'—'}</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <span class="w-status ${statusClass}">${statusText}</span>
+                    ${w.status==='gepland'||!w.status?`<button class="table-btn" onclick="openWedstrijdModalBewerken('${w.id}')">✏️</button><button class="table-btn danger" onclick="verwijderWedstrijd('${w.id}')">🗑</button>`:''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ===== TEAM MODAL =====
+    window.openTeamModal = function() {
+        bewerkTeamKey = null;
+        document.getElementById('team-modal-titel').textContent = '👥 Team toevoegen';
+        document.getElementById('team-modal-save').textContent = 'Team opslaan';
+        ['t-naam','t-gebruikersnaam','t-wachtwoord','t-klasse'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('t-categorie').value = '';
+        document.getElementById('t-helfttijd').value = '';
+        document.getElementById('team-modal-error').style.display = 'none';
+        openModal('team');
+    };
+
+    window.openTeamModalBewerken = function(key) {
+        bewerkTeamKey = key;
+        const t = alleTeams[key];
+        document.getElementById('team-modal-titel').textContent = '✏️ Team bewerken';
+        document.getElementById('team-modal-save').textContent = 'Opslaan';
+        document.getElementById('t-naam').value = t.naam || '';
+        document.getElementById('t-categorie').value = t.categorie || '';
+        document.getElementById('t-helfttijd').value = t.helfttijd || '';
+        document.getElementById('t-klasse').value = t.klasse || '';
+        document.getElementById('t-gebruikersnaam').value = t.gebruikersnaam || '';
+        document.getElementById('t-wachtwoord').value = t.wachtwoord || '';
+        document.getElementById('team-modal-error').style.display = 'none';
+        openModal('team');
+    };
+
+    window.vulHelfttijdIn = function() {
+        const cat = document.getElementById('t-categorie').value;
+        if (cat && helfttijden[cat]) document.getElementById('t-helfttijd').value = helfttijden[cat];
+    };
+
+    window.slaTeamOp = async function() {
+        const naam = document.getElementById('t-naam').value.trim();
+        const categorie = document.getElementById('t-categorie').value;
+        const helfttijd = parseInt(document.getElementById('t-helfttijd').value);
+        const klasse = document.getElementById('t-klasse').value.trim();
+        const gebruikersnaam = document.getElementById('t-gebruikersnaam').value.trim().toLowerCase().replace(/\s+/g,'-');
+        const wachtwoord = document.getElementById('t-wachtwoord').value.trim();
+        const errorEl = document.getElementById('team-modal-error');
+
+        if (!naam || !categorie || !helfttijd || !gebruikersnaam || !wachtwoord) {
+            errorEl.textContent = 'Vul alle verplichte velden in.'; errorEl.style.display = 'block'; return;
+        }
+        if (wachtwoord.length < 6) { errorEl.textContent = 'Wachtwoord minimaal 6 tekens.'; errorEl.style.display = 'block'; return; }
+
+        const teamData = { naam, categorie, helfttijd, klasse, gebruikersnaam, wachtwoord, club: mijnClub };
+
+        try {
+            // Firebase Auth account aanmaken via nep-email
+            const fakeEmail = gebruikersnaam + '@' + mijnClub + '.scorr';
+
+            if (!bewerkTeamKey) {
+                // Nieuw team
+                await createUserWithEmailAndPassword(auth, fakeEmail, wachtwoord);
+                // Sla ook op in gebruikers node voor login redirect
+                const emailKey = fakeEmail.replace(/\./g, ',');
+                await set(ref(db, 'gebruikers/' + emailKey), { naam, email: fakeEmail, rol: 'team', club: mijnClub, gebruikersnaam });
+                const nieuwRef = push(ref(db, 'teams'));
+                await set(nieuwRef, { ...teamData, firebaseEmail: fakeEmail });
+            } else {
+                // Bewerken
+                await update(ref(db, 'teams/' + bewerkTeamKey), teamData);
+            }
+            closeModal('team');
+            errorEl.style.display = 'none';
+        } catch(e) {
+            errorEl.textContent = '❌ ' + e.message; errorEl.style.display = 'block';
+        }
+    };
+
+    window.verwijderTeam = async function(key) {
+        const t = alleTeams[key];
+        if (!confirm('Team "' + (t.naam||key) + '" verwijderen?')) return;
+        await remove(ref(db, 'teams/' + key));
+    };
+
+    // ===== WACHTWOORD MODAL =====
+    window.openWachtwoordModal = function(key) {
+        document.getElementById('ww-team-key').value = key;
+        document.getElementById('nieuw-wachtwoord').value = '';
+        document.getElementById('ww-modal-error').style.display = 'none';
+        openModal('wachtwoord');
+    };
+
+    window.slaWachtwoordOp = async function() {
+        const key = document.getElementById('ww-team-key').value;
+        const nieuw = document.getElementById('nieuw-wachtwoord').value.trim();
+        const errorEl = document.getElementById('ww-modal-error');
+        if (nieuw.length < 6) { errorEl.textContent = 'Minimaal 6 tekens.'; errorEl.style.display = 'block'; return; }
+        try {
+            await update(ref(db, 'teams/' + key), { wachtwoord: nieuw });
+            closeModal('wachtwoord');
+            alert('✅ Wachtwoord bijgewerkt in database. Update ook Firebase Auth handmatig indien nodig.');
+        } catch(e) {
+            errorEl.textContent = '❌ ' + e.message; errorEl.style.display = 'block';
+        }
+    };
+
+    // ===== WEDSTRIJD MODAL =====
+    function vulTeamSelectIn() {
+        const sel = document.getElementById('w-team');
+        const huidig = sel.value;
+        sel.innerHTML = '<option value="">— Selecteer team —</option>';
+        Object.entries(alleTeams).sort((a,b)=>(a[1].naam||'').localeCompare(b[1].naam||'')).forEach(([key,t]) => {
+            const opt = document.createElement('option');
+            opt.value = key; opt.textContent = t.naam || t.gebruikersnaam;
+            sel.appendChild(opt);
+        });
+        if (huidig) sel.value = huidig;
+    }
+
+    window.vulWedstrijdTeamIn = function() {
+        const key = document.getElementById('w-team').value;
+        const t = alleTeams[key];
+        if (t) {
+            document.getElementById('w-helfttijd').value = t.helfttijd || '';
+            document.getElementById('w-klasse').value = t.klasse || '';
+            const thuis = document.getElementById('w-thuisof').value === 'thuis';
+            document.getElementById('w-namen-hint').textContent = thuis ? 'Thuis: ' + t.naam + ' | Uit: tegenstander' : 'Thuis: tegenstander | Uit: ' + t.naam;
+        }
+    };
+
+    window.openWedstrijdModal = function() {
+        bewerkWedstrijdKey = null;
+        document.getElementById('wedstrijd-modal-titel').textContent = '⚽ Wedstrijd toevoegen';
+        document.getElementById('w-team').value = '';
+        document.getElementById('w-helfttijd').value = '';
+        document.getElementById('w-klasse').value = '';
+        document.getElementById('w-datum').value = '';
+        document.getElementById('w-tijd').value = '';
+        document.getElementById('w-tegenstander').value = '';
+        document.getElementById('w-veld').value = '';
+        document.getElementById('w-thuisof').value = 'thuis';
+        document.getElementById('w-namen-hint').textContent = 'Selecteer eerst een team';
+        document.getElementById('wedstrijd-modal-error').style.display = 'none';
+        openModal('wedstrijd');
+    };
+
+    window.openWedstrijdModalBewerken = function(id) {
+        bewerkWedstrijdKey = id;
+        const w = alleWedstrijden.find(x=>x.id===id);
+        if (!w) return;
+        document.getElementById('wedstrijd-modal-titel').textContent = '✏️ Wedstrijd bewerken';
+        // Zoek team key op basis van teamNaam
+        const teamKey = Object.keys(alleTeams).find(k=>alleTeams[k].naam===w.teamNaam) || '';
+        document.getElementById('w-team').value = teamKey;
+        vulWedstrijdTeamIn();
+        document.getElementById('w-datum').value = w.datum || '';
+        document.getElementById('w-tijd').value = w.tijdstip || '';
+        document.getElementById('w-tegenstander').value = w.uitteam === w.teamNaam ? w.thuisteam : w.uitteam || '';
+        document.getElementById('w-veld').value = w.veld || '';
+        document.getElementById('wedstrijd-modal-error').style.display = 'none';
+        openModal('wedstrijd');
+    };
+
+    window.slaWedstrijdOp = async function() {
+        const teamKey = document.getElementById('w-team').value;
+        const datum = document.getElementById('w-datum').value;
+        const tijd = document.getElementById('w-tijd').value;
+        const tegenstander = document.getElementById('w-tegenstander').value.trim();
+        const veld = document.getElementById('w-veld').value.trim();
+        const thuisof = document.getElementById('w-thuisof').value;
+        const errorEl = document.getElementById('wedstrijd-modal-error');
+
+        if (!teamKey || !datum || !tegenstander) { errorEl.textContent = 'Vul team, datum en tegenstander in.'; errorEl.style.display = 'block'; return; }
+
+        const team = alleTeams[teamKey];
+        const thuisteam = thuisof === 'thuis' ? team.naam : tegenstander;
+        const uitteam = thuisof === 'thuis' ? tegenstander : team.naam;
+
+        const wedstrijdData = {
+            club: mijnClub,
+            teamId: team.gebruikersnaam,
+            teamNaam: team.naam,
+            thuisteam, uitteam,
+            datum, tijdstip: tijd,
+            veld, klasse: team.klasse || '',
+            helfttijd: team.helfttijd || 45,
+            thuisscore: 0, uitscore: 0,
+            status: 'gepland'
+        };
+
+        try {
+            if (bewerkWedstrijdKey) {
+                await update(ref(db, 'wedstrijden/' + bewerkWedstrijdKey), wedstrijdData);
+            } else {
+                await push(ref(db, 'wedstrijden'), wedstrijdData);
+            }
+            closeModal('wedstrijd');
+            errorEl.style.display = 'none';
+        } catch(e) {
+            errorEl.textContent = '❌ ' + e.message; errorEl.style.display = 'block';
+        }
+    };
+
+    window.verwijderWedstrijd = async function(id) {
+        if (!confirm('Wedstrijd verwijderen?')) return;
+        await remove(ref(db, 'wedstrijden/' + id));
+    };
+
+    window.openModal = function(type) { document.getElementById('modal-'+type).classList.add('open'); };
+    window.closeModal = function(type) { document.getElementById('modal-'+type).classList.remove('open'); };
+</script>
+
+<script>
+    function showSection(naam, el) {
+        ['teams','wedstrijden'].forEach(s => document.getElementById('section-'+s).style.display = s===naam?'block':'none');
+        document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+        if (el) el.classList.add('active');
+        const titels = { teams:['Teams','Teambeheer en inloggegevens'], wedstrijden:['Wedstrijden','Programma aanmaken en beheren'] };
+        document.getElementById('pageTitle').textContent = titels[naam][0];
+        document.getElementById('pageSubtitle').textContent = titels[naam][1];
+    }
+</script>
+</body>
+</html>

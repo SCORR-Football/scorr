@@ -6,368 +6,187 @@
     <title>Inloggen - SCORR</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --scorr-electric: #00FF88;
-            --scorr-deep: #0A0E27;
-            --scorr-slate: #1E2749;
-            --scorr-accent: #FF3D71;
-            --scorr-cloud: #F5F7FA;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Lexend', sans-serif;
-            background: var(--scorr-deep);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 61, 113, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 24px;
-            padding: 50px 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .logo-text {
-            font-size: 72px;
-            font-weight: 900;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, var(--scorr-electric) 0%, #00DDFF 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .logo-tagline {
-            font-size: 14px;
-            color: #999;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .welcome {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .welcome-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--scorr-deep);
-            margin-bottom: 8px;
-        }
-
-        .welcome-subtitle {
-            font-size: 15px;
-            color: #666;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--scorr-deep);
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 16px 18px;
-            border: 2px solid #E8EBF0;
-            border-radius: 12px;
-            font-family: 'Lexend', sans-serif;
-            font-size: 16px;
-            color: var(--scorr-deep);
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--scorr-electric);
-            box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.1);
-        }
-
-        .form-input::placeholder {
-            color: #999;
-        }
-
-        .forgot-password {
-            text-align: right;
-            margin-top: -16px;
-            margin-bottom: 24px;
-        }
-
-        .forgot-password a {
-            font-size: 13px;
-            color: #666;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .forgot-password a:hover {
-            color: var(--scorr-electric);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Lexend', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: var(--scorr-electric);
-            color: var(--scorr-deep);
-            margin-bottom: 16px;
-        }
-
-        .btn-primary:hover {
-            background: #00CC6A;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 255, 136, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .divider {
-            text-align: center;
-            margin: 32px 0;
-            position: relative;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #E8EBF0;
-        }
-
-        .divider-text {
-            position: relative;
-            display: inline-block;
-            background: white;
-            padding: 0 16px;
-            font-size: 13px;
-            color: #999;
-            font-weight: 500;
-        }
-
-        .signup-link {
-            text-align: center;
-            font-size: 15px;
-            color: #666;
-        }
-
-        .signup-link a {
-            color: var(--scorr-electric);
-            text-decoration: none;
-            font-weight: 700;
-        }
-
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
-
-        .pilot-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--scorr-accent);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 40px 30px;
-            }
-
-            .logo-text {
-                font-size: 56px;
-            }
-
-            .welcome-title {
-                font-size: 24px;
-            }
-        }
+        :root { --scorr-electric: #00FF88; --scorr-deep: #0A0E27; --scorr-slate: #1E2749; --scorr-accent: #FF3D71; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lexend', sans-serif; background: var(--scorr-deep); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        body::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(0,255,136,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255,61,113,0.15) 0%, transparent 50%); pointer-events: none; }
+        .container { width: 100%; max-width: 480px; padding: 20px; position: relative; z-index: 1; }
+        .login-card { background: white; border-radius: 24px; padding: 50px 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .logo { text-align: center; margin-bottom: 40px; }
+        .logo-text { font-size: 72px; font-weight: 900; letter-spacing: -2px; background: linear-gradient(135deg, var(--scorr-electric) 0%, #00DDFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
+        .logo-tagline { font-size: 14px; color: #999; letter-spacing: 2px; text-transform: uppercase; }
+        .welcome { text-align: center; margin-bottom: 32px; }
+        .welcome-title { font-size: 28px; font-weight: 700; color: var(--scorr-deep); margin-bottom: 8px; }
+        .welcome-subtitle { font-size: 15px; color: #666; }
+        .login-toggle { display: flex; background: #F0F4FF; border-radius: 12px; padding: 4px; margin-bottom: 28px; }
+        .toggle-btn { flex: 1; padding: 10px; border: none; border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: #999; transition: all 0.2s; }
+        .toggle-btn.active { background: white; color: var(--scorr-deep); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; font-weight: 600; color: var(--scorr-deep); margin-bottom: 8px; }
+        .form-input { width: 100%; padding: 16px 18px; border: 2px solid #E8EBF0; border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 16px; color: var(--scorr-deep); transition: all 0.3s ease; }
+        .form-input:focus { outline: none; border-color: var(--scorr-electric); box-shadow: 0 0 0 4px rgba(0,255,136,0.1); }
+        .form-input::placeholder { color: #999; }
+        .form-select { width: 100%; padding: 16px 18px; border: 2px solid #E8EBF0; border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 16px; color: var(--scorr-deep); background: white; appearance: none; cursor: pointer; }
+        .form-select:focus { outline: none; border-color: var(--scorr-electric); }
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; }
+        .btn-primary { background: var(--scorr-electric); color: var(--scorr-deep); }
+        .btn-primary:hover { background: #00CC6A; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,255,136,0.3); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .error-box { display: none; background: #FFF0F3; border: 1px solid rgba(255,61,113,0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px; color: #FF3D71; font-weight: 600; text-align: center; }
+        .pilot-badge { position: absolute; top: 20px; right: 20px; background: var(--scorr-accent); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        @media (max-width: 480px) { .login-card { padding: 40px 30px; } .logo-text { font-size: 56px; } .welcome-title { font-size: 24px; } }
     </style>
 </head>
 <body>
     <div class="pilot-badge">🚀 PILOT</div>
-
     <div class="container">
         <div class="login-card">
             <div class="logo">
                 <div class="logo-text">SCORR</div>
                 <div class="logo-tagline">Live Scores</div>
             </div>
-
             <div class="welcome">
                 <h1 class="welcome-title">Welkom terug</h1>
                 <p class="welcome-subtitle">Log in om je wedstrijden te beheren</p>
             </div>
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label class="form-label" for="email">E-mailadres</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        class="form-input" 
-                        placeholder="jouw@email.nl"
-                        required
-                    >
-                </div>
+            <!-- TOGGLE -->
+            <div class="login-toggle">
+                <button class="toggle-btn active" id="toggle-team" onclick="setLoginType('team')">⚽ Team</button>
+                <button class="toggle-btn" id="toggle-admin" onclick="setLoginType('admin')">🔐 Admin</button>
+            </div>
 
+            <!-- TEAM LOGIN -->
+            <div id="form-team">
                 <div class="form-group">
-                    <label class="form-label" for="password">Wachtwoord</label>
-                   <div style="position:relative;">
-                        <input 
-                            type="password" 
-                            id="password" 
-                            class="form-input" 
-                            placeholder="••••••••"
-                            required
-                            style="padding-right: 50px;"
-                        >
-                        <button type="button" id="togglePassword" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:20px; color:#999; padding:4px;">👁️</button>
+                    <label class="form-label">Club</label>
+                    <select id="club-select" class="form-select">
+                        <option value="fc-purmerend">FC Purmerend</option>
+                        <option value="vv-monnickendam">VV Monnickendam</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gebruikersnaam</label>
+                    <input type="text" id="gebruikersnaam" class="form-input" placeholder="bijv. fcp-o14" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Wachtwoord</label>
+                    <div style="position:relative;">
+                        <input type="password" id="password-team" class="form-input" placeholder="••••••••" style="padding-right:50px;">
+                        <button type="button" onclick="togglePW('password-team',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:20px;color:#999;padding:4px;">👁️</button>
                     </div>
-
-                <div class="forgot-password">
-                    <a href="#">Wachtwoord vergeten?</a>
                 </div>
-
-                <div id="errorMessage" style="display:none; background:#FFF0F3; border:1px solid rgba(255,61,113,0.3); border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:14px; color:#FF3D71; font-weight:600; text-align:center;"></div>
-                <button type="submit" class="btn btn-primary">Inloggen</button>
-            </form>
-
-            <div class="divider">
-                <span class="divider-text">of</span>
+                <div class="error-box" id="error-team"></div>
+                <button class="btn btn-primary" id="btn-team" onclick="loginTeam()">Inloggen</button>
             </div>
 
-            <div class="signup-link">
-                Nog geen account? <a href="scorr-signup.html">Meld je aan</a>
+            <!-- ADMIN LOGIN -->
+            <div id="form-admin" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">E-mailadres</label>
+                    <input type="email" id="email" class="form-input" placeholder="jouw@email.nl">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Wachtwoord</label>
+                    <div style="position:relative;">
+                        <input type="password" id="password-admin" class="form-input" placeholder="••••••••" style="padding-right:50px;">
+                        <button type="button" onclick="togglePW('password-admin',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:20px;color:#999;padding:4px;">👁️</button>
+                    </div>
+                </div>
+                <div class="error-box" id="error-admin"></div>
+                <button class="btn btn-primary" id="btn-admin" onclick="loginAdmin()">Inloggen</button>
             </div>
+
         </div>
     </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
-    authDomain: "scorr-c604a.firebaseapp.com",
-    databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "scorr-c604a",
-    storageBucket: "scorr-c604a.firebasestorage.app",
-    messagingSenderId: "413840042688",
-    appId: "1:413840042688:web:3183c36fd20f27ac925b25"
-  };
+    const app = initializeApp({
+        apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
+        authDomain: "scorr-c604a.firebaseapp.com",
+        databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "scorr-c604a",
+        storageBucket: "scorr-c604a.firebasestorage.app",
+        messagingSenderId: "413840042688",
+        appId: "1:413840042688:web:3183c36fd20f27ac925b25"
+    });
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    window.setLoginType = function(type) {
+        document.getElementById('form-team').style.display = type === 'team' ? 'block' : 'none';
+        document.getElementById('form-admin').style.display = type === 'admin' ? 'block' : 'none';
+        document.getElementById('toggle-team').classList.toggle('active', type === 'team');
+        document.getElementById('toggle-admin').classList.toggle('active', type === 'admin');
+    };
 
-  const purmerendTeams = [
-    "team1@fcpurmerend.nl",
-    "team2@fcpurmerend.nl",
-    "team3@fcpurmerend.nl",
-    "team4@fcpurmerend.nl"
-  ];
+    window.togglePW = function(id, btn) {
+        const pw = document.getElementById(id);
+        if (pw.type === 'password') { pw.type = 'text'; btn.textContent = '🙈'; }
+        else { pw.type = 'password'; btn.textContent = '👁️'; }
+    };
 
-  document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errorEl = document.getElementById('errorMessage');
+    // TEAM LOGIN — gebruikersnaam + club → nep-email
+    window.loginTeam = async function() {
+        const gebruikersnaam = document.getElementById('gebruikersnaam').value.trim().toLowerCase();
+        const wachtwoord = document.getElementById('password-team').value;
+        const club = document.getElementById('club-select').value;
+        const errorEl = document.getElementById('error-team');
+        const btn = document.getElementById('btn-team');
+        if (!gebruikersnaam || !wachtwoord) { errorEl.textContent = '❌ Vul gebruikersnaam en wachtwoord in.'; errorEl.style.display = 'block'; return; }
+        btn.disabled = true; btn.textContent = 'Bezig...';
+        errorEl.style.display = 'none';
+        try {
+            const fakeEmail = gebruikersnaam + '@' + club + '.scorr';
+            await signInWithEmailAndPassword(auth, fakeEmail, wachtwoord);
+            window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=' + club;
+        } catch (e) {
+            errorEl.textContent = '❌ Verkeerde gebruikersnaam of wachtwoord.';
+            errorEl.style.display = 'block';
+            btn.disabled = false; btn.textContent = 'Inloggen';
+        }
+    };
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      
-     // Check rol in database
-      const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
-      const db = getDatabase(app);
-      const emailKey = email.replace(/\./g, ',');
-      const snapshot = await get(ref(db, 'gebruikers/' + emailKey));
-      
-      if (snapshot.exists() && snapshot.val().rol === 'superadmin') {
-        window.location.href = '/frontend/admin/superadmin.html';
-      } else if (purmerendTeams.includes(email)) {
-        window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=fc-purmerend';
-      } else {
-        window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=vv-monnickendam';
-      }
-    } catch (error) {
-      const errorEl = document.getElementById('errorMessage');
-      errorEl.textContent = '❌ Verkeerd e-mailadres of wachtwoord.';
-      errorEl.style.display = 'block';
-      console.error(error);
-    }
-  });
-  document.getElementById('togglePassword').addEventListener('click', function() {
-      const pw = document.getElementById('password');
-      if (pw.type === 'password') { pw.type = 'text'; this.textContent = '🙈'; }
-      else { pw.type = 'password'; this.textContent = '👁️'; }
-  });
+    // ADMIN LOGIN — e-mail → rol check → juiste dashboard
+    window.loginAdmin = async function() {
+        const email = document.getElementById('email').value.trim();
+        const wachtwoord = document.getElementById('password-admin').value;
+        const errorEl = document.getElementById('error-admin');
+        const btn = document.getElementById('btn-admin');
+        if (!email || !wachtwoord) { errorEl.textContent = '❌ Vul e-mailadres en wachtwoord in.'; errorEl.style.display = 'block'; return; }
+        btn.disabled = true; btn.textContent = 'Bezig...';
+        errorEl.style.display = 'none';
+        try {
+            await signInWithEmailAndPassword(auth, email, wachtwoord);
+            const emailKey = email.replace(/\./g, ',');
+            const snap = await get(ref(db, 'gebruikers/' + emailKey));
+            if (snap.exists()) {
+                const { rol, club } = snap.val();
+                if (rol === 'superadmin') window.location.href = '/frontend/admin/superadmin.html';
+                else if (rol === 'clubadmin') window.location.href = '/frontend/admin/clubadmin.html';
+                else window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=' + (club || 'fc-purmerend');
+            } else {
+                errorEl.textContent = '❌ Account niet gevonden.';
+                errorEl.style.display = 'block';
+                btn.disabled = false; btn.textContent = 'Inloggen';
+            }
+        } catch (e) {
+            errorEl.textContent = '❌ Verkeerd e-mailadres of wachtwoord.';
+            errorEl.style.display = 'block';
+            btn.disabled = false; btn.textContent = 'Inloggen';
+        }
+    };
+
+    // Enter toets
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        if (document.getElementById('form-admin').style.display !== 'none') loginAdmin();
+        else loginTeam();
+    });
 </script>
 </body>
 </html>

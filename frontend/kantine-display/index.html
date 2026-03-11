@@ -334,7 +334,7 @@
             document.getElementById('matchCount').textContent = count + ' wedstrijd' + (count !== 1 ? 'en' : '');
 
             if (count === 0) {
-                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Geen wedstrijden gepland</div><div class="empty-sub">Er staan geen wedstrijden in de komende 48 uur</div></div>';
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Geen wedstrijden gepland</div><div class="empty-sub">Er staan geen wedstrijden in de komende 7 dagen</div></div>';
                 updateTimestamp();
                 return;
             }
@@ -450,7 +450,7 @@ var verschilUren = (wedstrijdDatum - nu) / (1000 * 60 * 60);
 var tijdstipUren = w.tijdstip ? parseInt(w.tijdstip.split(':')[0]) : 12;
 var eindTijd = new Date(w.datum + 'T' + (w.tijdstip || '12:00') + ':00');
 var urenNaEinde = (nu - eindTijd) / (1000 * 60 * 60);
-if (verschilUren <= 48 && urenNaEinde <= 24) {
+if (verschilUren <= 168 && urenNaEinde <= 2) {
                                             wedstrijden.push(w);
                                         }
                                     }

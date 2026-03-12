@@ -531,7 +531,19 @@
                 bezigtMetTeamAanmaken = false;
             } else {
                 // Bewerken
-                await update(ref(db, 'teams/' + bewerkTeamKey), teamData);
+                if (bewerkTeamKey !== gebruikersnaam) {
+                    // Gebruikersnaam gewijzigd: oude keys verwijderen, nieuwe aanmaken
+                    const fakeEmail = gebruikersnaam + '@' + mijnClub + '.scorr';
+                    const emailKey = fakeEmail.replace(/\./g, ',');
+                    const oudEmail = bewerkTeamKey + '@' + mijnClub + '.scorr';
+                    const oudEmailKey = oudEmail.replace(/\./g, ',');
+                    await set(ref(db, 'teams/' + gebruikersnaam), { ...teamData, firebaseEmail: fakeEmail });
+                    await remove(ref(db, 'teams/' + bewerkTeamKey));
+                    await set(ref(db, 'gebruikers/' + emailKey), { naam, email: fakeEmail, rol: 'team', club: mijnClub, gebruikersnaam });
+                    await remove(ref(db, 'gebruikers/' + oudEmailKey));
+                } else {
+                    await update(ref(db, 'teams/' + bewerkTeamKey), teamData);
+                }
             }
             closeModal('team');
             errorEl.style.display = 'none';

@@ -221,6 +221,20 @@
         .refresh-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: blink 2s infinite; }
 
         /* Responsive */
+        @media (orientation: portrait) {
+            .match-card { padding: 14px 16px; gap: 12px; }
+            .match-status { min-width: 70px; }
+            .match-time { font-size: 20px; }
+            .teams-row { flex-direction: column; gap: 4px; flex: 1; }
+            .team, .team.away { flex-direction: row; justify-content: flex-start; width: 100%; gap: 8px; }
+            .team.away .team-name { text-align: left; }
+            .team-name { font-size: 14px; }
+            .team-logo { width: 32px; height: 32px; font-size: 12px; }
+            .score-block { justify-content: center; padding: 4px 0; gap: 4px; }
+            .score { font-size: 28px; min-width: 32px; }
+            .card-divider { display: none; }
+        }
+
         @media (max-width: 768px) {
             .header { padding: 16px; flex-wrap: wrap; gap: 10px; }
             .pilot-badge { position: static; transform: none; font-size: 10px; padding: 4px 12px; }

@@ -352,6 +352,8 @@
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, updatePassword, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
     const app = initializeApp({ apiKey:"AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U", authDomain:"scorr-c604a.firebaseapp.com", databaseURL:"https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app", projectId:"scorr-c604a", storageBucket:"scorr-c604a.firebasestorage.app", messagingSenderId:"413840042688", appId:"1:413840042688:web:3183c36fd20f27ac925b25" });
+    const app2 = initializeApp({ apiKey:"AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U", authDomain:"scorr-c604a.firebaseapp.com", databaseURL:"https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app", projectId:"scorr-c604a", storageBucket:"scorr-c604a.firebasestorage.app", messagingSenderId:"413840042688", appId:"1:413840042688:web:3183c36fd20f27ac925b25" }, "secondary");
+    const app2 = initializeApp({ apiKey:"AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U", authDomain:"scorr-c604a.firebaseapp.com", databaseURL:"https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app", projectId:"scorr-c604a", storageBucket:"scorr-c604a.firebasestorage.app", messagingSenderId:"413840042688", appId:"1:413840042688:web:3183c36fd20f27ac925b25" }, "secondary");
     const db = getDatabase(app), auth = getAuth(app);
 
     // Standaard helfttijden per categorie
@@ -555,7 +557,15 @@
     window.verwijderTeam = async function(key) {
         const t = alleTeams[key];
         if (!confirm('Team "' + (t.naam||key) + '" verwijderen?')) return;
+        try {
+            // Login als team via tweede instantie en verwijder Auth account
+            const auth2 = getAuth(app2);
+            const cred = await signInWithEmailAndPassword(auth2, t.firebaseEmail, t.wachtwoord);
+            await cred.user.delete();
+        } catch(e) { console.warn('Auth delete skip:', e.message); }
+        const emailKey = (t.firebaseEmail||'').replace(/\./g, ',');
         await remove(ref(db, 'teams/' + key));
+        await remove(ref(db, 'gebruikers/' + emailKey));
     };
 
     // ===== WACHTWOORD MODAL =====
@@ -572,9 +582,14 @@
         const errorEl = document.getElementById('ww-modal-error');
         if (nieuw.length < 6) { errorEl.textContent = 'Minimaal 6 tekens.'; errorEl.style.display = 'block'; return; }
         try {
+            const t = alleTeams[key];
+            // Login als team via tweede instantie en update Auth wachtwoord
+            const auth2 = getAuth(app2);
+            const cred = await signInWithEmailAndPassword(auth2, t.firebaseEmail, t.wachtwoord);
+            await updatePassword(cred.user, nieuw);
             await update(ref(db, 'teams/' + key), { wachtwoord: nieuw });
             closeModal('wachtwoord');
-            alert('✅ Wachtwoord bijgewerkt in database. Update ook Firebase Auth handmatig indien nodig.');
+            alert('✅ Wachtwoord bijgewerkt.');
         } catch(e) {
             errorEl.textContent = '❌ ' + e.message; errorEl.style.display = 'block';
         }

@@ -549,6 +549,71 @@
             color: #0A0E27;
         }
 
+        /* Rich speler-grid: rugnummer + voornaam, gebruikt als selectie geladen is */
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .player-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 10px 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            color: #444;
+            font-family: inherit;
+            min-height: 64px;
+        }
+
+        .player-btn .nr {
+            font-size: 20px;
+            font-weight: 900;
+            line-height: 1;
+            color: #0A0E27;
+        }
+
+        .player-btn .naam {
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .player-btn.selected {
+            background: #00FF88;
+            border-color: #0A0E27;
+        }
+        .player-btn.selected .nr,
+        .player-btn.selected .naam { color: #0A0E27; }
+
+        .player-grid-toggle {
+            display: flex;
+            justify-content: flex-end;
+            margin: -2px 0 8px 0;
+        }
+        .player-grid-toggle button {
+            background: none;
+            border: none;
+            color: #666;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+
         .custom-number-container {
             margin-bottom: 10px;
         }
@@ -1179,26 +1244,82 @@ function changeScore(team, delta) {
             document.getElementById('homeTeamBtn').textContent = document.getElementById('homeTeamName').value || 'Thuisploeg';
             document.getElementById('awayTeamBtn').textContent = document.getElementById('awayTeamName').value || 'Uitploeg';
 
-            const numberGrid = document.getElementById('numberGrid');
-            numberGrid.innerHTML = '';
-            for (let i = 0; i <= 16; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'number-btn';
-                btn.textContent = i;
-                btn.type = 'button';
-                btn.addEventListener('click', () => selectNumber(i));
-                numberGrid.appendChild(btn);
-            }
             selectedNumber = '';
             document.getElementById('customNumber').value = '';
             document.getElementById('modalPlayerName').value = '';
+            window._renderPlayerSelector();
             eventModal.style.display = 'flex';
+        }
+
+        // Bepaal of het op dit moment geselecteerde team ons eigen team is.
+        // We vergelijken team-namen ipv 'thuisOfUit' omdat die laatste niet
+        // altijd correct is bij een geladen wedstrijd.
+        function isOwnTeamSelected() {
+            if (!selectedTeam || !huidigTeamNaam) return false;
+            const homeNaam = (document.getElementById('homeTeamName').value || '').trim();
+            const awayNaam = (document.getElementById('awayTeamName').value || '').trim();
+            if (selectedTeam === 'home') return homeNaam === huidigTeamNaam;
+            if (selectedTeam === 'away') return awayNaam === huidigTeamNaam;
+            return false;
+        }
+
+        // Render of het rugnummer-grid (0-16) of het rijke spelers-grid op basis van team + selectie.
+        // Wordt aangeroepen bij open van modal en bij wisselen van team.
+        window._renderPlayerSelector = function () {
+            const numberGrid = document.getElementById('numberGrid');
+            const selectie = (window._huidigSelectie || []);
+            const eigen = isOwnTeamSelected() && selectie.length > 0;
+            numberGrid.innerHTML = '';
+
+            if (eigen) {
+                numberGrid.className = 'player-grid';
+                selectie.forEach((s) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'player-btn';
+                    btn.type = 'button';
+                    btn.dataset.nr = s.rugnummer;
+                    btn.innerHTML = '<span class="nr">' + (s.rugnummer ?? '?') + '</span>' +
+                                    '<span class="naam">' + (s.voornaam || '').replace(/[<>&"']/g, '') + '</span>';
+                    btn.addEventListener('click', () => {
+                        selectedNumber = s.rugnummer;
+                        document.getElementById('customNumber').value = '';
+                        document.getElementById('modalPlayerName').value = s.voornaam || '';
+                        document.querySelectorAll('.player-btn').forEach(b =>
+                            b.classList.toggle('selected', Number(b.dataset.nr) === Number(s.rugnummer))
+                        );
+                    });
+                    numberGrid.appendChild(btn);
+                });
+                // Toggle naar rugnummer-grid als gebruiker een tegenstander wil invoeren
+                ensureToggleLink(true);
+            } else {
+                numberGrid.className = 'number-grid';
+                for (let i = 0; i <= 16; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'number-btn';
+                    btn.textContent = i;
+                    btn.type = 'button';
+                    btn.addEventListener('click', () => selectNumber(i));
+                    numberGrid.appendChild(btn);
+                }
+                ensureToggleLink(false);
+            }
+        };
+
+        function ensureToggleLink(showSwitch) {
+            // Voor nu geen visuele toggle: tegenstander gaat altijd via team-keuze.
+            // Deze functie is een placeholder voor toekomstige uitbreiding.
         }
 
         function selectTeam(team) {
             selectedTeam = team;
             document.getElementById('homeTeamBtn').classList.toggle('selected', team === 'home');
             document.getElementById('awayTeamBtn').classList.toggle('selected', team === 'away');
+            // Reset selectie en herrender grid (kan switchen tussen rugnummers en namen)
+            selectedNumber = '';
+            document.getElementById('customNumber').value = '';
+            document.getElementById('modalPlayerName').value = '';
+            window._renderPlayerSelector();
         }
 
         function selectNumber(number) {
@@ -1430,7 +1551,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
         document.body.addEventListener('input', function(e) {
             if (e.target.id === 'customNumber' && e.target.value) {
-                document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
+                document.querySelectorAll('.number-btn, .player-btn').forEach(btn => btn.classList.remove('selected'));
                 selectedNumber = '';
             }
         });
@@ -1445,7 +1566,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  import { getDatabase, ref, set, get, remove, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -1500,6 +1621,22 @@ window._selecteerThuisUit = function(keuze) {
                 huidigTeamNaam = teamMapping[user.email] || huidigTeamId;
             }
         } catch(e) { huidigTeamNaam = teamMapping[user.email] || huidigTeamId; }
+
+        // Live luisteren naar eigen selectie (voor naam-grid in event modal)
+        try {
+          onValue(ref(db, 'teams/' + huidigTeamId + '/spelers'), (snap) => {
+            const lijst = [];
+            if (snap.exists()) snap.forEach(c => lijst.push({ id: c.key, ...c.val() }));
+            lijst.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
+            window._huidigSelectie = lijst;
+            // Als event modal open is, render opnieuw
+            if (typeof window._renderPlayerSelector === 'function' &&
+                document.getElementById('eventModal').style.display === 'flex') {
+              window._renderPlayerSelector();
+            }
+          });
+        } catch (e) { window._huidigSelectie = []; }
+
         toonSelectieScherm(huidigTeamNaam, user);
       } else {
         window.location.href = '/frontend/auth/login.html';

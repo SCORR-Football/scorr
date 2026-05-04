@@ -6,19 +6,62 @@
 <title>SCORR — Selectie</title>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --scorr-electric: #00FF88; --scorr-deep: #0A0E27; --scorr-slate: #1E2749; --scorr-text: #F0F4FF; }
+  :root {
+    --scorr-electric: #00FF88;
+    --scorr-deep: #0A0E27;
+    --scorr-slate: #1E2749;
+    --scorr-accent: #FF3B5C;
+    --scorr-text: #F0F4FF;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 20px 40px 20px; }
+  body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 16px 40px 16px; }
   .page { max-width:520px; margin:0 auto; }
-  .page-header { text-align:center; margin-bottom:32px; }
+
+  .page-header { text-align:center; margin-bottom:20px; }
   .page-header .scorr { font-size:28px; font-weight:900; color:var(--scorr-electric); letter-spacing:-1px; }
   .page-header .sub { font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
-  .placeholder { background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:32px 24px; text-align:center; }
-  .placeholder .icon { font-size:42px; margin-bottom:16px; }
-  .placeholder h2 { font-size:18px; font-weight:700; margin-bottom:10px; }
-  .placeholder p { font-size:14px; color:rgba(240,244,255,0.6); line-height:1.5; }
-  .placeholder ul { text-align:left; font-size:13px; color:rgba(240,244,255,0.55); margin-top:18px; padding-left:18px; line-height:1.7; }
-  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); }
+
+  .summary-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding:0 4px; }
+  .summary-bar .count { font-size:13px; color:rgba(240,244,255,0.55); letter-spacing:1.5px; text-transform:uppercase; }
+  .summary-bar .add-btn { background:var(--scorr-electric); color:var(--scorr-deep); border:none; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; letter-spacing:0.5px; }
+  .summary-bar .add-btn:active { transform:translateY(1px); }
+
+  .empty-state { text-align:center; background:var(--scorr-slate); border:1px dashed rgba(255,255,255,0.12); border-radius:14px; padding:36px 20px; margin-top:8px; }
+  .empty-state .ico { font-size:36px; margin-bottom:10px; }
+  .empty-state h3 { font-size:15px; font-weight:700; margin-bottom:6px; }
+  .empty-state p { font-size:13px; color:rgba(240,244,255,0.55); line-height:1.5; }
+
+  .speler-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .speler-row { background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:border-color .15s ease, background .15s ease; }
+  .speler-row:hover { border-color:rgba(0,255,136,0.25); }
+  .speler-row .nr { width:42px; height:42px; border-radius:10px; background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.25); color:var(--scorr-electric); font-weight:900; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .speler-row .info { flex:1; min-width:0; }
+  .speler-row .info .naam { font-size:15px; font-weight:700; color:var(--scorr-text); }
+  .speler-row .info .meta { font-size:11px; color:rgba(240,244,255,0.45); margin-top:2px; }
+  .speler-row .arrow { color:rgba(240,244,255,0.3); font-size:18px; flex-shrink:0; }
+
+  /* Modal */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+  .modal-overlay.open { display:flex; }
+  .modal-card { position:relative; background:var(--scorr-slate); border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:28px 22px 22px 22px; width:100%; max-width:460px; }
+  .modal-card .close-x { position:absolute; top:12px; right:12px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0; }
+  .modal-card h3 { font-size:18px; font-weight:700; margin-bottom:18px; color:var(--scorr-text); }
+  .field { margin-bottom:14px; }
+  .field label { display:block; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; margin-bottom:6px; }
+  .field input, .field textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:11px 14px; font-size:15px; color:var(--scorr-text); font-family:'Lexend',sans-serif; outline:none; }
+  .field input:focus, .field textarea:focus { border-color:rgba(0,255,136,0.5); }
+  .field textarea { resize:vertical; min-height:64px; }
+  .field-row { display:grid; grid-template-columns:1fr 110px; gap:10px; }
+  .modal-actions { display:flex; gap:10px; margin-top:18px; }
+  .modal-actions button { flex:1; padding:13px; border:none; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:0.5px; }
+  .btn-primary { background:var(--scorr-electric); color:var(--scorr-deep); }
+  .btn-secondary { background:transparent; border:1px solid rgba(255,255,255,0.2)!important; color:var(--scorr-text); }
+  .btn-danger { background:transparent; border:1px solid rgba(255,59,92,0.4)!important; color:var(--scorr-accent); flex:0 0 auto; padding:13px 16px; }
+
+  .error-box { display:none; background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); border-radius:8px; padding:9px 12px; font-size:12px; color:var(--scorr-accent); margin-bottom:12px; }
+  .error-box.show { display:block; }
+
+  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); font-size:13px; letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -32,16 +75,54 @@
       <div class="sub" id="team-naam">Selectie</div>
     </div>
 
-    <div class="placeholder">
-      <div class="icon">👥</div>
-      <h2>Selectie — binnenkort</h2>
-      <p>Hier kun je straks je spelers beheren. Voor pilot-fase 2 komt:</p>
-      <ul>
-        <li>Voornamen en rugnummers toevoegen</li>
-        <li>Notities per speler (sterk in / ontwikkelpunten)</li>
-        <li>Spelers kiezen bij doelpunten en kaarten</li>
-        <li>Bij tegenstanders blijven het rugnummers</li>
-      </ul>
+    <div class="summary-bar">
+      <div class="count" id="speler-count">0 spelers</div>
+      <button type="button" class="add-btn" id="add-btn">+ Speler toevoegen</button>
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div class="ico">👥</div>
+      <h3>Nog geen spelers</h3>
+      <p>Voeg je selectie toe om bij doelpunten en kaarten op naam te kunnen tikken in plaats van rugnummer.</p>
+    </div>
+
+    <div id="speler-list" class="speler-list"></div>
+  </div>
+</div>
+
+<!-- Speler modal -->
+<div id="speler-modal" class="modal-overlay">
+  <div class="modal-card">
+    <button type="button" class="close-x" aria-label="Sluiten" id="modal-close-x">×</button>
+    <h3 id="modal-title">Speler toevoegen</h3>
+
+    <div id="modal-error" class="error-box"></div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="m-voornaam">Voornaam *</label>
+        <input id="m-voornaam" type="text" placeholder="bijv. Jan" maxlength="40" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="m-rugnummer">Rugnr *</label>
+        <input id="m-rugnummer" type="number" min="0" max="99" inputmode="numeric" placeholder="9">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="m-sterk">💪 Sterk in</label>
+      <textarea id="m-sterk" rows="2" placeholder="bijv. snelheid, eerste aanname"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="m-groei">📈 Ontwikkelpunten</label>
+      <textarea id="m-groei" rows="2" placeholder="bijv. linker been, koppen"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-danger" id="m-delete" style="display:none;">🗑</button>
+      <button type="button" class="btn-secondary" id="m-cancel">Annuleren</button>
+      <button type="button" class="btn-primary" id="m-save">Opslaan</button>
     </div>
   </div>
 </div>
@@ -51,7 +132,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  import { getDatabase, ref, get, set, push, remove, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
   const app = initializeApp({
     apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
@@ -72,6 +153,10 @@
     'rkav-1@rkav-volendam.scorr':  'RKAV Volendam 1'
   };
 
+  let huidigTeamId = null;
+  let editingSpelerId = null; // null = nieuwe speler, anders edit-mode
+
+  // ===== Auth + setup =====
   window.addEventListener('scorr:sidebar-logout', async () => {
     if (!confirm('Wil je uitloggen?')) return;
     try { await signOut(auth); } catch (e) {}
@@ -80,16 +165,170 @@
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
-    const teamId = user.email.split('@')[0];
-    let teamNaam = teamId;
+    huidigTeamId = user.email.split('@')[0];
+
+    let teamNaam = huidigTeamId;
     try {
-      const snap = await get(ref(db, 'teams/' + teamId));
-      if (snap.exists()) teamNaam = snap.val().naam || teamMapping[user.email] || teamId;
-      else teamNaam = teamMapping[user.email] || teamId;
-    } catch(e) { teamNaam = teamMapping[user.email] || teamId; }
+      const snap = await get(ref(db, 'teams/' + huidigTeamId));
+      if (snap.exists()) teamNaam = snap.val().naam || teamMapping[user.email] || huidigTeamId;
+      else teamNaam = teamMapping[user.email] || huidigTeamId;
+    } catch (e) { teamNaam = teamMapping[user.email] || huidigTeamId; }
     document.getElementById('team-naam').textContent = teamNaam;
+
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
+
+    // Live luisteren naar selectie
+    listenToSpelers();
+  });
+
+  // ===== Spelers laden =====
+  function listenToSpelers() {
+    const spelersRef = ref(db, 'teams/' + huidigTeamId + '/spelers');
+    onValue(spelersRef, (snapshot) => {
+      const spelers = [];
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          spelers.push({ id: child.key, ...child.val() });
+        });
+      }
+      // Sorteer op rugnummer (numeriek)
+      spelers.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
+      renderSpelers(spelers);
+    });
+  }
+
+  function renderSpelers(spelers) {
+    const list = document.getElementById('speler-list');
+    const empty = document.getElementById('empty-state');
+    const count = document.getElementById('speler-count');
+
+    count.textContent = spelers.length === 1 ? '1 speler' : spelers.length + ' spelers';
+
+    if (spelers.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    list.innerHTML = '';
+    spelers.forEach((s) => {
+      const row = document.createElement('div');
+      row.className = 'speler-row';
+      row.dataset.id = s.id;
+      var notes = '';
+      if (s.notitie_sterk || s.notitie_groei) {
+        notes = '· ' + (s.notitie_sterk ? '💪' : '') + (s.notitie_groei ? '📈' : '');
+      }
+      row.innerHTML =
+        '<div class="nr">' + (s.rugnummer ?? '?') + '</div>' +
+        '<div class="info">' +
+          '<div class="naam">' + escapeHtml(s.voornaam || 'Onbekend') + '</div>' +
+          '<div class="meta">Rugnummer ' + (s.rugnummer ?? '?') + ' ' + notes + '</div>' +
+        '</div>' +
+        '<div class="arrow">›</div>';
+      row.addEventListener('click', () => openModal(s));
+      list.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  // ===== Modal =====
+  const modalEl     = document.getElementById('speler-modal');
+  const errorEl     = document.getElementById('modal-error');
+  const titleEl     = document.getElementById('modal-title');
+  const inpVoornaam = document.getElementById('m-voornaam');
+  const inpRugnr    = document.getElementById('m-rugnummer');
+  const inpSterk    = document.getElementById('m-sterk');
+  const inpGroei    = document.getElementById('m-groei');
+  const btnDelete   = document.getElementById('m-delete');
+  const btnSave     = document.getElementById('m-save');
+
+  function openModal(speler) {
+    editingSpelerId = speler ? speler.id : null;
+    titleEl.textContent = speler ? 'Speler bewerken' : 'Speler toevoegen';
+    inpVoornaam.value = speler?.voornaam || '';
+    inpRugnr.value    = speler?.rugnummer ?? '';
+    inpSterk.value    = speler?.notitie_sterk || '';
+    inpGroei.value    = speler?.notitie_groei || '';
+    btnDelete.style.display = speler ? 'inline-flex' : 'none';
+    errorEl.classList.remove('show');
+    modalEl.classList.add('open');
+    setTimeout(() => inpVoornaam.focus(), 50);
+  }
+
+  function closeModal() {
+    modalEl.classList.remove('open');
+    editingSpelerId = null;
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.add('show');
+  }
+
+  document.getElementById('add-btn').addEventListener('click', () => openModal(null));
+  document.getElementById('modal-close-x').addEventListener('click', closeModal);
+  document.getElementById('m-cancel').addEventListener('click', closeModal);
+  modalEl.addEventListener('click', (e) => { if (e.target === modalEl) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalEl.classList.contains('open')) closeModal(); });
+
+  btnSave.addEventListener('click', async () => {
+    const voornaam = inpVoornaam.value.trim();
+    const rugRaw   = inpRugnr.value.trim();
+    const sterk    = inpSterk.value.trim();
+    const groei    = inpGroei.value.trim();
+
+    if (!voornaam) return showError('Vul een voornaam in.');
+    if (rugRaw === '') return showError('Vul een rugnummer in.');
+    const rugnummer = Number(rugRaw);
+    if (!Number.isFinite(rugnummer) || rugnummer < 0 || rugnummer > 99) {
+      return showError('Rugnummer moet tussen 0 en 99 zijn.');
+    }
+
+    btnSave.disabled = true;
+    btnSave.textContent = 'Opslaan...';
+    try {
+      const data = {
+        voornaam,
+        rugnummer,
+        notitie_sterk: sterk,
+        notitie_groei: groei,
+        bijgewerkt: Date.now()
+      };
+      if (editingSpelerId) {
+        await set(ref(db, 'teams/' + huidigTeamId + '/spelers/' + editingSpelerId), {
+          ...data,
+          aangemaakt: data.aangemaakt || data.bijgewerkt
+        });
+      } else {
+        const newRef = push(ref(db, 'teams/' + huidigTeamId + '/spelers'));
+        await set(newRef, { ...data, aangemaakt: data.bijgewerkt });
+      }
+      closeModal();
+    } catch (e) {
+      showError('Opslaan mislukt: ' + (e.message || e));
+    } finally {
+      btnSave.disabled = false;
+      btnSave.textContent = 'Opslaan';
+    }
+  });
+
+  btnDelete.addEventListener('click', async () => {
+    if (!editingSpelerId) return;
+    if (!confirm('Speler verwijderen uit selectie?')) return;
+    try {
+      await remove(ref(db, 'teams/' + huidigTeamId + '/spelers/' + editingSpelerId));
+      closeModal();
+    } catch (e) {
+      showError('Verwijderen mislukt: ' + (e.message || e));
+    }
   });
 </script>
 

@@ -456,6 +456,30 @@
             border: 2px solid rgba(123, 97, 255, 0.4);
         }
 
+        /* Opstelling modal: formatie chips */
+        .formatie-chip {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(240,244,255,0.7); border-radius: 18px; padding: 8px 14px;
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            font-family: 'Lexend', sans-serif; letter-spacing: 0.5px;
+            min-height: 36px; touch-action: manipulation;
+        }
+        .formatie-chip.active { background: rgba(0,255,136,0.12); border-color: rgba(0,255,136,0.5); color: #00FF88; }
+
+        /* Bank chips + picker chips */
+        .opst-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 7px 11px; border-radius: 14px; cursor: pointer;
+            font-family: 'Lexend', sans-serif; font-size: 11px; font-weight: 700;
+            min-height: 32px; background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.35); color: #F0F4FF;
+            touch-action: manipulation; user-select: none;
+        }
+        .opst-chip .nr { font-weight: 900; font-size: 10px; color: #00FF88; }
+        .opst-chip.bank { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.18); }
+        .opst-chip.bank .nr { color: rgba(240,244,255,0.6); }
+        .opst-chip.selected { background: rgba(255,184,0,0.2); border-color: #FFB800; }
+
         .toolbar-btn .btn-label {
             position: absolute;
             bottom: -1px;
@@ -1562,144 +1586,449 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         document.getElementById('awayTeamBtn').addEventListener('click', () => selectTeam('away'));
         document.getElementById('downloadBtn').addEventListener('click', downloadMatchReport);
 
-        // ===== WISSELBELEID =====
+        // ===== WISSELBELEID — Opstelling met formatie =====
+        const FORMATIES = {
+            '4-3-3': [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lb',  label:'LB',  x:42,  y:230 },
+                { key:'lcb', label:'CB',  x:82,  y:248 },
+                { key:'rcb', label:'CB',  x:138, y:248 },
+                { key:'rb',  label:'RB',  x:178, y:230 },
+                { key:'lcm', label:'CM',  x:62,  y:172 },
+                { key:'cm',  label:'CM',  x:110, y:152 },
+                { key:'rcm', label:'CM',  x:158, y:172 },
+                { key:'lw',  label:'LW',  x:46,  y:80 },
+                { key:'st',  label:'ST',  x:110, y:60 },
+                { key:'rw',  label:'RW',  x:174, y:80 }
+            ],
+            '4-4-2': [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lb',  label:'LB',  x:42,  y:230 },
+                { key:'lcb', label:'CB',  x:82,  y:248 },
+                { key:'rcb', label:'CB',  x:138, y:248 },
+                { key:'rb',  label:'RB',  x:178, y:230 },
+                { key:'lm',  label:'LM',  x:42,  y:155 },
+                { key:'lcm', label:'CM',  x:80,  y:170 },
+                { key:'rcm', label:'CM',  x:140, y:170 },
+                { key:'rm',  label:'RM',  x:178, y:155 },
+                { key:'lst', label:'ST',  x:80,  y:60 },
+                { key:'rst', label:'ST',  x:140, y:60 }
+            ],
+            '3-5-2': [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lcb', label:'CB',  x:62,  y:250 },
+                { key:'cb',  label:'CB',  x:110, y:258 },
+                { key:'rcb', label:'CB',  x:158, y:250 },
+                { key:'lwb', label:'LWB', x:32,  y:175 },
+                { key:'lcm', label:'CM',  x:75,  y:180 },
+                { key:'cm',  label:'CM',  x:110, y:160 },
+                { key:'rcm', label:'CM',  x:145, y:180 },
+                { key:'rwb', label:'RWB', x:188, y:175 },
+                { key:'lst', label:'ST',  x:80,  y:62 },
+                { key:'rst', label:'ST',  x:140, y:62 }
+            ],
+            '4-2-3-1': [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lb',  label:'LB',  x:42,  y:230 },
+                { key:'lcb', label:'CB',  x:82,  y:248 },
+                { key:'rcb', label:'CB',  x:138, y:248 },
+                { key:'rb',  label:'RB',  x:178, y:230 },
+                { key:'lcdm',label:'CDM', x:80,  y:185 },
+                { key:'rcdm',label:'CDM', x:140, y:185 },
+                { key:'lam', label:'LM',  x:50,  y:115 },
+                { key:'cam', label:'CAM', x:110, y:105 },
+                { key:'ram', label:'RM',  x:170, y:115 },
+                { key:'st',  label:'ST',  x:110, y:55 }
+            ]
+        };
+
+        // State
         window._opstelling = {};
+        let huidigeFormatie = '4-3-3';
+        let opstellingPickerPositie = null; // {key, label} - de positie waar gepickt wordt
+        let opstellingPickerSpelerId = null; // null = nieuwe, anders = vrijmaken/wisselen voor deze speler
 
-        document.getElementById('wisselBtn').addEventListener('click', openWisselModal);
-        document.getElementById('wisselCloseBtn').addEventListener('click', closeWisselModal);
-        document.getElementById('wisselSluitBtn').addEventListener('click', closeWisselModal);
-        document.getElementById('wissel-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'wissel-modal') closeWisselModal();
-        });
-
-        function closeWisselModal() {
-            document.getElementById('wissel-modal').style.display = 'none';
-        }
-
-        async function openWisselModal() {
-            const wId = huidigWedstrijdId;
-            if (!wId) {
-                alert('Kies eerst een wedstrijd voordat je wissels kunt bijhouden.');
-                return;
-            }
-            const selectie = window._huidigSelectie || [];
-            document.getElementById('wissel-modal').style.display = 'flex';
-
-            if (selectie.length === 0) {
-                document.getElementById('wissel-no-selectie').style.display = 'block';
-                document.getElementById('wissel-content').style.display = 'none';
-                document.getElementById('wissel-minute-info').textContent = '';
-                return;
-            }
-            document.getElementById('wissel-no-selectie').style.display = 'none';
-            document.getElementById('wissel-content').style.display = 'block';
-
-            let minuteInfo = '';
-            if (isRunning) {
-                const mn = getCurrentMinute();
-                minuteInfo = "Wedstrijd loopt — wissels worden gelogd op minuut " + mn + "'";
-            } else if (currentHalf > 0) {
-                minuteInfo = 'Wedstrijd gepauzeerd — wissels worden niet gelogd';
-            } else {
-                minuteInfo = 'Voor de wedstrijd — kies vast je opstelling';
-            }
-            document.getElementById('wissel-minute-info').textContent = minuteInfo;
-
-            // Load opstelling van Firebase
+        // Public: wordt aangeroepen vanuit _kiesWedstrijd
+        window._loadOpstellingVoorMatch = async function(wId) {
             try {
                 const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
-                const snap = await m.get(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling'));
-                window._opstelling = snap.exists() ? snap.val() : {};
+                const [oSnap, fSnap] = await Promise.all([
+                    m.get(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling')),
+                    m.get(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/formatie'))
+                ]);
+                window._opstelling = oSnap.exists() ? oSnap.val() : {};
+                huidigeFormatie    = (fSnap.exists() && FORMATIES[fSnap.val()]) ? fSnap.val() : '4-3-3';
+                return Object.keys(window._opstelling).length > 0;
             } catch (e) {
                 window._opstelling = {};
+                huidigeFormatie = '4-3-3';
+                return false;
             }
-            renderWisselLists();
+        };
+
+        document.getElementById('wisselBtn').addEventListener('click', () => window.openOpstellingModal(false));
+        document.getElementById('wisselCloseBtn').addEventListener('click', closeOpstellingModal);
+        document.getElementById('wisselSluitBtn').addEventListener('click', closeOpstellingModal);
+        document.getElementById('wissel-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'wissel-modal') closeOpstellingModal();
+        });
+
+        // Formatie-chip clicks
+        document.querySelectorAll('.formatie-chip').forEach(btn => {
+            btn.addEventListener('click', () => switchFormatie(btn.dataset.formatie));
+        });
+
+        // Picker buttons
+        document.getElementById('opst-picker-cancel').addEventListener('click', closeOpstPicker);
+        document.getElementById('opst-picker-clear').addEventListener('click', clearPickerPosition);
+
+        function closeOpstellingModal() {
+            document.getElementById('wissel-modal').style.display = 'none';
+            closeOpstPicker();
         }
 
-        function renderWisselLists() {
-            const veldEl = document.getElementById('wissel-veld-list');
-            const bankEl = document.getElementById('wissel-bank-list');
-            veldEl.innerHTML = '';
-            bankEl.innerHTML = '';
-
-            const selectie = (window._huidigSelectie || []).slice().sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
-            const opstelling = window._opstelling || {};
-
-            let inCount = 0, bankCount = 0;
-            selectie.forEach(s => {
-                const entry = opstelling[s.id];
-                const status = (entry && entry.status) || 'bank';
-                const inVeld = status === 'in';
-                const chip = document.createElement('button');
-                chip.type = 'button';
-                chip.dataset.id = s.id;
-                chip.style.cssText = 'display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:16px; cursor:pointer; font-family:Lexend,sans-serif; font-size:12px; font-weight:700; min-height:36px; touch-action:manipulation;' +
-                    (inVeld
-                        ? 'background:rgba(0,255,136,0.15); border:1px solid rgba(0,255,136,0.45); color:#00FF88;'
-                        : 'background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#F0F4FF;');
-                const naam = (s.voornaam || 'Onbekend').replace(/[<>&"']/g, '');
-                chip.innerHTML = '<span style="font-weight:900; font-size:11px;">#' + (s.rugnummer ?? '?') + '</span>' +
-                                 '<span>' + naam + '</span>';
-                chip.addEventListener('click', () => toggleSpelerStatus(s));
-                if (inVeld) { veldEl.appendChild(chip); inCount++; }
-                else        { bankEl.appendChild(chip); bankCount++; }
-            });
-
-            document.getElementById('wissel-count-in').textContent   = '(' + inCount + ')';
-            document.getElementById('wissel-count-bank').textContent = '(' + bankCount + ')';
-
-            if (inCount === 0)   veldEl.innerHTML = '<div style="font-size:11px; color:rgba(240,244,255,0.4); padding:6px;">Tap op een speler hieronder om \'m in het veld te zetten</div>';
-            if (bankCount === 0) bankEl.innerHTML = '<div style="font-size:11px; color:rgba(240,244,255,0.4); padding:6px;">Niemand op de bank</div>';
-        }
-
-        async function toggleSpelerStatus(speler) {
+        window.openOpstellingModal = async function(autoFromKies) {
             const wId = huidigWedstrijdId;
-            if (!wId) return;
-            const opstelling = window._opstelling || {};
-            const huidig = (opstelling[speler.id] && opstelling[speler.id].status) || 'bank';
-            const nieuwe = huidig === 'in' ? 'bank' : 'in';
-
-            opstelling[speler.id] = {
-                spelerId: speler.id,
-                voornaam: speler.voornaam,
-                rugnummer: speler.rugnummer,
-                status: nieuwe,
-                bijgewerkt: Date.now()
-            };
-            window._opstelling = opstelling;
-            renderWisselLists();
-            // Update minuut-info
+            if (!wId) {
+                if (!autoFromKies) alert('Kies eerst een wedstrijd voordat je een opstelling kunt maken.');
+                return;
+            }
+            // Update subtitle on basis van match-state
+            const subEl = document.getElementById('opst-subtitle');
             if (isRunning) {
                 const mn = getCurrentMinute();
-                document.getElementById('wissel-minute-info').textContent =
-                    "Wedstrijd loopt — wissels worden gelogd op minuut " + mn + "'";
+                subEl.textContent = "Wedstrijd loopt · wissels op minuut " + mn + "'";
+            } else if (currentHalf > 0) {
+                subEl.textContent = 'Wedstrijd gepauzeerd';
+            } else {
+                subEl.textContent = 'Voor de wedstrijd';
             }
+
+            document.getElementById('wissel-modal').style.display = 'flex';
+            renderFormatieChips();
+            renderVeldSVG();
+            renderBank();
+            updateNoSelectieMessage();
+        };
+
+        function updateNoSelectieMessage() {
+            const sel = window._huidigSelectie || [];
+            const noEl = document.getElementById('opst-no-selectie');
+            const bnk = document.getElementById('opst-bank-wrap');
+            if (sel.length === 0) {
+                noEl.style.display = 'block';
+                bnk.style.display = 'none';
+            } else {
+                noEl.style.display = 'none';
+                bnk.style.display = 'block';
+            }
+        }
+
+        function renderFormatieChips() {
+            document.querySelectorAll('.formatie-chip').forEach(c => {
+                c.classList.toggle('active', c.dataset.formatie === huidigeFormatie);
+            });
+        }
+
+        async function switchFormatie(naam) {
+            if (!FORMATIES[naam] || naam === huidigeFormatie) return;
+            // Bij wisselen van formatie: bestaande spelers blijven gekoppeld waar mogelijk,
+            // maar als positie-key niet bestaat in nieuwe formatie → speler naar bank.
+            const oudeKeys = new Set(FORMATIES[huidigeFormatie].map(p => p.key));
+            const nieuweKeys = new Set(FORMATIES[naam].map(p => p.key));
+
+            const o = window._opstelling || {};
+            Object.keys(o).forEach(spelerId => {
+                const e = o[spelerId];
+                if (e && e.status === 'in' && e.positie && !nieuweKeys.has(e.positie)) {
+                    // positie bestaat niet meer → naar bank
+                    e.status = 'bank';
+                    e.positie = null;
+                }
+            });
+
+            huidigeFormatie = naam;
+            window._opstelling = o;
+
+            renderFormatieChips();
+            renderVeldSVG();
+            renderBank();
+
+            // Save naar firebase
+            try {
+                const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
+                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + huidigWedstrijdId + '/formatie'), naam);
+                // Update gewijzigde spelers
+                for (const sId of Object.keys(o)) {
+                    await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + huidigWedstrijdId + '/opstelling/' + sId), o[sId]);
+                }
+            } catch (e) { console.warn('Formatie opslaan mislukt', e); }
+        }
+
+        function spelerOpPositie(positieKey) {
+            const o = window._opstelling || {};
+            for (const sId of Object.keys(o)) {
+                const e = o[sId];
+                if (e && e.status === 'in' && e.positie === positieKey) return e;
+            }
+            return null;
+        }
+
+        function renderVeldSVG() {
+            const svg = document.getElementById('opst-veld');
+            const formatie = FORMATIES[huidigeFormatie] || FORMATIES['4-3-3'];
+            const W = 220, H = 320;
+
+            let inner = '';
+            // Veld achtergrond + lijnen
+            inner += '<rect x="6" y="6" width="' + (W-12) + '" height="' + (H-12) + '" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>';
+            inner += '<line x1="6" y1="' + (H/2) + '" x2="' + (W-6) + '" y2="' + (H/2) + '" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>';
+            inner += '<circle cx="' + (W/2) + '" cy="' + (H/2) + '" r="22" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>';
+            inner += '<rect x="60"  y="6"  width="100" height="32" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>';
+            inner += '<rect x="60"  y="' + (H-38) + '" width="100" height="32" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>';
+            inner += '<rect x="86"  y="6"  width="48"  height="14" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>';
+            inner += '<rect x="86"  y="' + (H-20) + '" width="48"  height="14" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>';
+
+            // Posities
+            formatie.forEach(pos => {
+                const sp = spelerOpPositie(pos.key);
+                const isKeeper = pos.key === 'gk';
+                const fill   = sp ? (isKeeper ? '#7B61FF' : '#00FF88') : 'rgba(255,255,255,0.04)';
+                const stroke = sp ? (isKeeper ? '#A992FF' : '#00FF88') : 'rgba(255,255,255,0.3)';
+                const dash   = sp ? '' : ' stroke-dasharray="3 2"';
+                inner += '<circle class="opst-slot" data-pos="' + pos.key + '" cx="' + pos.x + '" cy="' + pos.y +
+                         '" r="14" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"' + dash + ' style="cursor:pointer;"/>';
+                if (sp) {
+                    // rugnummer in cirkel
+                    inner += '<text x="' + pos.x + '" y="' + (pos.y + 4) + '" text-anchor="middle" font-size="11" font-weight="900" fill="#0A0E27" font-family="Lexend, sans-serif" pointer-events="none">' + (sp.rugnummer ?? '?') + '</text>';
+                    // voornaam onder
+                    const naam = (sp.voornaam || '').slice(0, 9);
+                    inner += '<text x="' + pos.x + '" y="' + (pos.y + 28) + '" text-anchor="middle" font-size="9" font-weight="700" fill="#F0F4FF" font-family="Lexend, sans-serif" pointer-events="none">' + escapeHtmlSimple(naam) + '</text>';
+                } else {
+                    // positie label
+                    inner += '<text x="' + pos.x + '" y="' + (pos.y + 3) + '" text-anchor="middle" font-size="9" font-weight="700" fill="rgba(240,244,255,0.55)" font-family="Lexend, sans-serif" pointer-events="none">' + pos.label + '</text>';
+                }
+            });
+
+            svg.innerHTML = inner;
+
+            // Klik-handlers op posities
+            svg.querySelectorAll('.opst-slot').forEach(c => {
+                c.addEventListener('click', () => onPositieClick(c.dataset.pos));
+            });
+        }
+
+        function escapeHtmlSimple(s) {
+            return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function renderBank() {
+            const bankEl = document.getElementById('opst-bank-list');
+            const sel = (window._huidigSelectie || []).slice().sort((a,b) => Number(a.rugnummer||0) - Number(b.rugnummer||0));
+            const o = window._opstelling || {};
+            bankEl.innerHTML = '';
+            let bankCount = 0;
+            sel.forEach(s => {
+                const e = o[s.id];
+                const status = (e && e.status) || 'bank';
+                if (status === 'in') return;
+                bankCount++;
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'opst-chip bank';
+                chip.dataset.id = s.id;
+                chip.innerHTML = '<span class="nr">#' + (s.rugnummer ?? '?') + '</span>' +
+                                 '<span>' + escapeHtmlSimple(s.voornaam || 'Onbekend') + '</span>';
+                chip.addEventListener('click', () => onBankSpelerClick(s));
+                bankEl.appendChild(chip);
+            });
+            document.getElementById('opst-bank-count').textContent = '(' + bankCount + ')';
+            if (bankCount === 0) {
+                bankEl.innerHTML = '<div style="font-size:11px; color:rgba(240,244,255,0.4); padding:6px;">Geen spelers op de bank.</div>';
+            }
+        }
+
+        // Speler-picker openen voor een positie (na tap op veld-positie)
+        function onPositieClick(positieKey) {
+            const formatie = FORMATIES[huidigeFormatie];
+            const pos = formatie.find(p => p.key === positieKey);
+            if (!pos) return;
+            const sp = spelerOpPositie(positieKey);
+
+            opstellingPickerPositie = pos;
+            opstellingPickerSpelerId = sp ? sp.spelerId : null;
+
+            const picker = document.getElementById('opst-picker');
+            const title = document.getElementById('opst-picker-title');
+            const list  = document.getElementById('opst-picker-list');
+            const clearBtn = document.getElementById('opst-picker-clear');
+
+            title.textContent = sp
+                ? 'Wissel ' + (sp.voornaam || '') + ' (#' + (sp.rugnummer ?? '?') + ', ' + pos.label + ')'
+                : 'Kies speler voor ' + pos.label;
+            clearBtn.style.display = sp ? 'inline-flex' : 'none';
+
+            // Lijst: bank-spelers (excl huidige op deze positie)
+            const sel = (window._huidigSelectie || []).slice().sort((a,b) => Number(a.rugnummer||0) - Number(b.rugnummer||0));
+            const o = window._opstelling || {};
+            list.innerHTML = '';
+            let n = 0;
+            sel.forEach(s => {
+                const e = o[s.id];
+                const status = (e && e.status) || 'bank';
+                if (status === 'in' && e.positie !== positieKey) return; // andere posities NIET tonen
+                if (sp && s.id === sp.spelerId) return; // de huidige niet
+                n++;
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'opst-chip bank';
+                chip.innerHTML = '<span class="nr">#' + (s.rugnummer ?? '?') + '</span>' +
+                                 '<span>' + escapeHtmlSimple(s.voornaam || 'Onbekend') + '</span>';
+                chip.addEventListener('click', () => assignSpelerNaarPositie(s, pos));
+                list.appendChild(chip);
+            });
+            if (n === 0) {
+                list.innerHTML = '<div style="font-size:11px; color:rgba(240,244,255,0.4); padding:6px;">Geen beschikbare spelers.</div>';
+            }
+            picker.style.display = 'block';
+            picker.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
+
+        // Bank-speler tappen: vraag op welke positie
+        function onBankSpelerClick(speler) {
+            // Toon picker met alleen de eigen lege posities (alle posities)
+            const formatie = FORMATIES[huidigeFormatie];
+
+            opstellingPickerPositie = null;
+            opstellingPickerSpelerId = speler.id;
+
+            const picker = document.getElementById('opst-picker');
+            const title = document.getElementById('opst-picker-title');
+            const list  = document.getElementById('opst-picker-list');
+            const clearBtn = document.getElementById('opst-picker-clear');
+            title.textContent = 'Plaats #' + (speler.rugnummer ?? '?') + ' ' + (speler.voornaam || '') + ' op...';
+            clearBtn.style.display = 'none';
+
+            list.innerHTML = '';
+            formatie.forEach(pos => {
+                const sp = spelerOpPositie(pos.key);
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'opst-chip' + (sp ? '' : ' bank');
+                chip.innerHTML = '<span class="nr">' + pos.label + '</span>' +
+                                 '<span>' + (sp ? '#' + (sp.rugnummer ?? '?') + ' ' + escapeHtmlSimple(sp.voornaam || '') : 'leeg') + '</span>';
+                chip.addEventListener('click', () => assignSpelerNaarPositie(speler, pos));
+                list.appendChild(chip);
+            });
+            picker.style.display = 'block';
+            picker.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
+
+        async function assignSpelerNaarPositie(speler, positie) {
+            const wId = huidigWedstrijdId;
+            if (!wId) return;
+            const o = window._opstelling || {};
+            const minuut = isRunning ? getCurrentMinute() : 0;
+            const wasInLineup = (o[speler.id] && o[speler.id].status === 'in');
+
+            // Eerst: als er al iemand op die positie staat, naar bank
+            const huidig = spelerOpPositie(positie.key);
+            if (huidig && huidig.spelerId !== speler.id) {
+                // Bereken speeltijd voor uitgaande speler
+                if (isRunning) {
+                    const sinds = huidig.minuutIn != null ? huidig.minuutIn : 0;
+                    const newMin = (huidig.minutenGespeeld || 0) + Math.max(0, minuut - sinds);
+                    o[huidig.spelerId] = { ...huidig, status:'bank', positie:null, minuutIn:null, minutenGespeeld:newMin };
+                } else {
+                    o[huidig.spelerId] = { ...huidig, status:'bank', positie:null, minuutIn:null };
+                }
+            }
+
+            // Plaats nieuwe speler
+            const entry = o[speler.id] || {
+                spelerId: speler.id, voornaam: speler.voornaam, rugnummer: speler.rugnummer,
+                status: 'bank', positie: null, minutenGespeeld: 0
+            };
+            entry.status = 'in';
+            entry.positie = positie.key;
+            entry.minuutIn = isRunning ? minuut : 0;
+            entry.bijgewerkt = Date.now();
+            o[speler.id] = entry;
+            window._opstelling = o;
+
+            renderVeldSVG(); renderBank();
+            closeOpstPicker();
+
+            // Save firebase
+            try {
+                const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
+                if (huidig && huidig.spelerId !== speler.id) {
+                    await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + huidig.spelerId), o[huidig.spelerId]);
+                }
+                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + speler.id), entry);
+
+                // Log wissel-event als wedstrijd loopt
+                if (isRunning) {
+                    if (huidig && huidig.spelerId !== speler.id) {
+                        const desc = '🔄 Wissel: #' + (huidig.rugnummer ?? '?') + ' ' + (huidig.voornaam || '') +
+                                     ' eruit, #' + (speler.rugnummer ?? '?') + ' ' + (speler.voornaam || '') + ' erin (' + positie.label + ')';
+                        events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
+                        renderEvents();
+                        await m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
+                            type:'wissel', minuut, omschrijving: desc, tijdstip: Date.now(),
+                            uitSpeler: huidig.spelerId, inSpeler: speler.id, positie: positie.key
+                        });
+                    } else if (!wasInLineup) {
+                        const desc = '🔄 #' + (speler.rugnummer ?? '?') + ' ' + (speler.voornaam || '') + ' het veld in (' + positie.label + ')';
+                        events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
+                        renderEvents();
+                        await m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
+                            type:'wissel', minuut, omschrijving: desc, tijdstip: Date.now(),
+                            inSpeler: speler.id, positie: positie.key
+                        });
+                    }
+                }
+            } catch (e) { console.warn('Opstelling opslaan mislukt', e); }
+        }
+
+        async function clearPickerPosition() {
+            if (!opstellingPickerPositie) return;
+            const wId = huidigWedstrijdId;
+            const o = window._opstelling || {};
+            const sp = spelerOpPositie(opstellingPickerPositie.key);
+            if (!sp) { closeOpstPicker(); return; }
+
+            const minuut = isRunning ? getCurrentMinute() : 0;
+            if (isRunning) {
+                const sinds = sp.minuutIn != null ? sp.minuutIn : 0;
+                const newMin = (sp.minutenGespeeld || 0) + Math.max(0, minuut - sinds);
+                o[sp.spelerId] = { ...sp, status:'bank', positie:null, minuutIn:null, minutenGespeeld:newMin };
+            } else {
+                o[sp.spelerId] = { ...sp, status:'bank', positie:null, minuutIn:null };
+            }
+            window._opstelling = o;
+            renderVeldSVG(); renderBank();
+            closeOpstPicker();
 
             try {
                 const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
-                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + speler.id), opstelling[speler.id]);
-
-                // Log event tijdens lopende wedstrijd
+                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + sp.spelerId), o[sp.spelerId]);
                 if (isRunning) {
-                    const minuut = getCurrentMinute();
-                    const actie  = nieuwe === 'in' ? 'erin' : 'eruit';
-                    const desc   = '🔄 Wissel: #' + (speler.rugnummer ?? '?') + ' ' + (speler.voornaam || '') + ' ' + actie;
+                    const desc = '🔄 #' + (sp.rugnummer ?? '?') + ' ' + (sp.voornaam || '') + ' uit het veld';
                     events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
                     renderEvents();
                     await m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
-                        type: 'wissel',
-                        minuut: minuut,
-                        spelerId: speler.id,
-                        voornaam: speler.voornaam,
-                        rugnummer: speler.rugnummer,
-                        actie: nieuwe,
-                        omschrijving: desc,
-                        tijdstip: Date.now()
+                        type:'wissel', minuut, omschrijving: desc, tijdstip: Date.now(),
+                        uitSpeler: sp.spelerId, positie: sp.positie
                     });
                 }
-            } catch (e) {
-                console.warn('Wissel opslaan mislukt', e);
-            }
+            } catch (e) { console.warn('Vrijmaken mislukt', e); }
+        }
+
+        function closeOpstPicker() {
+            document.getElementById('opst-picker').style.display = 'none';
+            opstellingPickerPositie = null;
+            opstellingPickerSpelerId = null;
         }
 
         document.body.addEventListener('input', function(e) {
@@ -1984,6 +2313,16 @@ window._kiesWedstrijd = function(wedstrijdId) {
 
         document.getElementById('scorr-selectie-overlay').style.display = 'none';
         toonBanner(w, huidigTeamNaam, huidigUser);
+
+        // Laad opstelling + formatie. Open de opstelling-popup automatisch
+        // wanneer er nog niets is samengesteld (alleen voor de wedstrijd).
+        if (typeof window._loadOpstellingVoorMatch === 'function') {
+            window._loadOpstellingVoorMatch(wedstrijdId).then((heeftOpstelling) => {
+                if (!heeftOpstelling && typeof window.openOpstellingModal === 'function') {
+                    setTimeout(() => window.openOpstellingModal(true), 300);
+                }
+            });
+        }
     });
 };
 
@@ -2247,37 +2586,57 @@ awayScore.textContent = 0;
   </div>
 </div>
 
-<!-- Wissel modal -->
-<div id="wissel-modal" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; font-family:'Lexend',sans-serif;">
-  <div style="position:relative; background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:26px 20px 18px 20px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; color:#F0F4FF;">
-    <button type="button" id="wisselCloseBtn" aria-label="Sluiten" style="position:absolute; top:12px; right:12px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0;">×</button>
+<!-- Opstelling / Wissel modal -->
+<div id="wissel-modal" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:14px; overflow-y:auto; font-family:'Lexend',sans-serif;">
+  <div style="position:relative; background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:24px 16px 16px 16px; width:100%; max-width:440px; max-height:94vh; overflow-y:auto; color:#F0F4FF;">
+    <button type="button" id="wisselCloseBtn" aria-label="Sluiten" style="position:absolute; top:10px; right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0;">×</button>
 
-    <div style="text-align:center; margin-bottom:18px;">
-      <div style="font-size:24px; font-weight:900; color:#00FF88; letter-spacing:-1px;">SCORR</div>
-      <div style="font-size:11px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:2px;">Wisselbeleid</div>
-      <div id="wissel-minute-info" style="font-size:11px; color:rgba(240,244,255,0.45); margin-top:6px;"></div>
+    <div style="text-align:center; margin-bottom:14px;">
+      <div style="font-size:22px; font-weight:900; color:#00FF88; letter-spacing:-1px;">Opstelling</div>
+      <div id="opst-subtitle" style="font-size:11px; color:rgba(240,244,255,0.5); letter-spacing:2.5px; text-transform:uppercase; margin-top:2px;">Voor de wedstrijd</div>
     </div>
 
-    <div id="wissel-no-selectie" style="display:none; text-align:center; padding:24px 16px; background:rgba(255,184,0,0.08); border:1px solid rgba(255,184,0,0.3); border-radius:10px; color:rgba(255,238,180,0.95); font-size:13px; line-height:1.5;">
-      Voeg eerst spelers toe in <b>Selectie</b> om je opstelling samen te stellen.
+    <!-- Formatie chips -->
+    <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; justify-content:center;">
+      <button type="button" class="formatie-chip" data-formatie="4-3-3">4-3-3</button>
+      <button type="button" class="formatie-chip" data-formatie="4-4-2">4-4-2</button>
+      <button type="button" class="formatie-chip" data-formatie="3-5-2">3-5-2</button>
+      <button type="button" class="formatie-chip" data-formatie="4-2-3-1">4-2-3-1</button>
     </div>
 
-    <div id="wissel-content" style="display:none;">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-        <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:700;">⚽ In het veld <span id="wissel-count-in" style="color:rgba(240,244,255,0.5); font-weight:600;">(0)</span></div>
+    <!-- Voetbalveld + posities (SVG) -->
+    <div style="background:rgba(0,40,15,0.4); border:1px solid rgba(0,255,136,0.2); border-radius:10px; padding:6px; margin-bottom:12px;">
+      <svg id="opst-veld" viewBox="0 0 220 320" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; display:block; max-height:60vh;"></svg>
+    </div>
+
+    <!-- Geen selectie waarschuwing -->
+    <div id="opst-no-selectie" style="display:none; text-align:center; padding:14px; background:rgba(255,184,0,0.08); border:1px solid rgba(255,184,0,0.3); border-radius:10px; color:rgba(255,238,180,0.95); font-size:12px; line-height:1.5; margin-bottom:12px;">
+      Voeg spelers toe in <b>Selectie</b> om je opstelling te kunnen samenstellen.<br>
+      <span style="color:rgba(255,238,180,0.7);">Je kunt wel alvast een formatie kiezen en deze popup overslaan.</span>
+    </div>
+
+    <!-- Bank -->
+    <div id="opst-bank-wrap" style="margin-bottom:8px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+        <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:700;">🪑 Bank <span id="opst-bank-count" style="color:rgba(240,244,255,0.4); font-weight:600;">(0)</span></div>
       </div>
-      <div id="wissel-veld-list" style="display:flex; flex-wrap:wrap; gap:6px; min-height:30px; padding:8px 6px; background:rgba(0,40,15,0.35); border:1px solid rgba(0,255,136,0.2); border-radius:10px; margin-bottom:14px;"></div>
-
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-        <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:700;">🪑 Op de bank <span id="wissel-count-bank" style="color:rgba(240,244,255,0.4); font-weight:600;">(0)</span></div>
-      </div>
-      <div id="wissel-bank-list" style="display:flex; flex-wrap:wrap; gap:6px; min-height:30px; padding:8px 6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; margin-bottom:10px;"></div>
-
-      <div style="font-size:11px; color:rgba(240,244,255,0.5); padding:0 4px; line-height:1.5;">Tap op een speler om 'm tussen <span style="color:#00FF88;">veld</span> en <span style="color:rgba(240,244,255,0.7);">bank</span> te schuiven. Tijdens een lopende wedstrijd wordt elke wissel gelogd met de huidige minuut.</div>
+      <div id="opst-bank-list" style="display:flex; flex-wrap:wrap; gap:5px; min-height:36px; padding:6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px;"></div>
     </div>
 
-    <div style="display:flex; gap:10px; margin-top:18px;">
-      <button type="button" id="wisselSluitBtn" style="flex:1; padding:13px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#F0F4FF; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer;">Sluiten</button>
+    <!-- Speler-picker (verschijnt na tap op positie) -->
+    <div id="opst-picker" style="display:none; margin-top:12px; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.3); border-radius:10px; padding:10px;">
+      <div id="opst-picker-title" style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:700; margin-bottom:8px;">Kies speler</div>
+      <div id="opst-picker-list" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button type="button" id="opst-picker-cancel" style="flex:1; padding:9px; background:transparent; border:1px solid rgba(255,255,255,0.15); color:rgba(240,244,255,0.7); border-radius:8px; font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; cursor:pointer;">Annuleren</button>
+        <button type="button" id="opst-picker-clear" style="flex:0 0 auto; padding:9px 12px; background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.35); color:#FF3B5C; border-radius:8px; font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; cursor:pointer; display:none;">Vrijmaken</button>
+      </div>
+    </div>
+
+    <div id="opst-info" style="font-size:11px; color:rgba(240,244,255,0.45); margin-top:10px; padding:0 2px; line-height:1.5;">Tap op een lege positie om een speler te plaatsen. Tap op een speler om 'm te wisselen of vrij te maken.</div>
+
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button type="button" id="wisselSluitBtn" style="flex:1; padding:12px; background:#00FF88; border:none; color:#0A0E27; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:0.5px;">Klaar</button>
     </div>
   </div>
 </div>

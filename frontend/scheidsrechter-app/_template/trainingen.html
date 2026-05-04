@@ -236,6 +236,32 @@
   }
   .add-extra-btn:active { transform:translateY(1px); }
 
+  /* Voltooid toggle in sessie modal */
+  .voltooid-row { margin-top:14px; }
+  .vt-toggle { display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; padding:8px 4px; }
+  .vt-toggle input { position:absolute; opacity:0; pointer-events:none; }
+  .vt-box {
+    width:22px; height:22px; border-radius:6px;
+    border:1.5px solid rgba(255,255,255,0.25); background:transparent;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:background .15s ease, border-color .15s ease;
+  }
+  .vt-toggle input:checked + .vt-box {
+    background:var(--scorr-electric); border-color:var(--scorr-electric);
+  }
+  .vt-toggle input:checked + .vt-box::after {
+    content:'✓'; color:var(--scorr-deep); font-weight:900; font-size:14px; line-height:1;
+  }
+  .vt-label { font-size:13px; font-weight:700; color:var(--scorr-text); letter-spacing:0.3px; }
+
+  /* Voltooid badge in week-view */
+  .sessie.voltooid { opacity:0.78; }
+  .sessie .voltooid-badge {
+    background:rgba(0,255,136,0.15); border:1px solid rgba(0,255,136,0.35);
+    color:var(--scorr-electric); font-size:9px; font-weight:700;
+    padding:2px 7px; border-radius:5px; letter-spacing:1px; margin-left:6px; vertical-align:middle;
+  }
+
   .modal-actions { display:flex; gap:10px; margin-top:18px; }
   .modal-actions button { flex:1; padding:13px; border:none; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:0.5px; }
   .btn-primary { background:var(--scorr-electric); color:var(--scorr-deep); }
@@ -434,13 +460,26 @@
     </div>
 
     <div class="field">
-      <label>Notities</label>
+      <label>📝 Notities vooraf</label>
       <textarea id="s-notities" placeholder="bijv. focus op kort-kort spelen, blessures, etc."></textarea>
     </div>
 
     <div class="picker-section">
       <label class="label" style="display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin-bottom:5px;">Vormen koppelen</label>
       <div class="picker-list" id="picker-list"></div>
+    </div>
+
+    <div class="voltooid-row">
+      <label class="vt-toggle">
+        <input type="checkbox" id="s-voltooid">
+        <span class="vt-box"></span>
+        <span class="vt-label">Training voltooid</span>
+      </label>
+    </div>
+
+    <div class="field" id="s-verslag-wrap" style="display:none;">
+      <label>✅ Verslag achteraf</label>
+      <textarea id="s-verslag" placeholder="Hoe ging het? Wat werkte goed? Wat moet beter? Wie viel op? Blessures?"></textarea>
     </div>
 
     <div class="modal-actions">
@@ -508,6 +547,25 @@
   function ball(x, y) {
     return '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="white" stroke="#0A0E27" stroke-width="0.7"/>';
   }
+  // Geanimeerde bal die langs een SVG-path loopt en herhaalt.
+  function animBall(path, dur) {
+    return '<circle r="3.8" fill="white" stroke="#0A0E27" stroke-width="0.7">' +
+             '<animateMotion dur="' + dur + 's" repeatCount="indefinite" rotate="0" path="' + path + '"/>' +
+           '</circle>';
+  }
+  // Geanimeerde speler-cirkel langs path (volg de bal).
+  function animPly(path, dur, color, num) {
+    color = color || '#00FF88';
+    var n = num != null && num !== '' ? num : '';
+    var t = n !== ''
+      ? '<text font-size="9" font-weight="700" fill="#0A0E27" text-anchor="middle" dy="3">' + n +
+          '<animateMotion dur="' + dur + 's" repeatCount="indefinite" path="' + path + '"/>' +
+        '</text>'
+      : '';
+    return '<circle r="8" fill="' + color + '" stroke="rgba(10,14,39,0.7)" stroke-width="1">' +
+             '<animateMotion dur="' + dur + 's" repeatCount="indefinite" path="' + path + '"/>' +
+           '</circle>' + t;
+  }
   function goal(x, y, w, h) {
     w = w || 14; h = h || 28;
     return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
@@ -536,13 +594,15 @@
       beschrijving:'Zet 6 pylonen in een parcours: zigzag, sidestep en een korte versnelling. Spelers gaan om de 15 sec in groepjes van 2. Eerst rustig, daarna in tempo. Sluit af met een kort sprintje.',
       tekening: svg([
         cone(60, 60), cone(110, 130), cone(160, 60), cone(210, 130), cone(260, 60),
-        ply(25, 90, '', EIGEN), ball(40, 95),
         arr(35, 90, 55, 65, true),
         arr(60, 70, 105, 130, true),
         arr(115, 130, 155, 65, true),
         arr(165, 70, 205, 130, true),
         arr(215, 130, 255, 65, true),
         arr(265, 65, 295, 90, true),
+        // Geanimeerde speler + bal die langs het zigzagpad lopen
+        animPly('M 25 90 L 60 70 L 110 130 L 160 70 L 210 130 L 260 70 L 295 90 L 25 90', 6, EIGEN, ''),
+        animBall('M 40 95 L 65 75 L 115 130 L 165 75 L 215 130 L 265 75 L 290 92 L 40 95', 6),
         lbl(160, 168, 'Zigzag door pylonen — eindigt met sprintje')
       ]) },
     { id:'b2', icon:'⚽',  naam:'4 tegen 4 op klein veld',   categorie:'partij',     duur:15, spelersMin:8,  spelersMax:8,  doel:'Druk zetten en snel omschakelen',
@@ -551,7 +611,8 @@
         goal(8, 75, 8, 30), goal(304, 75, 8, 30),
         ply(60, 50, 1, EIGEN), ply(60, 130, 2, EIGEN), ply(110, 90, 3, EIGEN), ply(140, 50, 4, EIGEN),
         ply(180, 130, 1, TEGEN), ply(210, 90, 2, TEGEN), ply(260, 50, 3, TEGEN), ply(260, 130, 4, TEGEN),
-        ball(160, 90),
+        // Bal die rondbeweegt — partij-vibe
+        animBall('M 160 90 L 110 90 L 60 60 L 110 90 L 210 90 L 260 130 L 210 90 L 160 90', 6),
         lbl(40, 168, 'Doel'), lbl(280, 168, 'Doel'),
         lbl(160, 30, '4 vs 4 — geen keepers')
       ]) },
@@ -559,28 +620,31 @@
       beschrijving:'Vierkant van 15×15 m, 1 speler per zijde plus extra in het midden. Pass + meebewegen naar volgende positie. Eerst 2 contacten verplicht, daarna 1 contact. Variatie: tegenpartij erin als pressing.',
       tekening: svg([
         box(60, 30, 200, 120),
-        ply(60, 30, 'A', EIGEN), ball(75, 36),
+        ply(60, 30, 'A', EIGEN),
         ply(260, 30, 'B', EIGEN),
         ply(60, 150, 'D', EIGEN),
         ply(260, 150, 'C', EIGEN),
         ply(160, 90, 'M', EIGEN),
-        arr(72, 36, 152, 86),       // A → M
-        arr(168, 90, 250, 32, true), // M → B
-        arr(70, 38, 70, 140, true),  // A loopt naar D
+        arr(72, 36, 152, 86),
+        arr(168, 90, 250, 32, true),
+        arr(70, 38, 70, 140, true),
+        // Bal: A → M → B → C → D → A
+        animBall('M 75 36 L 160 90 L 248 36 L 248 144 L 72 144 L 75 36', 6),
         lbl(160, 168, 'Pass naar midden, midden speelt door, A loopt naar D')
       ]) },
     { id:'b4', icon:'🥅',  naam:'Schot uit voorzet',         categorie:'afwerken',   duur:15, spelersMin:6,  spelersMax:14, doel:'Schot uit beweging na voorzet',
       beschrijving:'Twee rijen op 16-meter, voorzet vanaf links én rechts afwisselend. Aanvaller maakt loopactie kort-lang. Doel: 1e contact áltijd richting goal. Keeper actief. Maximaal 2 contacten.',
       tekening: svg([
         goal(290, 65, 22, 50),
-        // 16-meter lijn (penalty area suggestion)
         '<path d="M 230 30 L 230 150" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="3 2"/>',
-        ply(50, 130, 'L', EIGEN), ball(63, 132),  // linkse flank
-        ply(50, 50, 'R', EIGEN),                  // rechtse flank rij
-        ply(180, 70, 'A', EIGEN),                 // aanvaller die loopt
-        arr(180, 70, 250, 90, true),              // aanvaller maakt diepteloop
-        arr(60, 130, 240, 95),                    // voorzet
-        arr(255, 92, 295, 88),                    // schot
+        ply(50, 130, 'L', EIGEN),
+        ply(50, 50, 'R', EIGEN),
+        ply(180, 70, 'A', EIGEN),
+        arr(180, 70, 250, 90, true),
+        arr(60, 130, 240, 95),
+        arr(255, 92, 295, 88),
+        // Bal: voorzet → schot, dan reset
+        animBall('M 63 132 L 240 95 L 295 88 L 63 132', 4),
         lbl(140, 168, 'Voorzet vanaf flank → eerste tijd schot op goal')
       ]) },
     { id:'b5', icon:'🔁',  naam:'Positiespel 6+2 vs 6+2',    categorie:'tactiek',    duur:20, spelersMin:12, spelersMax:16, doel:'Balcirculatie en ruimte herkennen',
@@ -592,20 +656,23 @@
         ply(190, 50, '', TEGEN), ply(220, 90, '', TEGEN), ply(180, 140, '', TEGEN),
         ply(250, 50, '', TEGEN), ply(265, 110, '', TEGEN), ply(230, 140, '', TEGEN),
         ply(155, 75, '', NEUT), ply(165, 130, '', NEUT),
-        ball(135, 90),
+        // Bal circuleert binnen eigen team via neutrals
+        animBall('M 80 80 L 155 75 L 130 100 L 165 130 L 100 140 L 60 130 L 45 50 L 110 50 L 80 80', 7),
         lbl(160, 18, '6 + 2  vs  6 + 2', 'rgba(240,244,255,0.7)')
       ]) },
     { id:'b6', icon:'➡️',  naam:'Loopvormen buitenspeler',   categorie:'aanvallend', duur:12, spelersMin:4,  spelersMax:10, doel:'Diepte zoeken en juiste timing voorzet',
       beschrijving:'Spits zet zich kort, buitenspeler maakt diagonale loop in de ruimte. Pass + voorzet eerste tijd. 2 herhalingen per speler, dan wisselen. Variatie: verdediger erbij die de buitenspeler probeert te volgen.',
       tekening: svg([
         goal(290, 65, 22, 50),
-        ply(80, 100, 'M', EIGEN), ball(95, 102),         // middenvelder met bal
-        ply(160, 90, 'S', EIGEN),                         // spits, zet zich kort
-        ply(180, 40, 'B', EIGEN),                         // buitenspeler
-        arr(95, 102, 152, 88),                            // pass naar spits
-        arr(160, 90, 100, 90, true),                       // spits komt korter
-        arr(185, 45, 270, 100, true),                     // buitenspeler diagonaal diep
-        arr(165, 90, 260, 110),                           // spits steekt door
+        ply(80, 100, 'M', EIGEN),
+        ply(160, 90, 'S', EIGEN),
+        ply(180, 40, 'B', EIGEN),
+        arr(95, 102, 152, 88),
+        arr(160, 90, 100, 90, true),
+        arr(185, 45, 270, 100, true),
+        arr(165, 90, 260, 110),
+        // Bal: M → S → diepte naar buitenspeler-loop
+        animBall('M 95 102 L 160 90 L 270 100 L 95 102', 4),
         lbl(160, 168, 'Spits kort, buitenspeler diagonaal diep')
       ]) },
     { id:'b7', icon:'🛡️',  naam:'1 tegen 1 verdedigen',      categorie:'verdedigend',duur:12, spelersMin:4,  spelersMax:12, doel:'Lichaamspositie en duel-management',
@@ -613,37 +680,41 @@
       tekening: svg([
         goal(290, 65, 22, 50),
         '<path d="M 240 35 L 240 145" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="3 2"/>',
-        ply(60, 90, 'A', EIGEN), ball(75, 92),
+        ply(60, 90, 'A', EIGEN),
         ply(180, 90, 'V', TEGEN),
         arr(75, 92, 165, 92),
-        arr(180, 80, 180, 50, true),                      // verdediger schuift mee
+        arr(180, 80, 180, 50, true),
         arr(180, 100, 180, 130, true),
+        // Bal beweegt mee met aanvaller heen en weer
+        animBall('M 75 92 L 165 92 L 75 92', 3),
         lbl(80, 168, 'Aanvaller'), lbl(220, 168, 'Verdediger schuift in')
       ]) },
     { id:'b8', icon:'🔺',  naam:'Pass-trio met diepte',      categorie:'techniek',   duur:10, spelersMin:6,  spelersMax:12, doel:'Triangulatie en diep aanspelen',
       beschrijving:'3 spelers in een driehoek. Speler A passt op B (kaatsen), B op C (diep). Daarna positie wisselen. Variatie: 2-touch verplicht, of pass + sprint naar volgende positie.',
       tekening: svg([
-        ply(70, 130, 'A', EIGEN), ball(85, 132),
+        ply(70, 130, 'A', EIGEN),
         ply(160, 50, 'B', EIGEN),
         ply(260, 130, 'C', EIGEN),
-        arr(82, 130, 152, 60),                            // A → B (open pass)
-        arr(160, 60, 95, 130, true),                      // B → A (kaats)
-        arr(170, 60, 252, 128),                           // B → C (diep)
+        arr(82, 130, 152, 60),
+        arr(160, 60, 95, 130, true),
+        arr(170, 60, 252, 128),
+        // Bal: A → B → A (kaats) → B → C (diep) → terug naar A
+        animBall('M 85 132 L 160 60 L 85 132 L 160 60 L 252 128 L 85 132', 6),
         lbl(160, 168, 'A passt — B kaatst óf speelt diep door')
       ]) },
     { id:'b9', icon:'⚡',  naam:'Hoog druk zetten',          categorie:'tactiek',    duur:15, spelersMin:10, spelersMax:16, doel:'Pressing als team, jagen op signaal',
       beschrijving:'8 vs 8 op half veld. Coach roept "persen!" → team zonder bal zet 5 sec hoog druk, dwingt naar buiten. Doel: bal binnen 5 sec afpakken of buiten de lijn werken. Daarna inzakken en herhalen.',
       tekening: svg([
         '<path d="M 160 25 L 160 155" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="3 2"/>',
-        // tegenstander linkshelft, met bal
         ply(60, 50, '', TEGEN), ply(40, 100, '', TEGEN), ply(60, 150, '', TEGEN),
-        ply(110, 80, '', TEGEN), ply(110, 130, '', TEGEN), ball(125, 132),
-        // eigen team perst
+        ply(110, 80, '', TEGEN), ply(110, 130, '', TEGEN),
         ply(150, 50, '', EIGEN), ply(140, 100, '', EIGEN), ply(150, 150, '', EIGEN),
         ply(200, 80, '', EIGEN), ply(200, 130, '', EIGEN),
         arr(195, 80, 130, 90, true),
         arr(195, 130, 135, 132, true),
         arr(150, 50, 110, 70, true),
+        // Bal: tegenstander speelt rond in eigen helft, dan onderschept en uitgespeeld
+        animBall('M 125 132 L 110 80 L 60 50 L 110 80 L 110 130 L 200 130', 5),
         lbl(80, 168, 'Tegenstander'), lbl(230, 168, 'Eigen team perst hoog')
       ]) },
     { id:'b10',icon:'🏁',  naam:'Klein partijspel zonder keepers', categorie:'partij', duur:15, spelersMin:8,  spelersMax:14, doel:'Snel omschakelen en afronden',
@@ -654,7 +725,8 @@
         ply(120, 50, '', EIGEN), ply(120, 130, '', EIGEN),
         ply(200, 60, '', TEGEN), ply(200, 130, '', TEGEN), ply(225, 90, '', TEGEN),
         ply(270, 60, '', TEGEN), ply(270, 120, '', TEGEN),
-        ball(160, 90),
+        // Bal heen en weer tussen helften — partij in beweging
+        animBall('M 160 90 L 95 90 L 50 60 L 16 90 L 95 90 L 225 90 L 270 120 L 304 90 L 225 90 L 160 90', 7),
         lbl(160, 30, 'Snel omschakelen — geen keepers'),
         lbl(160, 168, 'Bij doelpunt direct herstart')
       ]) }
@@ -832,12 +904,14 @@
       const heeftVormen = vormIds.length > 0;
       const isVandaag = sameYMD(datum, today);
 
+      const isVoltooid = !!(sessie && sessie.voltooid);
       const row = document.createElement('div');
-      row.className = 'sessie' + (heeftVormen ? ' heeft-vormen' : '') + (isVandaag ? ' is-vandaag' : '');
+      row.className = 'sessie' + (heeftVormen ? ' heeft-vormen' : '') + (isVandaag ? ' is-vandaag' : '') + (isVoltooid ? ' voltooid' : '');
 
       const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
       const datumLabel = d.label + ' ' + datum.getDate() + ' ' + months[datum.getMonth()];
-      const todayBadge = isVandaag ? '<span class="vandaag-badge">VANDAAG</span>' : '';
+      const todayBadge    = isVandaag  ? '<span class="vandaag-badge">VANDAAG</span>' : '';
+      const voltooidBadge = isVoltooid ? '<span class="voltooid-badge">✓ VOLTOOID</span>' : '';
 
       let vormenHtml = '';
       if (heeftVormen) {
@@ -855,7 +929,7 @@
       row.innerHTML =
         '<div class="top">' +
           '<div>' +
-            '<div class="day">' + escapeHtml(datumLabel) + todayBadge + '</div>' +
+            '<div class="day">' + escapeHtml(datumLabel) + todayBadge + voltooidBadge + '</div>' +
             '<div class="tijd">' + escapeHtml(start + ' – ' + eind + ' · Veld ' + veld) + '</div>' +
           '</div>' +
           '<div class="arrow">›</div>' +
@@ -883,6 +957,9 @@
   const sEind       = document.getElementById('s-eind');
   const sVeld       = document.getElementById('s-veld');
   const sNotities   = document.getElementById('s-notities');
+  const sVoltooid   = document.getElementById('s-voltooid');
+  const sVerslag    = document.getElementById('s-verslag');
+  const sVerslagWrap= document.getElementById('s-verslag-wrap');
   const sAantalEl   = document.getElementById('s-aantal-vormen');
   const pickerList  = document.getElementById('picker-list');
   const sBtnSave    = document.getElementById('s-save');
@@ -901,6 +978,9 @@
     sEind.value     = sessie.eind     || schema.eind  || '20:30';
     sVeld.value     = sessie.veld     || schema.veld  || 'A';
     sNotities.value = sessie.notities || '';
+    sVoltooid.checked = !!sessie.voltooid;
+    sVerslag.value  = sessie.verslag || '';
+    sVerslagWrap.style.display = sVoltooid.checked ? 'block' : 'none';
 
     pickerSelection = {};
     Object.keys(sessie.vormen || {}).forEach(k => { if (sessie.vormen[k]) pickerSelection[k] = true; });
@@ -910,6 +990,13 @@
     updateSessieMeta();
     sModal.classList.add('open');
   }
+
+  // Verslag-veld tonen/verbergen op basis van voltooid-checkbox
+  document.addEventListener('change', (e) => {
+    if (e.target && e.target.id === 's-voltooid') {
+      sVerslagWrap.style.display = e.target.checked ? 'block' : 'none';
+    }
+  });
 
   function updateSessieMeta() {
     const n = Object.keys(pickerSelection).filter(k => pickerSelection[k]).length;
@@ -976,6 +1063,8 @@
       eind:     sEind.value  || '20:30',
       veld:     sVeld.value  || 'A',
       notities: sNotities.value.trim(),
+      voltooid: !!sVoltooid.checked,
+      verslag:  sVerslag.value.trim(),
       vormen:   { ...pickerSelection },
       bijgewerkt: Date.now()
     };

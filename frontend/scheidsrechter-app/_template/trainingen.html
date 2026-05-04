@@ -262,6 +262,55 @@
     padding:2px 7px; border-radius:5px; letter-spacing:1px; margin-left:6px; vertical-align:middle;
   }
 
+  /* === Tekening editor === */
+  .editor-canvas-wrap {
+    background:rgba(0,30,12,0.45);
+    border:1px solid rgba(0,255,136,0.2);
+    border-radius:10px;
+    padding:6px;
+    margin-bottom:10px;
+    touch-action:none;
+  }
+  .editor-canvas-wrap svg { width:100%; height:auto; display:block; border-radius:6px; cursor:crosshair; user-select:none; }
+  .editor-canvas-wrap.tool-delete svg { cursor:not-allowed; }
+  .editor-canvas-wrap svg .item { cursor:pointer; }
+
+  .tool-palette { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .tool-btn {
+    background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.1);
+    border-radius:10px; padding:8px 10px; font-size:12px; font-weight:700;
+    color:var(--scorr-text); cursor:pointer; font-family:'Lexend',sans-serif;
+    display:inline-flex; align-items:center; gap:6px;
+    min-height:40px; min-width:40px;
+  }
+  .tool-btn .swatch { width:14px; height:14px; border-radius:50%; flex-shrink:0; }
+  .tool-btn.active { background:rgba(0,255,136,0.12); border-color:rgba(0,255,136,0.5); color:var(--scorr-electric); }
+  .tool-btn.danger.active { background:rgba(255,59,92,0.15); border-color:rgba(255,59,92,0.5); color:var(--scorr-accent); }
+
+  .editor-actions { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+  .editor-actions button {
+    background:transparent; border:1px solid rgba(255,255,255,0.15);
+    color:rgba(240,244,255,0.7); border-radius:8px; padding:8px 12px;
+    font-size:11px; font-weight:600; cursor:pointer; font-family:'Lexend',sans-serif;
+    letter-spacing:0.5px;
+  }
+  .editor-actions button:hover { color:var(--scorr-text); border-color:rgba(255,255,255,0.3); }
+  .editor-hint { font-size:11px; color:rgba(240,244,255,0.45); margin-top:4px; padding:0 2px; }
+
+  .open-editor-btn {
+    background:rgba(255,184,0,0.08); border:1px dashed rgba(255,184,0,0.4);
+    color:var(--scorr-yellow); border-radius:10px; padding:11px;
+    font-size:12px; font-weight:700; cursor:pointer; font-family:'Lexend',sans-serif;
+    letter-spacing:0.5px; width:100%;
+  }
+  .open-editor-btn:active { transform:translateY(1px); }
+  .open-editor-btn .preview-thumb {
+    display:inline-block; vertical-align:middle; margin-right:8px;
+    width:40px; height:24px; background:rgba(0,30,12,0.6); border-radius:4px;
+    border:1px solid rgba(0,255,136,0.2); overflow:hidden;
+  }
+  .open-editor-btn .preview-thumb svg { width:100%; height:100%; display:block; }
+
   .modal-actions { display:flex; gap:10px; margin-top:18px; }
   .modal-actions button { flex:1; padding:13px; border:none; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:0.5px; }
   .btn-primary { background:var(--scorr-electric); color:var(--scorr-deep); }
@@ -397,11 +446,58 @@
       </div>
       <div class="field"><label>Doel</label><input id="v-doel" type="text" placeholder="bijv. Eerste aanname onder druk" maxlength="80"></div>
       <div class="field"><label>Beschrijving</label><textarea id="v-beschrijving" placeholder="Beschrijf de oefening, opstelling, regels..."></textarea></div>
+      <div class="field">
+        <label>🎨 Tekening</label>
+        <button type="button" class="open-editor-btn" id="open-editor-btn">
+          <span class="preview-thumb" id="editor-preview-thumb"></span>
+          <span id="editor-preview-label">Tekening maken</span>
+        </button>
+      </div>
       <div class="modal-actions">
         <button type="button" class="btn-danger" id="v-delete" style="display:none;">🗑</button>
         <button type="button" class="btn-secondary" id="v-cancel">Annuleren</button>
         <button type="button" class="btn-primary" id="v-save">Opslaan</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tekening editor modal -->
+<div id="tekening-modal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <button type="button" class="close-x" aria-label="Sluiten" id="te-close">×</button>
+    <div class="v-header">
+      <div class="v-icon">🎨</div>
+      <div style="flex:1; min-width:0;">
+        <h3>Tekening maken</h3>
+        <div class="v-meta">Tik op een tool, daarna op het veld om iets te plaatsen</div>
+      </div>
+    </div>
+
+    <div class="tool-palette" id="te-palette">
+      <button type="button" class="tool-btn active" data-tool="eigen"><span class="swatch" style="background:#00FF88;"></span>Eigen</button>
+      <button type="button" class="tool-btn" data-tool="tegen"><span class="swatch" style="background:#FF3B5C;"></span>Tegen</button>
+      <button type="button" class="tool-btn" data-tool="neut"><span class="swatch" style="background:#FFB800;"></span>Neutraal</button>
+      <button type="button" class="tool-btn" data-tool="cone">🟧 Pylon</button>
+      <button type="button" class="tool-btn" data-tool="ball">⚪ Bal</button>
+      <button type="button" class="tool-btn" data-tool="arrow">↗ Pijl</button>
+      <button type="button" class="tool-btn danger" data-tool="delete">🗑 Verwijder</button>
+    </div>
+
+    <div class="editor-canvas-wrap" id="te-canvas-wrap">
+      <svg id="te-canvas" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="editor-hint" id="te-hint">Tik op het veld om een speler te plaatsen</div>
+
+    <div class="editor-actions">
+      <button type="button" id="te-undo">↶ Ongedaan</button>
+      <button type="button" id="te-clear">Wis alles</button>
+    </div>
+
+    <div class="modal-actions" style="margin-top:14px;">
+      <button type="button" class="btn-secondary" id="te-cancel">Annuleren</button>
+      <button type="button" class="btn-primary" id="te-save">Klaar</button>
     </div>
   </div>
 </div>
@@ -1298,6 +1394,9 @@
       vBtnDel.style.display = 'none';
       ['v-naam','v-duur','v-spelers-min','v-spelers-max','v-doel','v-beschrijving'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('v-categorie').value = 'techniek';
+      vormDraftItems = [];
+      vormDraftSvg   = null;
+      updateEditorPreviewBtn();
     } else if (v.eigen) {
       vModalCard.classList.add('eigen-mode');
       vRO.style.display = 'none';
@@ -1310,6 +1409,9 @@
       document.getElementById('v-spelers-max').value  = v.spelersMax ?? '';
       document.getElementById('v-doel').value         = v.doel || '';
       document.getElementById('v-beschrijving').value = v.beschrijving || '';
+      vormDraftItems = Array.isArray(v.tekeningItems) ? JSON.parse(JSON.stringify(v.tekeningItems)) : [];
+      vormDraftSvg   = v.tekening || (vormDraftItems.length > 0 ? buildSvgFromItems(vormDraftItems) : null);
+      updateEditorPreviewBtn();
     } else {
       vModalCard.classList.remove('eigen-mode');
       vRO.style.display = 'block';
@@ -1355,6 +1457,8 @@
       doel: document.getElementById('v-doel').value.trim(),
       beschrijving: document.getElementById('v-beschrijving').value.trim(),
       icon: '⭐',
+      tekening: vormDraftSvg || null,
+      tekeningItems: vormDraftItems.length > 0 ? vormDraftItems : null,
       bijgewerkt: Date.now()
     };
     vBtnSave.disabled = true; vBtnSave.textContent = 'Opslaan...';
@@ -1387,6 +1491,203 @@
       vModalErr.textContent = 'Verwijderen mislukt: ' + (e.message || e);
       vModalErr.classList.add('show');
     }
+  });
+
+  // ===== Tekening editor =====
+  // Items-format: {type: 'player', x, y, color} | {type: 'cone', x, y} | {type: 'ball', x, y} | {type: 'arrow', x1, y1, x2, y2}
+  let vormDraftItems = [];   // huidige draft (gebruikt door v-save)
+  let vormDraftSvg   = null; // serialized SVG van die items
+  let editorItems    = [];   // werkkopie tijdens editor open
+  let editorTool     = 'eigen';
+  let editorArrowStart = null;
+
+  const TOOL_HINTS = {
+    'eigen':  'Tik op het veld om een speler van het eigen team te plaatsen',
+    'tegen':  'Tik op het veld om een tegenstander te plaatsen',
+    'neut':   'Tik op het veld om een neutrale speler te plaatsen',
+    'cone':   'Tik op het veld om een pylon te plaatsen',
+    'ball':   'Tik op het veld om een bal te plaatsen',
+    'arrow':  'Tik op het startpunt en daarna op het eindpunt van de pijl',
+    'delete': 'Tik op een element om het te verwijderen'
+  };
+
+  const teModal     = document.getElementById('tekening-modal');
+  const teCanvas    = document.getElementById('te-canvas');
+  const teCanvasWrap= document.getElementById('te-canvas-wrap');
+  const teHint      = document.getElementById('te-hint');
+  const tePalette   = document.getElementById('te-palette');
+
+  function itemsToSvgParts(items) {
+    return items.map(it => {
+      if (it.type === 'player') return ply(it.x, it.y, '', it.color || EIGEN);
+      if (it.type === 'cone')   return cone(it.x, it.y);
+      if (it.type === 'ball')   return ball(it.x, it.y);
+      if (it.type === 'arrow')  return arr(it.x1, it.y1, it.x2, it.y2);
+      return '';
+    });
+  }
+
+  function buildSvgFromItems(items) {
+    if (!items || items.length === 0) return null;
+    return svg(itemsToSvgParts(items));
+  }
+
+  function rerenderEditor() {
+    // Render alle items + tijdelijke arrow-start indicator
+    var parts = itemsToSvgParts(editorItems);
+    if (editorArrowStart) {
+      parts.push('<circle cx="' + editorArrowStart.x + '" cy="' + editorArrowStart.y + '" r="5" fill="none" stroke="rgba(0,255,136,0.8)" stroke-width="2" stroke-dasharray="2 2"/>');
+    }
+    teCanvas.innerHTML = SVG_DEFS + fld() + parts.join('');
+    // Voeg klik-hit-areas toe voor delete-tool: gebruik unzichtbare overlays
+    if (editorTool === 'delete') {
+      var overlays = '';
+      editorItems.forEach((it, i) => {
+        if (it.type === 'arrow') {
+          // klikbare hit-rechthoek over de pijl
+          overlays += '<line x1="' + it.x1 + '" y1="' + it.y1 + '" x2="' + it.x2 + '" y2="' + it.y2 +
+                      '" stroke="transparent" stroke-width="14" data-i="' + i + '"/>';
+        } else {
+          overlays += '<circle cx="' + (it.x || 0) + '" cy="' + (it.y || 0) + '" r="14" fill="transparent" data-i="' + i + '"/>';
+        }
+      });
+      teCanvas.innerHTML = SVG_DEFS + fld() + parts.join('') + overlays;
+    }
+  }
+
+  function svgPointFromEvent(e) {
+    var rect = teCanvas.getBoundingClientRect();
+    var clientX, clientY;
+    if (e.touches && e.touches.length) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+    else { clientX = e.clientX; clientY = e.clientY; }
+    if (clientX == null) return null;
+    var x = ((clientX - rect.left) / rect.width)  * SVG_W;
+    var y = ((clientY - rect.top)  / rect.height) * SVG_H;
+    // Clamp binnen veld
+    x = Math.max(8, Math.min(SVG_W - 8, x));
+    y = Math.max(8, Math.min(SVG_H - 8, y));
+    return { x: Math.round(x), y: Math.round(y) };
+  }
+
+  function handleCanvasClick(e) {
+    e.preventDefault();
+    var pt = svgPointFromEvent(e);
+    if (!pt) return;
+
+    // Delete-tool: kijk of je een item raakt
+    if (editorTool === 'delete') {
+      var target = e.target;
+      var idxAttr = target && target.getAttribute && target.getAttribute('data-i');
+      if (idxAttr != null) {
+        var idx = parseInt(idxAttr, 10);
+        if (idx >= 0) editorItems.splice(idx, 1);
+        rerenderEditor();
+        return;
+      }
+      // Geen treffer? hit-test by closeness
+      var nearestIdx = -1, nearestDist = Infinity;
+      editorItems.forEach((it, i) => {
+        var cx = it.x != null ? it.x : (it.x1 + it.x2) / 2;
+        var cy = it.y != null ? it.y : (it.y1 + it.y2) / 2;
+        var d  = Math.hypot(cx - pt.x, cy - pt.y);
+        if (d < nearestDist) { nearestDist = d; nearestIdx = i; }
+      });
+      if (nearestIdx >= 0 && nearestDist < 18) {
+        editorItems.splice(nearestIdx, 1);
+        rerenderEditor();
+      }
+      return;
+    }
+
+    if (editorTool === 'eigen') editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: EIGEN });
+    else if (editorTool === 'tegen') editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: TEGEN });
+    else if (editorTool === 'neut')  editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: NEUT });
+    else if (editorTool === 'cone')  editorItems.push({ type: 'cone', x: pt.x, y: pt.y });
+    else if (editorTool === 'ball')  editorItems.push({ type: 'ball', x: pt.x, y: pt.y });
+    else if (editorTool === 'arrow') {
+      if (!editorArrowStart) editorArrowStart = pt;
+      else {
+        editorItems.push({ type: 'arrow', x1: editorArrowStart.x, y1: editorArrowStart.y, x2: pt.x, y2: pt.y });
+        editorArrowStart = null;
+      }
+    }
+    rerenderEditor();
+  }
+
+  teCanvas.addEventListener('click', handleCanvasClick);
+  teCanvas.addEventListener('touchend', (e) => {
+    if (e.cancelable) e.preventDefault();
+    // Touch: gebruik changedTouches
+    var t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    var pseudoEvt = { clientX: t.clientX, clientY: t.clientY, target: e.target, preventDefault: () => {} };
+    handleCanvasClick(pseudoEvt);
+  });
+
+  // Tool palette
+  tePalette.addEventListener('click', (e) => {
+    var btn = e.target.closest('.tool-btn');
+    if (!btn) return;
+    editorTool = btn.dataset.tool;
+    editorArrowStart = null;
+    tePalette.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b === btn));
+    teCanvasWrap.classList.toggle('tool-delete', editorTool === 'delete');
+    teHint.textContent = TOOL_HINTS[editorTool] || '';
+    rerenderEditor();
+  });
+
+  document.getElementById('te-undo').addEventListener('click', () => {
+    if (editorArrowStart) { editorArrowStart = null; rerenderEditor(); return; }
+    editorItems.pop();
+    rerenderEditor();
+  });
+
+  document.getElementById('te-clear').addEventListener('click', () => {
+    if (editorItems.length === 0) return;
+    if (!confirm('Hele tekening wissen?')) return;
+    editorItems = [];
+    editorArrowStart = null;
+    rerenderEditor();
+  });
+
+  function openTekeningEditor() {
+    // Begin met huidige draft-items (uit vorm modal)
+    editorItems = JSON.parse(JSON.stringify(vormDraftItems || []));
+    editorArrowStart = null;
+    editorTool = 'eigen';
+    tePalette.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b.dataset.tool === 'eigen'));
+    teCanvasWrap.classList.remove('tool-delete');
+    teHint.textContent = TOOL_HINTS['eigen'];
+    rerenderEditor();
+    teModal.classList.add('open');
+  }
+
+  function closeTekeningEditor() { teModal.classList.remove('open'); }
+
+  function updateEditorPreviewBtn() {
+    var thumb = document.getElementById('editor-preview-thumb');
+    var label = document.getElementById('editor-preview-label');
+    if (vormDraftItems && vormDraftItems.length > 0) {
+      thumb.innerHTML = vormDraftSvg || '';
+      label.textContent = 'Tekening bewerken (' + vormDraftItems.length + ' elementen)';
+    } else {
+      thumb.innerHTML = '';
+      label.textContent = '+ Tekening maken';
+    }
+  }
+
+  document.getElementById('open-editor-btn').addEventListener('click', openTekeningEditor);
+  document.getElementById('te-close').addEventListener('click', closeTekeningEditor);
+  document.getElementById('te-cancel').addEventListener('click', closeTekeningEditor);
+  document.getElementById('te-save').addEventListener('click', () => {
+    vormDraftItems = JSON.parse(JSON.stringify(editorItems));
+    vormDraftSvg   = buildSvgFromItems(vormDraftItems);
+    updateEditorPreviewBtn();
+    closeTekeningEditor();
+  });
+  teModal.addEventListener('click', (e) => { if (e.target === teModal) closeTekeningEditor(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && teModal.classList.contains('open')) closeTekeningEditor();
   });
 </script>
 

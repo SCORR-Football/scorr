@@ -227,6 +227,7 @@
   .vorm-legenda .leg-item { display:inline-flex; align-items:center; gap:6px; font-size:10px; color:rgba(240,244,255,0.55); }
   .vorm-legenda .leg-dot { width:9px; height:9px; border-radius:50%; }
   .vorm-legenda .leg-cone { width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:9px solid #FFB800; }
+  .vorm-legenda .leg-goal { width:9px; height:14px; border:1.5px solid white; border-radius:1px; }
 
   .add-extra-btn {
     width:100%; background:rgba(0,255,136,0.06); color:var(--scorr-electric);
@@ -450,9 +451,11 @@
       <div id="ro-legenda" class="vorm-legenda" style="display:none;">
         <span class="leg-item"><span class="leg-dot" style="background:#00FF88;"></span>Eigen team</span>
         <span class="leg-item"><span class="leg-dot" style="background:#FF3B5C;"></span>Tegenstander</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#7B61FF;"></span>Keeper</span>
         <span class="leg-item"><span class="leg-dot" style="background:#FFB800;"></span>Neutraal</span>
         <span class="leg-item"><span class="leg-cone"></span>Pylon</span>
         <span class="leg-item"><span class="leg-dot" style="background:white;"></span>Bal</span>
+        <span class="leg-item"><span class="leg-goal"></span>Doel</span>
       </div>
       <div class="read-section">
         <div class="label">Doel</div>
@@ -524,9 +527,11 @@
     <div class="tool-palette" id="te-palette">
       <button type="button" class="tool-btn active" data-tool="eigen"><span class="swatch" style="background:#00FF88;"></span>Eigen</button>
       <button type="button" class="tool-btn" data-tool="tegen"><span class="swatch" style="background:#FF3B5C;"></span>Tegen</button>
+      <button type="button" class="tool-btn" data-tool="keeper"><span class="swatch" style="background:#7B61FF;"></span>🧤 Keeper</button>
       <button type="button" class="tool-btn" data-tool="neut"><span class="swatch" style="background:#FFB800;"></span>Neutraal</button>
       <button type="button" class="tool-btn" data-tool="cone">🟧 Pylon</button>
       <button type="button" class="tool-btn" data-tool="ball">⚪ Bal</button>
+      <button type="button" class="tool-btn" data-tool="goal">🥅 Doel</button>
       <button type="button" class="tool-btn" data-tool="arrow">↗ Pijl</button>
       <button type="button" class="tool-btn danger" data-tool="delete">🗑 Verwijder</button>
     </div>
@@ -729,7 +734,7 @@
   }
 
   // Kleuren shortcuts
-  var EIGEN = '#00FF88', TEGEN = '#FF3B5C', NEUT = '#FFB800';
+  var EIGEN = '#00FF88', TEGEN = '#FF3B5C', NEUT = '#FFB800', KEEPER = '#7B61FF';
 
   // ===== 10 Starter trainingsvormen =====
   const BASIS_VORMEN = [
@@ -1551,9 +1556,11 @@
   const TOOL_HINTS = {
     'eigen':  'Tik op het veld om een speler van het eigen team te plaatsen',
     'tegen':  'Tik op het veld om een tegenstander te plaatsen',
+    'keeper': 'Tik op het veld om een keeper te plaatsen',
     'neut':   'Tik op het veld om een neutrale speler te plaatsen',
     'cone':   'Tik op het veld om een pylon te plaatsen',
     'ball':   'Tik op het veld om een bal te plaatsen',
+    'goal':   'Tik op het veld om een doel te plaatsen',
     'arrow':  'Tik op het startpunt en daarna op het eindpunt van de pijl',
     'delete': 'Tik op een element om het te verwijderen'
   };
@@ -1569,6 +1576,7 @@
       if (it.type === 'player') return ply(it.x, it.y, '', it.color || EIGEN);
       if (it.type === 'cone')   return cone(it.x, it.y);
       if (it.type === 'ball')   return ball(it.x, it.y);
+      if (it.type === 'goal')   return goal(it.x, it.y, it.w || 14, it.h || 28);
       if (it.type === 'arrow')  return arr(it.x1, it.y1, it.x2, it.y2);
       return '';
     });
@@ -1591,11 +1599,13 @@
       var overlays = '';
       editorItems.forEach((it, i) => {
         if (it.type === 'arrow') {
-          // klikbare hit-rechthoek over de pijl
           overlays += '<line x1="' + it.x1 + '" y1="' + it.y1 + '" x2="' + it.x2 + '" y2="' + it.y2 +
                       '" stroke="transparent" stroke-width="14" data-i="' + i + '"/>';
+        } else if (it.type === 'goal') {
+          var gx = it.x - 4, gy = it.y - 4, gw = (it.w || 14) + 8, gh = (it.h || 28) + 8;
+          overlays += '<rect x="' + gx + '" y="' + gy + '" width="' + gw + '" height="' + gh + '" fill="transparent" data-i="' + i + '"/>';
         } else {
-          overlays += '<circle cx="' + (it.x || 0) + '" cy="' + (it.y || 0) + '" r="14" fill="transparent" data-i="' + i + '"/>';
+          overlays += '<circle cx="' + (it.x || 0) + '" cy="' + (it.y || 0) + '" r="16" fill="transparent" data-i="' + i + '"/>';
         }
       });
       teCanvas.innerHTML = SVG_DEFS + fld() + parts.join('') + overlays;
@@ -1631,15 +1641,17 @@
         rerenderEditor();
         return;
       }
-      // Geen treffer? hit-test by closeness
+      // Geen treffer? hit-test by closeness — gebruik centers
       var nearestIdx = -1, nearestDist = Infinity;
       editorItems.forEach((it, i) => {
-        var cx = it.x != null ? it.x : (it.x1 + it.x2) / 2;
-        var cy = it.y != null ? it.y : (it.y1 + it.y2) / 2;
-        var d  = Math.hypot(cx - pt.x, cy - pt.y);
+        var cx, cy;
+        if (it.type === 'arrow')      { cx = (it.x1 + it.x2) / 2; cy = (it.y1 + it.y2) / 2; }
+        else if (it.type === 'goal')  { cx = it.x + (it.w || 14) / 2; cy = it.y + (it.h || 28) / 2; }
+        else                          { cx = it.x; cy = it.y; }
+        var d = Math.hypot(cx - pt.x, cy - pt.y);
         if (d < nearestDist) { nearestDist = d; nearestIdx = i; }
       });
-      if (nearestIdx >= 0 && nearestDist < 18) {
+      if (nearestIdx >= 0 && nearestDist < 22) {
         editorItems.splice(nearestIdx, 1);
         rerenderEditor();
       }
@@ -1647,10 +1659,12 @@
     }
 
     if (editorTool === 'eigen') editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: EIGEN });
-    else if (editorTool === 'tegen') editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: TEGEN });
-    else if (editorTool === 'neut')  editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: NEUT });
-    else if (editorTool === 'cone')  editorItems.push({ type: 'cone', x: pt.x, y: pt.y });
-    else if (editorTool === 'ball')  editorItems.push({ type: 'ball', x: pt.x, y: pt.y });
+    else if (editorTool === 'tegen')  editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: TEGEN });
+    else if (editorTool === 'keeper') editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: KEEPER });
+    else if (editorTool === 'neut')   editorItems.push({ type: 'player', x: pt.x, y: pt.y, color: NEUT });
+    else if (editorTool === 'cone')   editorItems.push({ type: 'cone', x: pt.x, y: pt.y });
+    else if (editorTool === 'ball')   editorItems.push({ type: 'ball', x: pt.x, y: pt.y });
+    else if (editorTool === 'goal')   editorItems.push({ type: 'goal', x: pt.x - 7, y: pt.y - 14, w: 14, h: 28 });
     else if (editorTool === 'arrow') {
       if (!editorArrowStart) editorArrowStart = pt;
       else {

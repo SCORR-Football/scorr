@@ -1517,6 +1517,13 @@ document.getElementById('logoutBtnBanner').addEventListener('click', async () =>
     await auth.signOut();
     window.location.href = '/frontend/auth/login.html';
 });
+
+// Logout vanuit shared sidebar component
+window.addEventListener('scorr:sidebar-logout', async () => {
+    if (!confirm('Wil je uitloggen? De timer blijft doorlopen.')) return;
+    try { await auth.signOut(); } catch(e) {}
+    window.location.href = '/frontend/auth/login.html';
+});
   async function toonSelectieScherm(teamNaam, user) {
     const snapshot = await get(ref(db, 'wedstrijden'));
     
@@ -1941,5 +1948,8 @@ awayScore.textContent = 0;
 
   </div>
 </div>
+
+<!-- Shared sidebar component (☰ menu naar Home / Wedstrijden / Selectie / Trainingen) -->
+<script src="sidebar.js" defer></script>
 </body>
 </html>

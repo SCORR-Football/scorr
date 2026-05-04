@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SCORR — Selectie</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --scorr-electric: #00FF88; --scorr-deep: #0A0E27; --scorr-slate: #1E2749; --scorr-text: #F0F4FF; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 20px 40px 20px; }
+  .page { max-width:520px; margin:0 auto; }
+  .page-header { text-align:center; margin-bottom:32px; }
+  .page-header .scorr { font-size:28px; font-weight:900; color:var(--scorr-electric); letter-spacing:-1px; }
+  .page-header .sub { font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
+  .placeholder { background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:32px 24px; text-align:center; }
+  .placeholder .icon { font-size:42px; margin-bottom:16px; }
+  .placeholder h2 { font-size:18px; font-weight:700; margin-bottom:10px; }
+  .placeholder p { font-size:14px; color:rgba(240,244,255,0.6); line-height:1.5; }
+  .placeholder ul { text-align:left; font-size:13px; color:rgba(240,244,255,0.55); margin-top:18px; padding-left:18px; line-height:1.7; }
+  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div id="loading" class="loading">Laden...</div>
+
+  <div id="content" style="display:none;">
+    <div class="page-header">
+      <div class="scorr">SCORR</div>
+      <div class="sub" id="team-naam">Selectie</div>
+    </div>
+
+    <div class="placeholder">
+      <div class="icon">👥</div>
+      <h2>Selectie — binnenkort</h2>
+      <p>Hier kun je straks je spelers beheren. Voor pilot-fase 2 komt:</p>
+      <ul>
+        <li>Voornamen en rugnummers toevoegen</li>
+        <li>Notities per speler (sterk in / ontwikkelpunten)</li>
+        <li>Spelers kiezen bij doelpunten en kaarten</li>
+        <li>Bij tegenstanders blijven het rugnummers</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js" defer></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
+    authDomain: "scorr-c604a.firebaseapp.com",
+    databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "scorr-c604a",
+    storageBucket: "scorr-c604a.firebasestorage.app",
+    messagingSenderId: "413840042688",
+    appId: "1:413840042688:web:3183c36fd20f27ac925b25"
+  });
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  const teamMapping = {
+    'fcp-1@fc-purmerend.scorr':    'FC Purmerend 1',
+    'fcp-2@fc-purmerend.scorr':    'FC Purmerend 2',
+    'vvm-1@vv-monnickendam.scorr': 'VV Monnickendam 1',
+    'rkav-1@rkav-volendam.scorr':  'RKAV Volendam 1'
+  };
+
+  window.addEventListener('scorr:sidebar-logout', async () => {
+    if (!confirm('Wil je uitloggen?')) return;
+    try { await signOut(auth); } catch (e) {}
+    window.location.href = '/frontend/auth/login.html';
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
+    const teamId = user.email.split('@')[0];
+    let teamNaam = teamId;
+    try {
+      const snap = await get(ref(db, 'teams/' + teamId));
+      if (snap.exists()) teamNaam = snap.val().naam || teamMapping[user.email] || teamId;
+      else teamNaam = teamMapping[user.email] || teamId;
+    } catch(e) { teamNaam = teamMapping[user.email] || teamId; }
+    document.getElementById('team-naam').textContent = teamNaam;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>

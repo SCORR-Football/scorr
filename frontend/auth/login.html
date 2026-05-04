@@ -144,7 +144,7 @@
         try {
             const fakeEmail = gebruikersnaam + '@' + club + '.scorr';
             await signInWithEmailAndPassword(auth, fakeEmail, wachtwoord);
-            window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=' + club;
+            window.location.href = '/frontend/scheidsrechter-app/_template/home.html?club=' + club;
         } catch (e) {
             errorEl.textContent = '❌ Verkeerde gebruikersnaam of wachtwoord.';
             errorEl.style.display = 'block';
@@ -170,7 +170,7 @@
                 const { rol, club } = snap.val();
                 if (rol === 'superadmin') window.location.href = '/frontend/admin/superadmin.html';
                 else if (rol === 'clubadmin') window.location.href = '/frontend/admin/clubadmin.html';
-                else window.location.href = '/frontend/scheidsrechter-app/_template/index.html?club=' + (club || 'fc-purmerend');
+                else window.location.href = '/frontend/scheidsrechter-app/_template/home.html?club=' + (club || 'fc-purmerend');
             } else {
                 errorEl.textContent = '❌ Account niet gevonden.';
                 errorEl.style.display = 'block';

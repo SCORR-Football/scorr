@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SCORR — Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --scorr-electric: #00FF88;
+    --scorr-deep: #0A0E27;
+    --scorr-slate: #1E2749;
+    --scorr-accent: #FF3B5C;
+    --scorr-text: #F0F4FF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Lexend', sans-serif;
+    background: var(--scorr-deep);
+    color: var(--scorr-text);
+    min-height: 100vh;
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(0,255,136,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 85% 80%, rgba(255,59,92,0.08) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+  .home-container { position: relative; z-index: 1; max-width: 520px; margin: 0 auto; padding: 0 20px; }
+  .home-header { text-align: center; margin-bottom: 28px; }
+  .home-club-badge { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px auto; display: block; border: 2px solid rgba(0,255,136,0.3); background: rgba(255,255,255,0.04); }
+  .home-club-badge.hidden { display: none; }
+  .home-scorr { font-size: 32px; font-weight: 900; color: var(--scorr-electric); letter-spacing: -1px; line-height: 1; }
+  .home-team { font-size: 14px; color: rgba(240,244,255,0.6); letter-spacing: 3px; text-transform: uppercase; margin-top: 6px; font-weight: 600; }
+  .home-greeting { text-align: center; font-size: 13px; color: rgba(240,244,255,0.4); margin-bottom: 24px; }
+
+  .home-cards { display: flex; flex-direction: column; gap: 14px; }
+  .home-card {
+    display: flex; align-items: center; gap: 18px;
+    background: var(--scorr-slate);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 22px 22px;
+    text-decoration: none;
+    color: var(--scorr-text);
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    cursor: pointer;
+  }
+  .home-card:hover, .home-card:focus-visible {
+    border-color: rgba(0,255,136,0.35);
+    background: #232C54;
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .home-card:active { transform: translateY(0); }
+  .home-card .home-card-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.2);
+  }
+  .home-card .home-card-text { flex: 1; min-width: 0; }
+  .home-card .home-card-title { font-size: 18px; font-weight: 700; color: var(--scorr-text); margin-bottom: 4px; }
+  .home-card .home-card-sub { font-size: 13px; color: rgba(240,244,255,0.55); line-height: 1.4; }
+  .home-card .home-card-arrow { font-size: 22px; color: rgba(240,244,255,0.3); flex-shrink: 0; }
+
+  .home-loading { text-align: center; padding: 80px 20px; color: rgba(240,244,255,0.5); }
+</style>
+</head>
+<body>
+
+<div class="home-container">
+  <div id="home-loading" class="home-loading">Laden...</div>
+
+  <div id="home-content" style="display:none;">
+    <div class="home-header">
+      <img id="home-club-logo" class="home-club-badge hidden" alt="">
+      <div class="home-scorr">SCORR</div>
+      <div id="home-team-naam" class="home-team">—</div>
+    </div>
+
+    <div id="home-greeting" class="home-greeting">Wat ga je vandaag doen?</div>
+
+    <div class="home-cards">
+      <a class="home-card" id="card-wedstrijden">
+        <div class="home-card-icon">⚽</div>
+        <div class="home-card-text">
+          <div class="home-card-title">Wedstrijden</div>
+          <div class="home-card-sub">Beheer je wedstrijddag, score en kaarten</div>
+        </div>
+        <div class="home-card-arrow">→</div>
+      </a>
+
+      <a class="home-card" id="card-selectie">
+        <div class="home-card-icon">👥</div>
+        <div class="home-card-text">
+          <div class="home-card-title">Selectie</div>
+          <div class="home-card-sub">Spelers, rugnummers en notities</div>
+        </div>
+        <div class="home-card-arrow">→</div>
+      </a>
+
+      <a class="home-card" id="card-trainingen">
+        <div class="home-card-icon">🏋️</div>
+        <div class="home-card-text">
+          <div class="home-card-title">Trainingen</div>
+          <div class="home-card-sub">Schema en trainingsvormen</div>
+        </div>
+        <div class="home-card-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js" defer></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
+    authDomain: "scorr-c604a.firebaseapp.com",
+    databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "scorr-c604a",
+    storageBucket: "scorr-c604a.firebasestorage.app",
+    messagingSenderId: "413840042688",
+    appId: "1:413840042688:web:3183c36fd20f27ac925b25"
+  });
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  // Bepaal club uit ?club= of uit user.email
+  const params = new URLSearchParams(window.location.search);
+  let club = params.get('club') || '';
+
+  // Fallback team mapping als 'teams' node niets oplevert
+  const teamMapping = {
+    'fcp-1@fc-purmerend.scorr':       'FC Purmerend 1',
+    'fcp-2@fc-purmerend.scorr':       'FC Purmerend 2',
+    'vvm-1@vv-monnickendam.scorr':    'VV Monnickendam 1',
+    'rkav-1@rkav-volendam.scorr':     'RKAV Volendam 1'
+  };
+
+  function clubFromEmail(email) {
+    if (!email) return '';
+    const parts = email.split('@');
+    if (parts.length < 2) return '';
+    return parts[1].replace('.scorr', '');
+  }
+
+  function urlFor(page) {
+    const q = club ? '?club=' + encodeURIComponent(club) : '';
+    return '/frontend/scheidsrechter-app/_template/' + page + q;
+  }
+
+  // Logout vanuit sidebar component
+  window.addEventListener('scorr:sidebar-logout', async () => {
+    if (!confirm('Wil je uitloggen?')) return;
+    try { await signOut(auth); } catch (e) {}
+    window.location.href = '/frontend/auth/login.html';
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = '/frontend/auth/login.html';
+      return;
+    }
+
+    const teamId = user.email.split('@')[0];
+    if (!club) club = clubFromEmail(user.email);
+
+    // Team-naam ophalen
+    let teamNaam = teamId;
+    try {
+      const snap = await get(ref(db, 'teams/' + teamId));
+      if (snap.exists()) {
+        const data = snap.val();
+        teamNaam = data.naam || teamMapping[user.email] || teamId;
+      } else {
+        teamNaam = teamMapping[user.email] || teamId;
+      }
+    } catch (e) {
+      teamNaam = teamMapping[user.email] || teamId;
+    }
+
+    // Club logo
+    if (club) {
+      const logo = document.getElementById('home-club-logo');
+      logo.src = '/frontend/clubs/icons/' + club + '-512.png';
+      logo.onload = () => logo.classList.remove('hidden');
+      logo.onerror = () => {
+        // probeer .jpg en .jpeg als fallback
+        if (logo.src.endsWith('.png')) {
+          logo.src = '/frontend/clubs/icons/' + club + '-512.jpg';
+        } else if (logo.src.endsWith('.jpg')) {
+          logo.src = '/frontend/clubs/icons/' + club + '-512.jpeg';
+        } else {
+          logo.classList.add('hidden');
+        }
+      };
+    }
+
+    document.getElementById('home-team-naam').textContent = teamNaam;
+
+    // Tijdgebonden begroeting
+    const u = (teamMapping[user.email] || '').split(' ')[0] || teamNaam.split(' ')[0];
+    const hour = new Date().getHours();
+    let greet = 'Wat ga je vandaag doen?';
+    if (hour < 12) greet = 'Goedemorgen — wat ga je doen?';
+    else if (hour < 18) greet = 'Goedemiddag — wat ga je doen?';
+    else greet = 'Goedenavond — wat ga je doen?';
+    document.getElementById('home-greeting').textContent = greet;
+
+    // Card links
+    document.getElementById('card-wedstrijden').href = urlFor('index.html');
+    document.getElementById('card-selectie').href    = urlFor('selectie.html');
+    document.getElementById('card-trainingen').href  = urlFor('trainingen.html');
+
+    document.getElementById('home-loading').style.display = 'none';
+    document.getElementById('home-content').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>

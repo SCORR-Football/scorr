@@ -22,9 +22,89 @@
   .page-header .scorr { font-size:28px; font-weight:900; color:var(--scorr-electric); letter-spacing:-1px; }
   .page-header .sub { font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
 
-  .section-title { font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin:24px 4px 10px 4px; }
+  .section-title { font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin:24px 4px 10px 4px; display:flex; align-items:center; justify-content:space-between; }
+  .section-title .title-action { font-size:11px; color:rgba(240,244,255,0.45); cursor:pointer; text-decoration:underline; letter-spacing:0.5px; text-transform:none; font-weight:600; }
+  .section-title .title-action:hover { color:var(--scorr-electric); }
 
-  /* === Weekschema === */
+  /* === Week-navigator === */
+  .week-nav {
+    display:flex; align-items:stretch; gap:6px;
+    background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px; padding:8px; margin-bottom:14px;
+  }
+  .week-nav .arrow {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    color:var(--scorr-text); border-radius:8px; padding:0 14px;
+    font-size:18px; cursor:pointer; font-family:'Lexend',sans-serif; font-weight:700;
+  }
+  .week-nav .arrow:active { transform:translateY(1px); }
+  .week-nav .label {
+    flex:1; text-align:center; padding:10px 6px;
+    background:rgba(0,255,136,0.06); border-radius:8px;
+  }
+  .week-nav .label.this-week { background:rgba(0,255,136,0.12); }
+  .week-nav .label .week-no { font-size:10px; color:rgba(240,244,255,0.5); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+  .week-nav .label .range { font-size:14px; color:var(--scorr-text); font-weight:700; margin-top:1px; }
+  .week-nav .today-btn {
+    background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3);
+    color:var(--scorr-electric); border-radius:8px; padding:0 14px;
+    font-size:12px; font-weight:700; cursor:pointer; font-family:'Lexend',sans-serif;
+    letter-spacing:0.5px;
+  }
+  .week-nav .today-btn:disabled { opacity:0.35; cursor:default; }
+
+  /* === Sessies === */
+  .sessies-list { display:flex; flex-direction:column; gap:8px; }
+  .sessie {
+    background:var(--scorr-slate);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .sessie.heeft-vormen { border-color:rgba(0,255,136,0.25); background:#232C54; }
+  .sessie.is-vandaag { border-color:rgba(0,255,136,0.5); }
+  .sessie:hover { border-color:rgba(0,255,136,0.4); }
+  .sessie .top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .sessie .day { font-size:13px; font-weight:700; color:var(--scorr-text); }
+  .sessie .day .vandaag-badge { background:var(--scorr-electric); color:var(--scorr-deep); font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; letter-spacing:1px; margin-left:6px; vertical-align:middle; }
+  .sessie .tijd { font-size:11px; color:rgba(240,244,255,0.6); margin-top:2px; letter-spacing:0.3px; }
+  .sessie .arrow { color:rgba(240,244,255,0.3); font-size:18px; }
+  .sessie .vormen { margin-top:8px; }
+  .sessie .vorm-pill {
+    display:inline-block; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2);
+    color:rgba(240,244,255,0.85); font-size:11px; padding:4px 9px; border-radius:14px;
+    margin:2px 3px 2px 0; font-weight:600;
+  }
+  .sessie .geen-vormen {
+    margin-top:6px; font-size:11px; color:rgba(240,244,255,0.4);
+    font-style:italic;
+  }
+  .sessie .add-vormen-link {
+    margin-top:4px; display:inline-block; color:var(--scorr-electric);
+    font-size:11px; font-weight:700; letter-spacing:0.5px;
+  }
+
+  .week-empty {
+    text-align:center; background:var(--scorr-slate); border:1px dashed rgba(255,255,255,0.12);
+    border-radius:12px; padding:26px 20px; color:rgba(240,244,255,0.5); font-size:13px;
+  }
+
+  /* === Standaard weekschema (collapsable) === */
+  .schema-section { margin-top:16px; }
+  .schema-section .toggle-bar {
+    width:100%; background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08); border-radius:10px;
+    padding:11px 14px; display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; font-family:'Lexend',sans-serif; color:var(--scorr-text);
+  }
+  .schema-section .toggle-bar .label { font-size:12px; font-weight:700; letter-spacing:1px; }
+  .schema-section .toggle-bar .chev { color:rgba(240,244,255,0.5); transition:transform .2s ease; }
+  .schema-section.open .toggle-bar .chev { transform:rotate(180deg); }
+  .schema-section .body { display:none; margin-top:8px; }
+  .schema-section.open .body { display:block; }
+
   .schedule-list { display:flex; flex-direction:column; gap:6px; }
   .day-row {
     background:var(--scorr-slate);
@@ -48,7 +128,6 @@
     border-radius:50%; background:white; transition:transform .15s ease;
   }
   .day-row.actief .toggle::after { transform:translateX(18px); }
-
   .day-row .row-fields {
     display:none;
     margin-top:12px;
@@ -104,7 +183,6 @@
     color:var(--scorr-yellow); font-size:9px; font-weight:700;
     padding:2px 6px; border-radius:6px; letter-spacing:1px; margin-left:6px;
   }
-
   .add-vorm-btn {
     width:100%; background:rgba(255,184,0,0.08); color:var(--scorr-yellow);
     border:1px dashed rgba(255,184,0,0.4); border-radius:12px;
@@ -116,8 +194,8 @@
   /* === Modal === */
   .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
   .modal-overlay.open { display:flex; }
-  .modal-card { position:relative; background:var(--scorr-slate); border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:28px 22px 22px 22px; width:100%; max-width:480px; }
-  .modal-card .close-x { position:absolute; top:12px; right:12px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0; }
+  .modal-card { position:relative; background:var(--scorr-slate); border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:28px 22px 22px 22px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; }
+  .modal-card .close-x { position:absolute; top:12px; right:12px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0; z-index:1; }
   .modal-card .v-header { display:flex; align-items:center; gap:14px; margin-bottom:18px; padding-right:30px; }
   .modal-card .v-icon { width:48px; height:48px; border-radius:12px; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
   .modal-card.eigen-mode .v-icon { background:rgba(255,184,0,0.1); border-color:rgba(255,184,0,0.3); }
@@ -128,9 +206,10 @@
   .field label { display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin-bottom:5px; }
   .field input, .field textarea, .field select { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:11px 14px; font-size:14px; color:var(--scorr-text); font-family:'Lexend',sans-serif; outline:none; }
   .field input:focus, .field textarea:focus, .field select:focus { border-color:rgba(0,255,136,0.5); }
-  .field textarea { resize:vertical; min-height:90px; line-height:1.5; }
+  .field textarea { resize:vertical; min-height:70px; line-height:1.5; }
   .field select { appearance:none; background:rgba(30,39,73,0.9); cursor:pointer; }
   .field-row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .field-row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
   .read-section { margin-bottom:14px; }
   .read-section .label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin-bottom:5px; }
@@ -145,8 +224,20 @@
   .error-box { display:none; background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); border-radius:8px; padding:9px 12px; font-size:12px; color:var(--scorr-accent); margin-bottom:12px; }
   .error-box.show { display:block; }
 
-  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); font-size:13px; letter-spacing:1px; }
+  /* Sessie modal: vormen-multi-select */
+  .picker-section { margin-top:8px; }
+  .picker-list { max-height:240px; overflow-y:auto; padding-right:4px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:6px; }
+  .picker-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; cursor:pointer; }
+  .picker-row:hover { background:rgba(255,255,255,0.03); }
+  .picker-row.checked { background:rgba(0,255,136,0.08); }
+  .picker-row .pcheck { width:18px; height:18px; border-radius:5px; border:1.5px solid rgba(255,255,255,0.25); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--scorr-deep); background:transparent; }
+  .picker-row.checked .pcheck { background:var(--scorr-electric); border-color:var(--scorr-electric); }
+  .picker-row .pinfo { flex:1; min-width:0; }
+  .picker-row .pname { font-size:13px; font-weight:700; color:var(--scorr-text); }
+  .picker-row .pmeta { font-size:10px; color:rgba(240,244,255,0.5); margin-top:1px; }
+  .picker-row .pico { font-size:18px; }
 
+  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); font-size:13px; letter-spacing:1px; }
   .empty-hint { text-align:center; color:rgba(240,244,255,0.4); font-size:12px; padding:18px 0; }
 </style>
 </head>
@@ -161,19 +252,41 @@
       <div class="sub" id="team-naam">Trainingen</div>
     </div>
 
-    <!-- Weekschema -->
-    <div class="section-title">📅 Weekschema</div>
-    <div id="schedule-list" class="schedule-list"></div>
+    <!-- Week-navigator + sessies van die week -->
+    <div class="section-title">📋 Trainingen van de week</div>
+    <div class="week-nav">
+      <button type="button" class="arrow" id="prev-week" aria-label="Vorige week">‹</button>
+      <div class="label" id="week-label">
+        <div class="week-no" id="week-no">Week —</div>
+        <div class="range" id="week-range">—</div>
+      </div>
+      <button type="button" class="today-btn" id="today-btn">Vandaag</button>
+      <button type="button" class="arrow" id="next-week" aria-label="Volgende week">›</button>
+    </div>
 
-    <!-- Vormen -->
-    <div class="section-title" style="margin-top:32px;">🏋️ Trainingsvormen</div>
+    <div id="sessies-list" class="sessies-list"></div>
+
+    <!-- Standaard weekschema (collapsable) -->
+    <div class="section-title" style="margin-top:28px;">⚙️ Instellingen</div>
+    <div class="schema-section" id="schema-section">
+      <button type="button" class="toggle-bar" id="schema-toggle">
+        <span class="label">Standaard weekschema</span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="body">
+        <div id="schedule-list" class="schedule-list" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <!-- Vormen library -->
+    <div class="section-title" style="margin-top:28px;">🏋️ Trainingsvormen</div>
     <div id="vorm-toolbar" class="vorm-toolbar"></div>
     <div id="vorm-list" class="vorm-list"></div>
     <button type="button" id="add-vorm-btn" class="add-vorm-btn">+ Eigen vorm toevoegen</button>
   </div>
 </div>
 
-<!-- Vorm modal -->
+<!-- Vorm modal (basis-detail of eigen-form) -->
 <div id="vorm-modal" class="modal-overlay">
   <div class="modal-card" id="vorm-modal-card">
     <button type="button" class="close-x" aria-label="Sluiten" id="vorm-modal-close">×</button>
@@ -187,7 +300,6 @@
 
     <div id="vorm-modal-error" class="error-box"></div>
 
-    <!-- Read-only weergave (basis-vormen) -->
     <div id="vorm-readonly" style="display:none;">
       <div class="read-section">
         <div class="label">Doel</div>
@@ -202,13 +314,11 @@
       </div>
     </div>
 
-    <!-- Edit-form (eigen vormen) -->
     <div id="vorm-edit" style="display:none;">
       <div class="field">
         <label for="v-naam">Naam *</label>
         <input id="v-naam" type="text" placeholder="bijv. Pass-trio met diepte" maxlength="60">
       </div>
-
       <div class="field">
         <label for="v-categorie">Categorie</label>
         <select id="v-categorie">
@@ -223,37 +333,67 @@
           <option value="anders">Anders</option>
         </select>
       </div>
-
       <div class="field-row3">
-        <div class="field">
-          <label for="v-duur">Duur (min)</label>
-          <input id="v-duur" type="number" min="1" max="120" inputmode="numeric" placeholder="15">
-        </div>
-        <div class="field">
-          <label for="v-spelers-min">Spelers min</label>
-          <input id="v-spelers-min" type="number" min="1" max="30" inputmode="numeric" placeholder="6">
-        </div>
-        <div class="field">
-          <label for="v-spelers-max">Spelers max</label>
-          <input id="v-spelers-max" type="number" min="1" max="30" inputmode="numeric" placeholder="12">
-        </div>
+        <div class="field"><label>Duur (min)</label><input id="v-duur" type="number" min="1" max="120" inputmode="numeric" placeholder="15"></div>
+        <div class="field"><label>Spelers min</label><input id="v-spelers-min" type="number" min="1" max="30" inputmode="numeric" placeholder="6"></div>
+        <div class="field"><label>Spelers max</label><input id="v-spelers-max" type="number" min="1" max="30" inputmode="numeric" placeholder="12"></div>
       </div>
-
-      <div class="field">
-        <label for="v-doel">Doel</label>
-        <input id="v-doel" type="text" placeholder="bijv. Eerste aanname onder druk" maxlength="80">
-      </div>
-
-      <div class="field">
-        <label for="v-beschrijving">Beschrijving</label>
-        <textarea id="v-beschrijving" placeholder="Beschrijf de oefening, opstelling, regels..."></textarea>
-      </div>
-
+      <div class="field"><label>Doel</label><input id="v-doel" type="text" placeholder="bijv. Eerste aanname onder druk" maxlength="80"></div>
+      <div class="field"><label>Beschrijving</label><textarea id="v-beschrijving" placeholder="Beschrijf de oefening, opstelling, regels..."></textarea></div>
       <div class="modal-actions">
         <button type="button" class="btn-danger" id="v-delete" style="display:none;">🗑</button>
         <button type="button" class="btn-secondary" id="v-cancel">Annuleren</button>
         <button type="button" class="btn-primary" id="v-save">Opslaan</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sessie modal -->
+<div id="sessie-modal" class="modal-overlay">
+  <div class="modal-card">
+    <button type="button" class="close-x" aria-label="Sluiten" id="sessie-modal-close">×</button>
+    <div class="v-header">
+      <div class="v-icon">📅</div>
+      <div style="flex:1; min-width:0;">
+        <h3 id="sessie-modal-title">Training plannen</h3>
+        <div class="v-meta" id="sessie-modal-meta"></div>
+      </div>
+    </div>
+
+    <div id="sessie-modal-error" class="error-box"></div>
+
+    <div class="field-row2">
+      <div class="field"><label>Start</label><input id="s-start" type="time"></div>
+      <div class="field"><label>Eind</label><input id="s-eind" type="time"></div>
+    </div>
+    <div class="field-row2">
+      <div class="field">
+        <label>Veld</label>
+        <select id="s-veld">
+          <option value="A">Veld A</option><option value="B">Veld B</option>
+          <option value="C">Veld C</option><option value="D">Veld D</option>
+          <option value="E">Veld E</option><option value="F">Veld F</option>
+          <option value="n.v.t.">n.v.t.</option>
+        </select>
+      </div>
+      <div class="field"><label>Aantal vormen</label><input id="s-aantal-vormen" type="text" readonly value="0" style="opacity:0.7;"></div>
+    </div>
+
+    <div class="field">
+      <label>Notities</label>
+      <textarea id="s-notities" placeholder="bijv. focus op kort-kort spelen, blessures, etc."></textarea>
+    </div>
+
+    <div class="picker-section">
+      <label class="label" style="display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin-bottom:5px;">Vormen koppelen</label>
+      <div class="picker-list" id="picker-list"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-danger" id="s-delete" style="display:none;">🗑</button>
+      <button type="button" class="btn-secondary" id="s-cancel">Annuleren</button>
+      <button type="button" class="btn-primary" id="s-save">Opslaan</button>
     </div>
   </div>
 </div>
@@ -284,7 +424,7 @@
     'rkav-1@rkav-volendam.scorr':  'RKAV Volendam 1'
   };
 
-  // ===== 10 Starter trainingsvormen (hardcoded — basis library) =====
+  // ===== 10 Starter trainingsvormen =====
   const BASIS_VORMEN = [
     { id:'b1', icon:'🏃',  naam:'Pylonenparcours',           categorie:'warming-up', duur:10, spelersMin:6,  spelersMax:16, doel:'Coördinatie, lichaamscontrole en activatie',
       beschrijving:'Zet 6 pylonen in een parcours: zigzag, sidestep en een korte versnelling. Spelers gaan om de 15 sec in groepjes van 2. Eerst rustig, daarna in tempo. Sluit af met een kort sprintje.' },
@@ -295,7 +435,7 @@
     { id:'b4', icon:'🥅',  naam:'Schot uit voorzet',         categorie:'afwerken',   duur:15, spelersMin:6,  spelersMax:14, doel:'Schot uit beweging na voorzet',
       beschrijving:'Twee rijen op 16-meter, voorzet vanaf links én rechts afwisselend. Aanvaller maakt loopactie kort-lang. Doel: 1e contact áltijd richting goal. Keeper actief. Maximaal 2 contacten.' },
     { id:'b5', icon:'🔁',  naam:'Positiespel 6+2 vs 6+2',    categorie:'tactiek',    duur:20, spelersMin:12, spelersMax:16, doel:'Balcirculatie en ruimte herkennen',
-      beschrijving:'Veld 30×25 m, 2 neutrale spelers in het midden. Doel: 8 passes achter elkaar = punt. Bij balverlies omdraaien. Verboden lange ballen. Coach roept “druk!” of “ruimte!” om aandacht te sturen.' },
+      beschrijving:'Veld 30×25 m, 2 neutrale spelers in het midden. Doel: 8 passes achter elkaar = punt. Bij balverlies omdraaien. Verboden lange ballen. Coach roept "druk!" of "ruimte!" om aandacht te sturen.' },
     { id:'b6', icon:'➡️',  naam:'Loopvormen buitenspeler',   categorie:'aanvallend', duur:12, spelersMin:4,  spelersMax:10, doel:'Diepte zoeken en juiste timing voorzet',
       beschrijving:'Spits zet zich kort, buitenspeler maakt diagonale loop in de ruimte. Pass + voorzet eerste tijd. 2 herhalingen per speler, dan wisselen. Variatie: verdediger erbij die de buitenspeler probeert te volgen.' },
     { id:'b7', icon:'🛡️',  naam:'1 tegen 1 verdedigen',      categorie:'verdedigend',duur:12, spelersMin:4,  spelersMax:12, doel:'Lichaamspositie en duel-management',
@@ -303,7 +443,7 @@
     { id:'b8', icon:'🔺',  naam:'Pass-trio met diepte',      categorie:'techniek',   duur:10, spelersMin:6,  spelersMax:12, doel:'Triangulatie en diep aanspelen',
       beschrijving:'3 spelers in een driehoek. Speler A passt op B (kaatsen), B op C (diep). Daarna positie wisselen. Variatie: 2-touch verplicht, of pass + sprint naar volgende positie.' },
     { id:'b9', icon:'⚡',  naam:'Hoog druk zetten',          categorie:'tactiek',    duur:15, spelersMin:10, spelersMax:16, doel:'Pressing als team, jagen op signaal',
-      beschrijving:'8 vs 8 op half veld. Coach roept “persen!” → team zonder bal zet 5 sec hoog druk, dwingt naar buiten. Doel: bal binnen 5 sec afpakken of buiten de lijn werken. Daarna inzakken en herhalen.' },
+      beschrijving:'8 vs 8 op half veld. Coach roept "persen!" → team zonder bal zet 5 sec hoog druk, dwingt naar buiten. Doel: bal binnen 5 sec afpakken of buiten de lijn werken. Daarna inzakken en herhalen.' },
     { id:'b10',icon:'🏁',  naam:'Klein partijspel zonder keepers', categorie:'partij', duur:15, spelersMin:8,  spelersMax:14, doel:'Snel omschakelen en afronden',
       beschrijving:'Veld 25×20 m. 2 mini-doeltjes per kant op de doellijn. Bij doelpunt direct opnieuw inspelen vanaf eigen mini-doel. Geen vrije trappen, snel herstart. Wissel team na 3 min, korte rust 1 min.' }
   ];
@@ -315,20 +455,67 @@
   };
 
   const DAGEN = [
-    { key:'ma', label:'Maandag' },
-    { key:'di', label:'Dinsdag' },
-    { key:'wo', label:'Woensdag' },
-    { key:'do', label:'Donderdag' },
-    { key:'vr', label:'Vrijdag' },
-    { key:'za', label:'Zaterdag' },
-    { key:'zo', label:'Zondag' }
+    { key:'ma', label:'Maandag',   short:'Ma' },
+    { key:'di', label:'Dinsdag',   short:'Di' },
+    { key:'wo', label:'Woensdag',  short:'Wo' },
+    { key:'do', label:'Donderdag', short:'Do' },
+    { key:'vr', label:'Vrijdag',   short:'Vr' },
+    { key:'za', label:'Zaterdag',  short:'Za' },
+    { key:'zo', label:'Zondag',    short:'Zo' }
   ];
 
   let huidigTeamId = null;
-  let eigenVormen  = [];      // dynamisch uit Firebase
-  let scheduleData = {};      // dynamisch uit Firebase
+  let eigenVormen  = [];
+  let scheduleData = {};
+  let sessiesData  = {};   // alle sessies van team — gefilterd per week
   let activeFilter = 'alle';
-  let editingVormId = null;   // null = nieuwe, anders edit
+  let editingVormId   = null;
+  let editingSessieId = null;
+  let weekStart = getMondayOf(new Date()); // huidige week default
+
+  // ===== Date helpers =====
+  function getMondayOf(d) {
+    const dt = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = dt.getDay() || 7; // 0 (zo) → 7
+    if (day !== 1) dt.setDate(dt.getDate() - (day - 1));
+    return dt;
+  }
+  function addDays(d, n) {
+    const x = new Date(d);
+    x.setDate(x.getDate() + n);
+    return x;
+  }
+  function isoDate(d) {
+    // YYYY-MM-DD in local timezone
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+  function isoWeekNumber(d) {
+    // ISO 8601 week number
+    const t = new Date(d.valueOf());
+    const day = (t.getDay() + 6) % 7;
+    t.setDate(t.getDate() - day + 3);
+    const firstThu = new Date(t.getFullYear(), 0, 4);
+    const ft = (firstThu.getDay() + 6) % 7;
+    firstThu.setDate(firstThu.getDate() - ft + 3);
+    return 1 + Math.round((t - firstThu) / (7 * 24 * 3600 * 1000));
+  }
+  function sameYMD(a, b) {
+    return a.getFullYear() === b.getFullYear()
+        && a.getMonth()    === b.getMonth()
+        && a.getDate()     === b.getDate();
+  }
+  function formatDayRange(monday) {
+    const sunday = addDays(monday, 6);
+    const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    const sameMonth = monday.getMonth() === sunday.getMonth();
+    if (sameMonth) {
+      return monday.getDate() + '–' + sunday.getDate() + ' ' + months[monday.getMonth()];
+    }
+    return monday.getDate() + ' ' + months[monday.getMonth()] + ' – ' + sunday.getDate() + ' ' + months[sunday.getMonth()];
+  }
 
   // ===== Auth =====
   window.addEventListener('scorr:sidebar-logout', async () => {
@@ -354,16 +541,263 @@
 
     listenToSchedule();
     listenToEigenVormen();
+    listenToSessies();
+    renderWeek();
     renderSchedule();
     renderToolbar();
     renderVormen();
+    wireWeekNav();
+    wireSchemaToggle();
   });
 
-  // ===== Weekschema =====
+  // ===== Live listeners =====
   function listenToSchedule() {
     onValue(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema'), (snap) => {
       scheduleData = snap.exists() ? snap.val() : {};
       renderSchedule();
+      renderWeek();
+    });
+  }
+
+  function listenToEigenVormen() {
+    onValue(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen'), (snap) => {
+      const lijst = [];
+      if (snap.exists()) snap.forEach(c => { lijst.push({ id: c.key, eigen: true, ...c.val() }); });
+      eigenVormen = lijst;
+      renderToolbar();
+      renderVormen();
+      renderWeek(); // sessies tonen ook vorm-namen
+    });
+  }
+
+  function listenToSessies() {
+    onValue(ref(db, 'teams/' + huidigTeamId + '/trainingen/sessies'), (snap) => {
+      sessiesData = snap.exists() ? snap.val() : {};
+      renderWeek();
+    });
+  }
+
+  // ===== Week-navigator =====
+  function wireWeekNav() {
+    document.getElementById('prev-week').addEventListener('click', () => { weekStart = addDays(weekStart, -7); renderWeek(); });
+    document.getElementById('next-week').addEventListener('click', () => { weekStart = addDays(weekStart, +7); renderWeek(); });
+    document.getElementById('today-btn').addEventListener('click', () => { weekStart = getMondayOf(new Date()); renderWeek(); });
+  }
+
+  function renderWeek() {
+    const today = new Date();
+    const todayMonday = getMondayOf(today);
+    const isThisWeek = sameYMD(weekStart, todayMonday);
+
+    const weekNo = isoWeekNumber(weekStart);
+    document.getElementById('week-no').textContent = (isThisWeek ? 'Deze week — ' : '') + 'Week ' + weekNo;
+    document.getElementById('week-range').textContent = formatDayRange(weekStart);
+    document.getElementById('week-label').classList.toggle('this-week', isThisWeek);
+    document.getElementById('today-btn').disabled = isThisWeek;
+
+    const list = document.getElementById('sessies-list');
+    list.innerHTML = '';
+
+    let toonbareDagen = 0;
+
+    DAGEN.forEach((d, idx) => {
+      const datum = addDays(weekStart, idx);
+      const iso = isoDate(datum);
+      const sessie = sessiesData[iso];
+      const schema = scheduleData[d.key] || {};
+      const heeftSchema = !!schema.actief;
+
+      // Toon alleen als schema actief is OF er een sessie bestaat voor die datum
+      if (!heeftSchema && !sessie) return;
+      toonbareDagen++;
+
+      // Effectieve waarden (sessie override schema)
+      const start = (sessie && sessie.start) || schema.start || '19:00';
+      const eind  = (sessie && sessie.eind)  || schema.eind  || '20:30';
+      const veld  = (sessie && sessie.veld)  || schema.veld  || 'A';
+      const vormenMap = (sessie && sessie.vormen) || {};
+      const vormIds = Object.keys(vormenMap).filter(k => vormenMap[k]);
+      const heeftVormen = vormIds.length > 0;
+      const isVandaag = sameYMD(datum, today);
+
+      const row = document.createElement('div');
+      row.className = 'sessie' + (heeftVormen ? ' heeft-vormen' : '') + (isVandaag ? ' is-vandaag' : '');
+
+      const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+      const datumLabel = d.label + ' ' + datum.getDate() + ' ' + months[datum.getMonth()];
+      const todayBadge = isVandaag ? '<span class="vandaag-badge">VANDAAG</span>' : '';
+
+      let vormenHtml = '';
+      if (heeftVormen) {
+        const allVormen = BASIS_VORMEN.concat(eigenVormen);
+        const pills = vormIds.map(vid => {
+          const v = allVormen.find(x => x.id === vid);
+          return v ? '<span class="vorm-pill">' + escapeHtml(v.naam) + '</span>' : '';
+        }).join('');
+        vormenHtml = '<div class="vormen">' + pills + '</div>';
+      } else {
+        vormenHtml = '<div class="geen-vormen">Geen vormen gekoppeld</div>' +
+                     '<div class="add-vormen-link">+ Vormen koppelen</div>';
+      }
+
+      row.innerHTML =
+        '<div class="top">' +
+          '<div>' +
+            '<div class="day">' + escapeHtml(datumLabel) + todayBadge + '</div>' +
+            '<div class="tijd">' + escapeHtml(start + ' – ' + eind + ' · Veld ' + veld) + '</div>' +
+          '</div>' +
+          '<div class="arrow">›</div>' +
+        '</div>' +
+        vormenHtml;
+
+      row.addEventListener('click', () => openSessieModal({ iso, datum, dagKey: d.key, dagLabel: d.label, schema }));
+      list.appendChild(row);
+    });
+
+    if (toonbareDagen === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'week-empty';
+      empty.innerHTML = 'Geen trainingen deze week.<br><span style="font-size:11px; color:rgba(240,244,255,0.35);">Zet dagen aan in het standaard weekschema hieronder.</span>';
+      list.appendChild(empty);
+    }
+  }
+
+  // ===== Sessie modal =====
+  const sModal      = document.getElementById('sessie-modal');
+  const sModalErr   = document.getElementById('sessie-modal-error');
+  const sModalTitle = document.getElementById('sessie-modal-title');
+  const sModalMeta  = document.getElementById('sessie-modal-meta');
+  const sStart      = document.getElementById('s-start');
+  const sEind       = document.getElementById('s-eind');
+  const sVeld       = document.getElementById('s-veld');
+  const sNotities   = document.getElementById('s-notities');
+  const sAantalEl   = document.getElementById('s-aantal-vormen');
+  const pickerList  = document.getElementById('picker-list');
+  const sBtnSave    = document.getElementById('s-save');
+  const sBtnDel     = document.getElementById('s-delete');
+
+  let pickerSelection = {}; // {vormId: true}
+
+  function openSessieModal({ iso, datum, dagKey, dagLabel, schema }) {
+    editingSessieId = iso;
+    sModalErr.classList.remove('show');
+    const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    sModalTitle.textContent = dagLabel + ' ' + datum.getDate() + ' ' + months[datum.getMonth()];
+
+    const sessie = sessiesData[iso] || {};
+    sStart.value    = sessie.start    || schema.start || '19:00';
+    sEind.value     = sessie.eind     || schema.eind  || '20:30';
+    sVeld.value     = sessie.veld     || schema.veld  || 'A';
+    sNotities.value = sessie.notities || '';
+
+    pickerSelection = {};
+    Object.keys(sessie.vormen || {}).forEach(k => { if (sessie.vormen[k]) pickerSelection[k] = true; });
+
+    renderPicker();
+    sBtnDel.style.display = sessiesData[iso] ? 'inline-flex' : 'none';
+    updateSessieMeta();
+    sModal.classList.add('open');
+  }
+
+  function updateSessieMeta() {
+    const n = Object.keys(pickerSelection).filter(k => pickerSelection[k]).length;
+    sAantalEl.value = n + (n === 1 ? ' vorm' : ' vormen');
+    sModalMeta.textContent = n === 0
+      ? 'Vormen koppelen om de training in te plannen'
+      : (n + ' ' + (n === 1 ? 'vorm' : 'vormen') + ' gekoppeld');
+  }
+
+  function renderPicker() {
+    const all = BASIS_VORMEN.map(v => ({ ...v, eigen:false }))
+      .concat(eigenVormen.map(v => ({ ...v, eigen:true, icon: v.icon || '⭐' })));
+    pickerList.innerHTML = '';
+    if (all.length === 0) {
+      pickerList.innerHTML = '<div class="empty-hint">Geen vormen beschikbaar.</div>';
+      return;
+    }
+    all.forEach(v => {
+      const checked = !!pickerSelection[v.id];
+      const row = document.createElement('div');
+      row.className = 'picker-row' + (checked ? ' checked' : '');
+      const meta = [
+        CATEGORIE_LABELS[v.categorie] || v.categorie || '',
+        v.duur ? v.duur + ' min' : ''
+      ].filter(Boolean).join(' · ');
+      row.innerHTML =
+        '<span class="pcheck">' + (checked ? '✓' : '') + '</span>' +
+        '<span class="pico">' + (v.icon || '⚽') + '</span>' +
+        '<div class="pinfo">' +
+          '<div class="pname">' + escapeHtml(v.naam) + (v.eigen ? '<span class="badge-eigen">EIGEN</span>' : '') + '</div>' +
+          '<div class="pmeta">' + escapeHtml(meta) + '</div>' +
+        '</div>';
+      row.addEventListener('click', () => {
+        if (pickerSelection[v.id]) delete pickerSelection[v.id];
+        else pickerSelection[v.id] = true;
+        renderPicker();
+        updateSessieMeta();
+      });
+      pickerList.appendChild(row);
+    });
+  }
+
+  function closeSessieModal() {
+    sModal.classList.remove('open');
+    editingSessieId = null;
+  }
+
+  document.getElementById('sessie-modal-close').addEventListener('click', closeSessieModal);
+  document.getElementById('s-cancel').addEventListener('click', closeSessieModal);
+  sModal.addEventListener('click', (e) => { if (e.target === sModal) closeSessieModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (sModal.classList.contains('open')) closeSessieModal();
+      if (vModal.classList.contains('open')) closeVormModal();
+    }
+  });
+
+  sBtnSave.addEventListener('click', async () => {
+    if (!editingSessieId) return;
+    const data = {
+      datum:    editingSessieId,
+      start:    sStart.value || '19:00',
+      eind:     sEind.value  || '20:30',
+      veld:     sVeld.value  || 'A',
+      notities: sNotities.value.trim(),
+      vormen:   { ...pickerSelection },
+      bijgewerkt: Date.now()
+    };
+    sBtnSave.disabled = true; sBtnSave.textContent = 'Opslaan...';
+    try {
+      await set(ref(db, 'teams/' + huidigTeamId + '/trainingen/sessies/' + editingSessieId), {
+        ...data,
+        aangemaakt: (sessiesData[editingSessieId] && sessiesData[editingSessieId].aangemaakt) || data.bijgewerkt
+      });
+      closeSessieModal();
+    } catch (e) {
+      sModalErr.textContent = 'Opslaan mislukt: ' + (e.message || e);
+      sModalErr.classList.add('show');
+    } finally {
+      sBtnSave.disabled = false; sBtnSave.textContent = 'Opslaan';
+    }
+  });
+
+  sBtnDel.addEventListener('click', async () => {
+    if (!editingSessieId) return;
+    if (!confirm('Trainingsessie verwijderen?')) return;
+    try {
+      await remove(ref(db, 'teams/' + huidigTeamId + '/trainingen/sessies/' + editingSessieId));
+      closeSessieModal();
+    } catch (e) {
+      sModalErr.textContent = 'Verwijderen mislukt: ' + (e.message || e);
+      sModalErr.classList.add('show');
+    }
+  });
+
+  // ===== Standaard weekschema =====
+  function wireSchemaToggle() {
+    const section = document.getElementById('schema-section');
+    document.getElementById('schema-toggle').addEventListener('click', () => {
+      section.classList.toggle('open');
     });
   }
 
@@ -393,41 +827,24 @@
       list.appendChild(row);
     });
 
-    // Wire up toggles
     list.querySelectorAll('.toggle').forEach(btn => {
       btn.addEventListener('click', async () => {
         const dag = btn.dataset.dag;
         const huidig = !!(scheduleData[dag] && scheduleData[dag].actief);
-        const nieuwe = !huidig;
-        const data = Object.assign({ start:'19:00', eind:'20:30', veld:'A' }, scheduleData[dag] || {}, { actief: nieuwe });
-        try {
-          await set(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema/' + dag), data);
-        } catch (e) { console.warn('Schedule toggle mislukt', e); }
+        const data = Object.assign({ start:'19:00', eind:'20:30', veld:'A' }, scheduleData[dag] || {}, { actief: !huidig });
+        try { await set(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema/' + dag), data); }
+        catch (e) { console.warn('Schedule toggle mislukt', e); }
       });
     });
-
-    // Wire up field changes (debounced)
     list.querySelectorAll('.row-fields input, .row-fields select').forEach(el => {
       el.addEventListener('change', async () => {
         const dag = el.dataset.dag;
         const veld = el.dataset.veld;
         const data = Object.assign({ start:'19:00', eind:'20:30', veld:'A', actief:true }, scheduleData[dag] || {});
         data[veld] = el.value;
-        try {
-          await update(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema/' + dag), data);
-        } catch (e) { console.warn('Schedule update mislukt', e); }
+        try { await update(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema/' + dag), data); }
+        catch (e) { console.warn('Schedule update mislukt', e); }
       });
-    });
-  }
-
-  // ===== Eigen vormen =====
-  function listenToEigenVormen() {
-    onValue(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen'), (snap) => {
-      const lijst = [];
-      if (snap.exists()) snap.forEach(c => { lijst.push({ id: c.key, eigen: true, ...c.val() }); });
-      eigenVormen = lijst;
-      renderToolbar();
-      renderVormen();
     });
   }
 
@@ -471,7 +888,6 @@
     else if (activeFilter !== 'alle') alles = alles.filter(v => v.categorie === activeFilter);
 
     list.innerHTML = '';
-
     if (alles.length === 0) {
       const e = document.createElement('div');
       e.className = 'empty-hint';
@@ -485,7 +901,7 @@
       row.className = 'vorm-row' + (v.eigen ? ' eigen' : '');
       const spelers = v.spelersMin && v.spelersMax
         ? (v.spelersMin === v.spelersMax ? v.spelersMin + ' sp.' : v.spelersMin + '-' + v.spelersMax + ' sp.')
-        : (v.spelers || '');
+        : '';
       const meta = [
         CATEGORIE_LABELS[v.categorie] || v.categorie || '',
         v.duur ? v.duur + ' min' : '',
@@ -535,21 +951,14 @@
       : '';
 
     if (!v) {
-      // Nieuwe eigen vorm
       vModalCard.classList.add('eigen-mode');
       vIcon.textContent = '⭐';
       vRO.style.display = 'none';
       vED.style.display = 'block';
       vBtnDel.style.display = 'none';
-      document.getElementById('v-naam').value         = '';
-      document.getElementById('v-categorie').value    = 'techniek';
-      document.getElementById('v-duur').value         = '';
-      document.getElementById('v-spelers-min').value  = '';
-      document.getElementById('v-spelers-max').value  = '';
-      document.getElementById('v-doel').value         = '';
-      document.getElementById('v-beschrijving').value = '';
+      ['v-naam','v-duur','v-spelers-min','v-spelers-max','v-doel','v-beschrijving'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('v-categorie').value = 'techniek';
     } else if (v.eigen) {
-      // Bewerk eigen vorm
       vModalCard.classList.add('eigen-mode');
       vRO.style.display = 'none';
       vED.style.display = 'block';
@@ -562,7 +971,6 @@
       document.getElementById('v-doel').value         = v.doel || '';
       document.getElementById('v-beschrijving').value = v.beschrijving || '';
     } else {
-      // Read-only basis-vorm
       vModalCard.classList.remove('eigen-mode');
       vRO.style.display = 'block';
       vED.style.display = 'none';
@@ -578,22 +986,15 @@
     editingVormId = null;
   }
 
-  function showErr(msg) {
-    vModalErr.textContent = msg;
-    vModalErr.classList.add('show');
-  }
-
   document.getElementById('add-vorm-btn').addEventListener('click', () => openVormModal(null));
   document.getElementById('vorm-modal-close').addEventListener('click', closeVormModal);
   document.getElementById('ro-close').addEventListener('click', closeVormModal);
   document.getElementById('v-cancel').addEventListener('click', closeVormModal);
   vModal.addEventListener('click', (e) => { if (e.target === vModal) closeVormModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && vModal.classList.contains('open')) closeVormModal(); });
 
   vBtnSave.addEventListener('click', async () => {
     const naam = document.getElementById('v-naam').value.trim();
-    if (!naam) return showErr('Vul een naam in.');
-
+    if (!naam) { vModalErr.textContent = 'Vul een naam in.'; vModalErr.classList.add('show'); return; }
     const data = {
       naam,
       categorie: document.getElementById('v-categorie').value,
@@ -605,9 +1006,7 @@
       icon: '⭐',
       bijgewerkt: Date.now()
     };
-
-    vBtnSave.disabled = true;
-    vBtnSave.textContent = 'Opslaan...';
+    vBtnSave.disabled = true; vBtnSave.textContent = 'Opslaan...';
     try {
       if (editingVormId) {
         await set(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen/' + editingVormId), {
@@ -620,10 +1019,10 @@
       }
       closeVormModal();
     } catch (e) {
-      showErr('Opslaan mislukt: ' + (e.message || e));
+      vModalErr.textContent = 'Opslaan mislukt: ' + (e.message || e);
+      vModalErr.classList.add('show');
     } finally {
-      vBtnSave.disabled = false;
-      vBtnSave.textContent = 'Opslaan';
+      vBtnSave.disabled = false; vBtnSave.textContent = 'Opslaan';
     }
   });
 
@@ -634,7 +1033,8 @@
       await remove(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen/' + editingVormId));
       closeVormModal();
     } catch (e) {
-      showErr('Verwijderen mislukt: ' + (e.message || e));
+      vModalErr.textContent = 'Verwijderen mislukt: ' + (e.message || e);
+      vModalErr.classList.add('show');
     }
   });
 </script>

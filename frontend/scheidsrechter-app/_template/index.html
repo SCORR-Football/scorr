@@ -1254,12 +1254,16 @@ function changeScore(team, delta) {
         // Bepaal of het op dit moment geselecteerde team ons eigen team is.
         // We vergelijken team-namen ipv 'thuisOfUit' omdat die laatste niet
         // altijd correct is bij een geladen wedstrijd.
+        // window._huidigTeamNaam wordt door het module-script gezet na auth.
         function isOwnTeamSelected() {
-            if (!selectedTeam || !huidigTeamNaam) return false;
+            const myTeam = window._huidigTeamNaam;
+            if (!selectedTeam || !myTeam) return false;
             const homeNaam = (document.getElementById('homeTeamName').value || '').trim();
             const awayNaam = (document.getElementById('awayTeamName').value || '').trim();
-            if (selectedTeam === 'home') return homeNaam === huidigTeamNaam;
-            if (selectedTeam === 'away') return awayNaam === huidigTeamNaam;
+            // Case-insensitive vergelijking voor robuustheid
+            const eq = (a, b) => a.toLowerCase() === b.toLowerCase();
+            if (selectedTeam === 'home') return eq(homeNaam, myTeam);
+            if (selectedTeam === 'away') return eq(awayNaam, myTeam);
             return false;
         }
 
@@ -1621,6 +1625,10 @@ window._selecteerThuisUit = function(keuze) {
                 huidigTeamNaam = teamMapping[user.email] || huidigTeamId;
             }
         } catch(e) { huidigTeamNaam = teamMapping[user.email] || huidigTeamId; }
+
+        // Beschikbaar maken voor classic-script blok (event modal logica)
+        window._huidigTeamNaam = huidigTeamNaam;
+        window._huidigTeamId   = huidigTeamId;
 
         // Live luisteren naar eigen selectie (voor naam-grid in event modal)
         try {

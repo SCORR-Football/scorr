@@ -25,6 +25,13 @@
   .section-title { font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin:24px 4px 10px 4px; display:flex; align-items:center; justify-content:space-between; }
   .section-title .title-action { font-size:11px; color:rgba(240,244,255,0.45); cursor:pointer; text-decoration:underline; letter-spacing:0.5px; text-transform:none; font-weight:600; }
   .section-title .title-action:hover { color:var(--scorr-electric); }
+  .section-title .title-action.wa-share {
+    background:rgba(37,211,102,0.12); border:1px solid rgba(37,211,102,0.4);
+    color:#25D366; padding:5px 10px; border-radius:8px; text-decoration:none;
+    font-size:11px; cursor:pointer; font-family:'Lexend',sans-serif; font-weight:700;
+    letter-spacing:0.3px;
+  }
+  .section-title .title-action.wa-share:hover { background:rgba(37,211,102,0.2); color:#25D366; }
 
   /* === Week-navigator === */
   .week-nav {
@@ -397,7 +404,10 @@
     </div>
 
     <!-- Week-navigator + sessies van die week -->
-    <div class="section-title">📋 Trainingen van de week</div>
+    <div class="section-title">
+      <span>📋 Trainingen van de week</span>
+      <button type="button" class="title-action wa-share" id="wa-share-week" title="Deel deze week via WhatsApp">📲 Delen</button>
+    </div>
     <div class="week-nav">
       <button type="button" class="arrow" id="prev-week" aria-label="Vorige week">‹</button>
       <div class="label" id="week-label">
@@ -1014,6 +1024,58 @@
     document.getElementById('prev-week').addEventListener('click', () => { weekStart = addDays(weekStart, -7); renderWeek(); });
     document.getElementById('next-week').addEventListener('click', () => { weekStart = addDays(weekStart, +7); renderWeek(); });
     document.getElementById('today-btn').addEventListener('click', () => { weekStart = getMondayOf(new Date()); renderWeek(); });
+    document.getElementById('wa-share-week').addEventListener('click', shareWeekViaWhatsApp);
+  }
+
+  function shareWeekViaWhatsApp() {
+    const teamNaam = document.getElementById('team-naam').textContent || 'Team';
+    const weekNo   = isoWeekNumber(weekStart);
+    const range    = formatDayRange(weekStart);
+    const months   = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    const allVormen = BASIS_VORMEN.concat(eigenVormen);
+
+    let lines = ['🏃 *' + teamNaam + ' — Trainingen week ' + weekNo + '*', '_' + range + '_', ''];
+    let count = 0;
+
+    DAGEN.forEach((d, idx) => {
+      const datum  = addDays(weekStart, idx);
+      const iso    = isoDate(datum);
+      const sessie = sessiesData[iso];
+      const schema = scheduleData[d.key] || {};
+      const heeftSchema = !!schema.actief;
+      if (!heeftSchema && !sessie) return;
+      count++;
+
+      const start = (sessie && sessie.start) || schema.start || '19:00';
+      const eind  = (sessie && sessie.eind)  || schema.eind  || '20:30';
+      const veld  = (sessie && sessie.veld)  || schema.veld  || 'A';
+      const vormenMap = (sessie && sessie.vormen) || {};
+      const vormIds   = Object.keys(vormenMap).filter(k => vormenMap[k]);
+
+      const datumStr = d.label + ' ' + datum.getDate() + ' ' + months[datum.getMonth()];
+      lines.push('📅 *' + datumStr + '* · ' + start + '–' + eind + ' · Veld ' + veld);
+
+      if (vormIds.length > 0) {
+        const namen = vormIds.map(id => {
+          const v = allVormen.find(x => x.id === id);
+          return v ? v.naam : null;
+        }).filter(Boolean);
+        lines.push('   ' + namen.join(', '));
+      } else {
+        lines.push('   _(programma volgt)_');
+      }
+      lines.push('');
+    });
+
+    if (count === 0) {
+      alert('Er staan geen trainingen in deze week om te delen.');
+      return;
+    }
+
+    lines.push('Tot dan! ⚽');
+    const tekst = lines.join('\n');
+    const url   = 'https://wa.me/?text=' + encodeURIComponent(tekst);
+    window.open(url, '_blank', 'noopener');
   }
 
   function renderWeek() {

@@ -450,6 +450,11 @@
             color: #00FF88;
             border: 2px solid rgba(0, 255, 136, 0.3);
         }
+        .toolbar-btn.wissel-btn {
+            background: rgba(123, 97, 255, 0.18);
+            color: #A992FF;
+            border: 2px solid rgba(123, 97, 255, 0.4);
+        }
 
         .toolbar-btn .btn-label {
             position: absolute;
@@ -766,6 +771,10 @@
             </button>
             <button class="toolbar-btn red-card" id="redBtn" title="Rode kaart">
                 🟥
+            </button>
+            <button class="toolbar-btn wissel-btn" id="wisselBtn" title="Wissel / opstelling">
+                🔄
+                <span class="btn-label">WISSEL</span>
             </button>
             <button class="toolbar-btn" id="resetBtn" title="Reset">
                 ↺
@@ -1553,6 +1562,146 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         document.getElementById('awayTeamBtn').addEventListener('click', () => selectTeam('away'));
         document.getElementById('downloadBtn').addEventListener('click', downloadMatchReport);
 
+        // ===== WISSELBELEID =====
+        window._opstelling = {};
+
+        document.getElementById('wisselBtn').addEventListener('click', openWisselModal);
+        document.getElementById('wisselCloseBtn').addEventListener('click', closeWisselModal);
+        document.getElementById('wisselSluitBtn').addEventListener('click', closeWisselModal);
+        document.getElementById('wissel-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'wissel-modal') closeWisselModal();
+        });
+
+        function closeWisselModal() {
+            document.getElementById('wissel-modal').style.display = 'none';
+        }
+
+        async function openWisselModal() {
+            const wId = huidigWedstrijdId;
+            if (!wId) {
+                alert('Kies eerst een wedstrijd voordat je wissels kunt bijhouden.');
+                return;
+            }
+            const selectie = window._huidigSelectie || [];
+            document.getElementById('wissel-modal').style.display = 'flex';
+
+            if (selectie.length === 0) {
+                document.getElementById('wissel-no-selectie').style.display = 'block';
+                document.getElementById('wissel-content').style.display = 'none';
+                document.getElementById('wissel-minute-info').textContent = '';
+                return;
+            }
+            document.getElementById('wissel-no-selectie').style.display = 'none';
+            document.getElementById('wissel-content').style.display = 'block';
+
+            let minuteInfo = '';
+            if (isRunning) {
+                const mn = getCurrentMinute();
+                minuteInfo = "Wedstrijd loopt — wissels worden gelogd op minuut " + mn + "'";
+            } else if (currentHalf > 0) {
+                minuteInfo = 'Wedstrijd gepauzeerd — wissels worden niet gelogd';
+            } else {
+                minuteInfo = 'Voor de wedstrijd — kies vast je opstelling';
+            }
+            document.getElementById('wissel-minute-info').textContent = minuteInfo;
+
+            // Load opstelling van Firebase
+            try {
+                const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
+                const snap = await m.get(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling'));
+                window._opstelling = snap.exists() ? snap.val() : {};
+            } catch (e) {
+                window._opstelling = {};
+            }
+            renderWisselLists();
+        }
+
+        function renderWisselLists() {
+            const veldEl = document.getElementById('wissel-veld-list');
+            const bankEl = document.getElementById('wissel-bank-list');
+            veldEl.innerHTML = '';
+            bankEl.innerHTML = '';
+
+            const selectie = (window._huidigSelectie || []).slice().sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
+            const opstelling = window._opstelling || {};
+
+            let inCount = 0, bankCount = 0;
+            selectie.forEach(s => {
+                const entry = opstelling[s.id];
+                const status = (entry && entry.status) || 'bank';
+                const inVeld = status === 'in';
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.dataset.id = s.id;
+                chip.style.cssText = 'display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:16px; cursor:pointer; font-family:Lexend,sans-serif; font-size:12px; font-weight:700; min-height:36px; touch-action:manipulation;' +
+                    (inVeld
+                        ? 'background:rgba(0,255,136,0.15); border:1px solid rgba(0,255,136,0.45); color:#00FF88;'
+                        : 'background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#F0F4FF;');
+                const naam = (s.voornaam || 'Onbekend').replace(/[<>&"']/g, '');
+                chip.innerHTML = '<span style="font-weight:900; font-size:11px;">#' + (s.rugnummer ?? '?') + '</span>' +
+                                 '<span>' + naam + '</span>';
+                chip.addEventListener('click', () => toggleSpelerStatus(s));
+                if (inVeld) { veldEl.appendChild(chip); inCount++; }
+                else        { bankEl.appendChild(chip); bankCount++; }
+            });
+
+            document.getElementById('wissel-count-in').textContent   = '(' + inCount + ')';
+            document.getElementById('wissel-count-bank').textContent = '(' + bankCount + ')';
+
+            if (inCount === 0)   veldEl.innerHTML = '<div style="font-size:11px; color:rgba(240,244,255,0.4); padding:6px;">Tap op een speler hieronder om \'m in het veld te zetten</div>';
+            if (bankCount === 0) bankEl.innerHTML = '<div style="font-size:11px; color:rgba(240,244,255,0.4); padding:6px;">Niemand op de bank</div>';
+        }
+
+        async function toggleSpelerStatus(speler) {
+            const wId = huidigWedstrijdId;
+            if (!wId) return;
+            const opstelling = window._opstelling || {};
+            const huidig = (opstelling[speler.id] && opstelling[speler.id].status) || 'bank';
+            const nieuwe = huidig === 'in' ? 'bank' : 'in';
+
+            opstelling[speler.id] = {
+                spelerId: speler.id,
+                voornaam: speler.voornaam,
+                rugnummer: speler.rugnummer,
+                status: nieuwe,
+                bijgewerkt: Date.now()
+            };
+            window._opstelling = opstelling;
+            renderWisselLists();
+            // Update minuut-info
+            if (isRunning) {
+                const mn = getCurrentMinute();
+                document.getElementById('wissel-minute-info').textContent =
+                    "Wedstrijd loopt — wissels worden gelogd op minuut " + mn + "'";
+            }
+
+            try {
+                const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
+                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + speler.id), opstelling[speler.id]);
+
+                // Log event tijdens lopende wedstrijd
+                if (isRunning) {
+                    const minuut = getCurrentMinute();
+                    const actie  = nieuwe === 'in' ? 'erin' : 'eruit';
+                    const desc   = '🔄 Wissel: #' + (speler.rugnummer ?? '?') + ' ' + (speler.voornaam || '') + ' ' + actie;
+                    events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
+                    renderEvents();
+                    await m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
+                        type: 'wissel',
+                        minuut: minuut,
+                        spelerId: speler.id,
+                        voornaam: speler.voornaam,
+                        rugnummer: speler.rugnummer,
+                        actie: nieuwe,
+                        omschrijving: desc,
+                        tijdstip: Date.now()
+                    });
+                }
+            } catch (e) {
+                console.warn('Wissel opslaan mislukt', e);
+            }
+        }
+
         document.body.addEventListener('input', function(e) {
             if (e.target.id === 'customNumber' && e.target.value) {
                 document.querySelectorAll('.number-btn, .player-btn').forEach(btn => btn.classList.remove('selected'));
@@ -2095,6 +2244,41 @@ awayScore.textContent = 0;
       </button>
     </div>
 
+  </div>
+</div>
+
+<!-- Wissel modal -->
+<div id="wissel-modal" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; font-family:'Lexend',sans-serif;">
+  <div style="position:relative; background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:26px 20px 18px 20px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; color:#F0F4FF;">
+    <button type="button" id="wisselCloseBtn" aria-label="Sluiten" style="position:absolute; top:12px; right:12px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0;">×</button>
+
+    <div style="text-align:center; margin-bottom:18px;">
+      <div style="font-size:24px; font-weight:900; color:#00FF88; letter-spacing:-1px;">SCORR</div>
+      <div style="font-size:11px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:2px;">Wisselbeleid</div>
+      <div id="wissel-minute-info" style="font-size:11px; color:rgba(240,244,255,0.45); margin-top:6px;"></div>
+    </div>
+
+    <div id="wissel-no-selectie" style="display:none; text-align:center; padding:24px 16px; background:rgba(255,184,0,0.08); border:1px solid rgba(255,184,0,0.3); border-radius:10px; color:rgba(255,238,180,0.95); font-size:13px; line-height:1.5;">
+      Voeg eerst spelers toe in <b>Selectie</b> om je opstelling samen te stellen.
+    </div>
+
+    <div id="wissel-content" style="display:none;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+        <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:700;">⚽ In het veld <span id="wissel-count-in" style="color:rgba(240,244,255,0.5); font-weight:600;">(0)</span></div>
+      </div>
+      <div id="wissel-veld-list" style="display:flex; flex-wrap:wrap; gap:6px; min-height:30px; padding:8px 6px; background:rgba(0,40,15,0.35); border:1px solid rgba(0,255,136,0.2); border-radius:10px; margin-bottom:14px;"></div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+        <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:700;">🪑 Op de bank <span id="wissel-count-bank" style="color:rgba(240,244,255,0.4); font-weight:600;">(0)</span></div>
+      </div>
+      <div id="wissel-bank-list" style="display:flex; flex-wrap:wrap; gap:6px; min-height:30px; padding:8px 6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; margin-bottom:10px;"></div>
+
+      <div style="font-size:11px; color:rgba(240,244,255,0.5); padding:0 4px; line-height:1.5;">Tap op een speler om 'm tussen <span style="color:#00FF88;">veld</span> en <span style="color:rgba(240,244,255,0.7);">bank</span> te schuiven. Tijdens een lopende wedstrijd wordt elke wissel gelogd met de huidige minuut.</div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:18px;">
+      <button type="button" id="wisselSluitBtn" style="flex:1; padding:13px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#F0F4FF; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer;">Sluiten</button>
+    </div>
   </div>
 </div>
 

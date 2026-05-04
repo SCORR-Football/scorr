@@ -26,6 +26,7 @@
     if (path.endsWith('/home.html')) return 'home';
     if (path.endsWith('/selectie.html')) return 'selectie';
     if (path.endsWith('/trainingen.html')) return 'trainingen';
+    if (path.endsWith('/uitleg.html')) return 'uitleg';
     if (path.endsWith('/index.html') || path.endsWith('/_template/')) return 'wedstrijden';
     return '';
   }
@@ -37,7 +38,8 @@
       { id: 'home',        href: withClub('/frontend/scheidsrechter-app/_template/home.html'),        icon: '🏠', label: 'Home' },
       { id: 'wedstrijden', href: withClub('/frontend/scheidsrechter-app/_template/index.html'),       icon: '⚽', label: 'Wedstrijden' },
       { id: 'selectie',    href: withClub('/frontend/scheidsrechter-app/_template/selectie.html'),    icon: '👥', label: 'Selectie' },
-      { id: 'trainingen',  href: withClub('/frontend/scheidsrechter-app/_template/trainingen.html'),  icon: '🏋️', label: 'Trainingen' }
+      { id: 'trainingen',  href: withClub('/frontend/scheidsrechter-app/_template/trainingen.html'),  icon: '🏋️', label: 'Trainingen' },
+      { id: 'uitleg',      href: withClub('/frontend/scheidsrechter-app/_template/uitleg.html'),      icon: '❓', label: 'Uitleg' }
     ];
 
     // CSS — ge-injecteerd in de pagina

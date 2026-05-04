@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SCORR — Uitleg</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --scorr-electric: #00FF88;
+    --scorr-deep: #0A0E27;
+    --scorr-slate: #1E2749;
+    --scorr-accent: #FF3B5C;
+    --scorr-yellow: #FFB800;
+    --scorr-text: #F0F4FF;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 16px 40px 16px; }
+  .page { max-width:560px; margin:0 auto; }
+
+  .page-header { text-align:center; margin-bottom:24px; }
+  .page-header .scorr { font-size:28px; font-weight:900; color:var(--scorr-electric); letter-spacing:-1px; }
+  .page-header .sub { font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
+
+  .intro {
+    background:var(--scorr-slate); border:1px solid rgba(0,255,136,0.2);
+    border-radius:14px; padding:18px 18px; margin-bottom:24px;
+    font-size:14px; color:rgba(240,244,255,0.85); line-height:1.55;
+  }
+  .intro b { color:var(--scorr-electric); font-weight:700; }
+
+  .toc { display:flex; flex-direction:column; gap:6px; margin-bottom:32px; }
+  .toc a {
+    display:flex; align-items:center; gap:12px;
+    background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
+    border-radius:10px; padding:12px 14px;
+    text-decoration:none; color:var(--scorr-text);
+    font-size:14px; font-weight:600;
+  }
+  .toc a:hover { border-color:rgba(0,255,136,0.3); background:#232C54; }
+  .toc a .ic { font-size:18px; }
+  .toc a .arrow { margin-left:auto; color:rgba(240,244,255,0.3); }
+
+  .chapter {
+    background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
+    border-radius:14px; padding:20px 18px; margin-bottom:18px;
+  }
+  .chapter h2 {
+    font-size:18px; font-weight:700; margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .chapter h2 .ic { font-size:22px; }
+  .chapter h3 {
+    font-size:13px; font-weight:700; margin:18px 0 8px 0;
+    color:var(--scorr-electric); letter-spacing:0.3px;
+  }
+  .chapter p { font-size:14px; line-height:1.6; color:rgba(240,244,255,0.85); margin-bottom:8px; }
+  .chapter b { color:var(--scorr-text); font-weight:700; }
+  .chapter ul { margin:6px 0 8px 18px; }
+  .chapter ul li { font-size:14px; line-height:1.6; color:rgba(240,244,255,0.85); margin-bottom:4px; }
+
+  .visual {
+    background:rgba(0,30,12,0.4);
+    border:1px solid rgba(0,255,136,0.18);
+    border-radius:10px;
+    padding:8px 8px 4px 8px;
+    margin:10px 0;
+  }
+  .visual svg { width:100%; height:auto; display:block; border-radius:6px; }
+  .visual .cap { font-size:11px; color:rgba(240,244,255,0.55); text-align:center; padding:6px 4px; }
+
+  .tip {
+    background:rgba(255,184,0,0.07); border:1px solid rgba(255,184,0,0.3);
+    border-radius:10px; padding:11px 14px; margin:10px 0;
+    font-size:13px; color:rgba(255,238,180,0.95); line-height:1.5;
+  }
+  .tip b { color:#FFD680; }
+
+  .faq-q {
+    font-size:14px; font-weight:700; margin-top:14px;
+    color:var(--scorr-text);
+  }
+  .faq-q::before { content:'❓ '; color:var(--scorr-electric); }
+  .faq-a { font-size:13px; line-height:1.55; color:rgba(240,244,255,0.75); margin-top:4px; }
+
+  .pill {
+    display:inline-block; padding:2px 8px; border-radius:6px;
+    font-size:11px; font-weight:700; letter-spacing:0.3px; vertical-align:middle;
+    margin:0 2px;
+  }
+  .pill-eigen   { background:rgba(0,255,136,0.15); color:#00FF88; border:1px solid rgba(0,255,136,0.4); }
+  .pill-tegen   { background:rgba(255,59,92,0.15);  color:#FF3B5C; border:1px solid rgba(255,59,92,0.4); }
+  .pill-yellow  { background:rgba(255,184,0,0.15);  color:#FFB800; border:1px solid rgba(255,184,0,0.4); }
+  .pill-purple  { background:rgba(123,97,255,0.15); color:#A992FF; border:1px solid rgba(123,97,255,0.4); }
+
+  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); font-size:13px; letter-spacing:1px; }
+
+  @media (max-width: 480px) {
+    body { padding:54px 12px 30px 12px; }
+    .chapter { padding:18px 14px; }
+    .toc a { padding:14px 14px; min-height:48px; }
+  }
+  .toc a, .chapter { touch-action: manipulation; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div id="loading" class="loading">Laden...</div>
+
+  <div id="content" style="display:none;">
+    <div class="page-header">
+      <div class="scorr">SCORR</div>
+      <div class="sub">Uitleg</div>
+    </div>
+
+    <div class="intro">
+      Welkom in de SCORR coach-app. Deze pagina legt uit hoe de drie hoofdfuncties werken:
+      <b>Wedstrijden</b>, <b>Selectie</b> en <b>Trainingen</b>. Onderaan vind je een aantal veelgestelde vragen.
+    </div>
+
+    <div class="toc">
+      <a href="#wedstrijden"><span class="ic">⚽</span><span>Wedstrijden</span><span class="arrow">›</span></a>
+      <a href="#selectie"><span class="ic">👥</span><span>Selectie</span><span class="arrow">›</span></a>
+      <a href="#trainingen"><span class="ic">🏋️</span><span>Trainingen</span><span class="arrow">›</span></a>
+      <a href="#faq"><span class="ic">💡</span><span>Veelgestelde vragen</span><span class="arrow">›</span></a>
+    </div>
+
+    <!-- Wedstrijden -->
+    <div class="chapter" id="wedstrijden">
+      <h2><span class="ic">⚽</span> Wedstrijden</h2>
+      <p>De wedstrijd-app is je hulpmiddel op de wedstrijddag. Je houdt de tijd bij, registreert doelpunten en kaarten, en deelt eventueel de live score met de kantine.</p>
+
+      <h3>Wedstrijd plannen</h3>
+      <p>Bij het inloggen krijg je een lijstje van geplande wedstrijden. Tik op <b>+ Nieuwe wedstrijd aanmaken</b> en vul tegenstander, klasse, datum en tijdstip in. Je kiest <span class="pill pill-eigen">Thuis</span> of Uit.</p>
+
+      <h3>Tijdens de wedstrijd</h3>
+      <p>Boven zie je de score per team met een <b>+</b> en <b>−</b> knop. Tik op <b>+</b> om een doelpunt te registreren — er opent een popup waar je de speler kiest. Daaronder loopt de timer; tik op <b>STARTEN WEDSTRIJD</b> om die te starten.</p>
+
+      <div class="visual">
+        <svg viewBox="0 0 320 130" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="312" height="122" rx="6" fill="rgba(30,39,73,0.6)" stroke="rgba(255,255,255,0.1)"/>
+          <text x="80" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="rgba(240,244,255,0.7)" font-family="Lexend, sans-serif">FC PURMEREND</text>
+          <text x="240" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="rgba(240,244,255,0.7)" font-family="Lexend, sans-serif">TEGENSTANDER</text>
+          <text x="80" y="62" text-anchor="middle" font-size="32" font-weight="900" fill="white" font-family="Lexend, sans-serif">2</text>
+          <text x="160" y="58" text-anchor="middle" font-size="22" fill="rgba(240,244,255,0.4)" font-family="Lexend, sans-serif">-</text>
+          <text x="240" y="62" text-anchor="middle" font-size="32" font-weight="900" fill="white" font-family="Lexend, sans-serif">1</text>
+          <circle cx="55" cy="90" r="11" fill="#444"/><text x="55" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="white">−</text>
+          <circle cx="105" cy="90" r="11" fill="#00FF88"/><text x="105" y="95" text-anchor="middle" font-size="14" font-weight="900" fill="#0A0E27">+</text>
+          <circle cx="215" cy="90" r="11" fill="#444"/><text x="215" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="white">−</text>
+          <circle cx="265" cy="90" r="11" fill="#00FF88"/><text x="265" y="95" text-anchor="middle" font-size="14" font-weight="900" fill="#0A0E27">+</text>
+          <text x="160" y="118" text-anchor="middle" font-size="10" font-weight="600" fill="rgba(240,244,255,0.55)" font-family="Lexend, sans-serif">Tap + om een doelpunt te registreren</text>
+        </svg>
+      </div>
+
+      <h3>Doelpunten en kaarten</h3>
+      <p>In de event-popup kies je een rugnummer. Heb je je <b>selectie</b> ingevoerd, dan zie je daar de namen + rugnummers van het eigen team. Voor de tegenstander blijven het rugnummers (0–16) of een eigen invoer.</p>
+
+      <div class="tip"><b>Tip:</b> de timer loopt door wanneer het scherm uit gaat. Dus telefoon in zak terwijl je de wedstrijd fluit, en bij een doelpunt even tappen.</div>
+    </div>
+
+    <!-- Selectie -->
+    <div class="chapter" id="selectie">
+      <h2><span class="ic">👥</span> Selectie</h2>
+      <p>Hier beheer je de spelers van je team. Voornaam, rugnummer en optionele notities (sterk in / ontwikkelpunten). Je selectie verschijnt automatisch in de wedstrijd-app bij doelpunten en kaarten.</p>
+
+      <h3>Speler toevoegen</h3>
+      <p>Tik op <b>+ Speler toevoegen</b>, vul de gegevens in en klik <b>Opslaan</b>. Spelers worden gesorteerd op rugnummer.</p>
+
+      <div class="visual">
+        <svg viewBox="0 0 320 130" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="6"   width="312" height="34" rx="8" fill="rgba(30,39,73,0.6)" stroke="rgba(255,255,255,0.08)"/>
+          <rect x="14" y="14" width="20" height="20" rx="5" fill="rgba(0,255,136,0.15)" stroke="rgba(0,255,136,0.4)"/>
+          <text x="24" y="29" text-anchor="middle" font-size="12" font-weight="900" fill="#00FF88" font-family="Lexend, sans-serif">1</text>
+          <text x="44" y="22" font-size="11" font-weight="700" fill="white" font-family="Lexend, sans-serif">Lars</text>
+          <text x="44" y="34" font-size="9"  fill="rgba(240,244,255,0.5)" font-family="Lexend, sans-serif">Rugnummer 1</text>
+          <text x="305" y="29" text-anchor="end" font-size="13" fill="rgba(240,244,255,0.3)" font-family="Lexend, sans-serif">›</text>
+
+          <rect x="4" y="48"  width="312" height="34" rx="8" fill="rgba(30,39,73,0.6)" stroke="rgba(255,255,255,0.08)"/>
+          <rect x="14" y="56" width="20" height="20" rx="5" fill="rgba(0,255,136,0.15)" stroke="rgba(0,255,136,0.4)"/>
+          <text x="24" y="71" text-anchor="middle" font-size="12" font-weight="900" fill="#00FF88" font-family="Lexend, sans-serif">9</text>
+          <text x="44" y="64" font-size="11" font-weight="700" fill="white" font-family="Lexend, sans-serif">Tim</text>
+          <text x="44" y="76" font-size="9"  fill="rgba(240,244,255,0.5)" font-family="Lexend, sans-serif">Rugnummer 9 · 💪</text>
+          <text x="305" y="71" text-anchor="end" font-size="13" fill="rgba(240,244,255,0.3)" font-family="Lexend, sans-serif">›</text>
+
+          <rect x="4" y="90"  width="312" height="34" rx="8" fill="rgba(30,39,73,0.6)" stroke="rgba(255,255,255,0.08)"/>
+          <rect x="14" y="98" width="20" height="20" rx="5" fill="rgba(0,255,136,0.15)" stroke="rgba(0,255,136,0.4)"/>
+          <text x="24" y="113" text-anchor="middle" font-size="12" font-weight="900" fill="#00FF88" font-family="Lexend, sans-serif">10</text>
+          <text x="44" y="106" font-size="11" font-weight="700" fill="white" font-family="Lexend, sans-serif">Jasper</text>
+          <text x="44" y="118" font-size="9"  fill="rgba(240,244,255,0.5)" font-family="Lexend, sans-serif">Rugnummer 10</text>
+          <text x="305" y="113" text-anchor="end" font-size="13" fill="rgba(240,244,255,0.3)" font-family="Lexend, sans-serif">›</text>
+        </svg>
+        <div class="cap">Spelerslijst gesorteerd op rugnummer · 💪 = sterk in / 📈 = ontwikkelpunt</div>
+      </div>
+
+      <h3>Notities</h3>
+      <p>Per speler kun je twee notities kwijt:</p>
+      <ul>
+        <li><b>💪 Sterk in</b> — kwaliteiten die je wil benadrukken</li>
+        <li><b>📈 Ontwikkelpunten</b> — waar de speler aan kan werken</li>
+      </ul>
+      <p>Tap op een speler in de lijst om te bewerken of verwijderen.</p>
+    </div>
+
+    <!-- Trainingen -->
+    <div class="chapter" id="trainingen">
+      <h2><span class="ic">🏋️</span> Trainingen</h2>
+      <p>Het trainingen-deel bestaat uit drie lagen: een <b>weekschema</b> (vaste trainingsdagen), <b>sessies</b> (per dag in de week) en een <b>vormen-bibliotheek</b> (oefeningen die je koppelt aan een sessie).</p>
+
+      <h3>Weekschema instellen</h3>
+      <p>Onder <b>⚙️ Instellingen</b> klap je het standaard weekschema open. Zet de dagen aan waarop je traint en stel start-tijd, eind-tijd en veld in. Dit zijn de defaults — die gelden voor alle weken.</p>
+
+      <h3>Sessies vullen per week</h3>
+      <p>Bovenaan zie je de week-navigator. Met de pijlen ga je naar vorige of volgende weken; de knop <b>Vandaag</b> springt terug naar de huidige week. Per dag waarop je traint zie je een sessie-card. Tap erop om <b>vormen te koppelen</b>, tijd/veld te overschrijven of een verslag bij te houden.</p>
+
+      <div class="visual">
+        <svg viewBox="0 0 320 90" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="6" width="312" height="38" rx="8" fill="rgba(35,44,84,1)" stroke="rgba(0,255,136,0.3)"/>
+          <text x="14" y="22" font-size="11" font-weight="700" fill="white" font-family="Lexend, sans-serif">Maandag 4 mei</text>
+          <rect x="100" y="13" width="50" height="12" rx="3" fill="rgba(0,255,136,0.15)" stroke="rgba(0,255,136,0.4)"/>
+          <text x="125" y="22" text-anchor="middle" font-size="8" font-weight="700" fill="#00FF88" font-family="Lexend, sans-serif">VANDAAG</text>
+          <text x="14" y="34" font-size="9" fill="rgba(240,244,255,0.6)" font-family="Lexend, sans-serif">19:30 – 21:00 · Veld A</text>
+          <rect x="14" y="52" width="80" height="14" rx="7" fill="rgba(0,255,136,0.08)" stroke="rgba(0,255,136,0.2)"/>
+          <text x="54" y="62" text-anchor="middle" font-size="9" font-weight="600" fill="white" font-family="Lexend, sans-serif">Pylonenparcours</text>
+          <rect x="100" y="52" width="60" height="14" rx="7" fill="rgba(0,255,136,0.08)" stroke="rgba(0,255,136,0.2)"/>
+          <text x="130" y="62" text-anchor="middle" font-size="9" font-weight="600" fill="white" font-family="Lexend, sans-serif">Pass &amp; Move</text>
+          <rect x="166" y="52" width="56" height="14" rx="7" fill="rgba(0,255,136,0.08)" stroke="rgba(0,255,136,0.2)"/>
+          <text x="194" y="62" text-anchor="middle" font-size="9" font-weight="600" fill="white" font-family="Lexend, sans-serif">4 tegen 4</text>
+          <text x="305" y="78" text-anchor="end" font-size="10" font-weight="600" fill="rgba(240,244,255,0.45)" font-family="Lexend, sans-serif">tap om te bewerken</text>
+        </svg>
+        <div class="cap">Sessie-card met gekoppelde vormen — tap voor detail</div>
+      </div>
+
+      <h3>Vormen-bibliotheek</h3>
+      <p>Onderaan staan 10 starter-vormen plus eventueel je eigen vormen. Filter op categorie (Warming-up / Techniek / Partij / Tactiek / etc). Tap op een vorm voor de uitleg <i>met geanimeerde tekening</i>.</p>
+
+      <h3>Eigen vorm met tekening maken</h3>
+      <p>Tap <b>+ Eigen vorm toevoegen</b> en vul de gegevens in. Onder <b>🎨 Tekening</b> open je de editor: tools voor</p>
+      <ul>
+        <li><span class="pill pill-eigen">Eigen team</span> — eigen spelers</li>
+        <li><span class="pill pill-tegen">Tegenstander</span></li>
+        <li><span class="pill pill-purple">🧤 Keeper</span> — keeper in paars</li>
+        <li><span class="pill pill-yellow">Neutraal</span> — neutrale speler in geel</li>
+        <li><b>🟧 Pylon</b>, <b>⚪ Bal</b>, <b>🥅 Doel</b>, <b>↗ Pijl</b></li>
+        <li><b>🗑 Verwijder</b> — tap een element om 'm te wissen</li>
+      </ul>
+      <p>Klaar? Tap <b>Klaar</b> en de tekening wordt opgeslagen bij je vorm.</p>
+
+      <h3>Trainingsverslag</h3>
+      <p>In een sessie kun je <b>📝 notities vooraf</b> kwijt (focus van de training, blessures, etc) en — na afloop — een <b>✅ verslag achteraf</b> als je de checkbox <i>Training voltooid</i> aanvinkt. Voltooide sessies krijgen in de week-view een groene <span class="pill pill-eigen">VOLTOOID</span> badge.</p>
+
+      <h3>WhatsApp delen</h3>
+      <p>Boven de week-view staat de knop <b>📲 Delen</b> — een tap genereert een nette WhatsApp-tekst met alle trainingen van die week, zodat je 'm meteen in de teamgroep kan plakken.</p>
+
+      <div class="tip"><b>Tip:</b> wil je een eenmalige extra training plannen die niet in je standaard weekschema past? Tap op <b>+ Eenmalige extra training plannen</b> onder de week-view, kies een datum, en vul 'm verder in.</div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="chapter" id="faq">
+      <h2><span class="ic">💡</span> Veelgestelde vragen</h2>
+
+      <div class="faq-q">Werkt SCORR ook offline?</div>
+      <div class="faq-a">De wedstrijd-timer en LocalStorage werken offline, maar wijzigingen synchroniseren pas weer als je internet hebt. Voor een wedstrijd raden we een stabiele 4G/5G verbinding aan zodat scores live met de kantine gedeeld worden.</div>
+
+      <div class="faq-q">Wat als ik per ongeluk een doelpunt registreer?</div>
+      <div class="faq-a">Tap op de <b>−</b> knop bij dat team om de score te verlagen. Je kunt ook in de event-tijdlijn op het kruisje achter een gebeurtenis tappen om die te wissen.</div>
+
+      <div class="faq-q">Kan ik vorige weken terugkijken?</div>
+      <div class="faq-a">Ja, gebruik de pijl ‹ in de week-navigator op de Trainingen-pagina. Alle eerdere sessies, vormen en verslagen blijven bewaard.</div>
+
+      <div class="faq-q">Worden mijn spelers gedeeld met andere teams?</div>
+      <div class="faq-a">Nee. Je selectie en trainingsvormen zijn per team-account. Andere teams binnen dezelfde club zien alleen wedstrijden, niet je spelers of eigen oefeningen.</div>
+
+      <div class="faq-q">Hoe log ik uit?</div>
+      <div class="faq-a">Open het ☰ menu linksboven en tap op <b>🚪 Uitloggen</b> onderaan. Je sessie blijft anders een paar dagen actief.</div>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js" defer></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+  import { getDatabase } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
+    authDomain: "scorr-c604a.firebaseapp.com",
+    databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "scorr-c604a",
+    storageBucket: "scorr-c604a.firebasestorage.app",
+    messagingSenderId: "413840042688",
+    appId: "1:413840042688:web:3183c36fd20f27ac925b25"
+  });
+  const auth = getAuth(app);
+
+  window.addEventListener('scorr:sidebar-logout', async () => {
+    if (!confirm('Wil je uitloggen?')) return;
+    try { await signOut(auth); } catch (e) {}
+    window.location.href = '/frontend/auth/login.html';
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>

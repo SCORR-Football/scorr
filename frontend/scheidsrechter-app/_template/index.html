@@ -1696,17 +1696,19 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         }
 
         window.openOpstellingModal = async function(autoFromKies) {
-            const wId = huidigWedstrijdId;
+            const wId = (typeof window._getWedstrijdId === 'function') ? window._getWedstrijdId() : null;
             if (!wId) {
                 if (!autoFromKies) alert('Kies eerst een wedstrijd voordat je een opstelling kunt maken.');
                 return;
             }
             // Update subtitle on basis van match-state
             const subEl = document.getElementById('opst-subtitle');
-            if (isRunning) {
-                const mn = getCurrentMinute();
+            const lopend = (typeof isRunning !== 'undefined' && isRunning);
+            const half   = (typeof currentHalf !== 'undefined') ? currentHalf : 0;
+            if (lopend) {
+                const mn = (typeof getCurrentMinute === 'function') ? getCurrentMinute() : 0;
                 subEl.textContent = "Wedstrijd loopt · wissels op minuut " + mn + "'";
-            } else if (currentHalf > 0) {
+            } else if (half > 0) {
                 subEl.textContent = 'Wedstrijd gepauzeerd';
             } else {
                 subEl.textContent = 'Voor de wedstrijd';
@@ -1765,10 +1767,12 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             // Save naar firebase
             try {
                 const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
-                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + huidigWedstrijdId + '/formatie'), naam);
+                const wIdf = (typeof window._getWedstrijdId === 'function') ? window._getWedstrijdId() : null;
+                if (!wIdf) return;
+                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wIdf + '/formatie'), naam);
                 // Update gewijzigde spelers
                 for (const sId of Object.keys(o)) {
-                    await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + huidigWedstrijdId + '/opstelling/' + sId), o[sId]);
+                    await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wIdf + '/opstelling/' + sId), o[sId]);
                 }
             } catch (e) { console.warn('Formatie opslaan mislukt', e); }
         }
@@ -1933,17 +1937,18 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         }
 
         async function assignSpelerNaarPositie(speler, positie) {
-            const wId = huidigWedstrijdId;
+            const wId = (typeof window._getWedstrijdId === 'function') ? window._getWedstrijdId() : null;
             if (!wId) return;
             const o = window._opstelling || {};
-            const minuut = isRunning ? getCurrentMinute() : 0;
+            const minuut = (typeof isRunning !== 'undefined' && isRunning && typeof getCurrentMinute === 'function') ? getCurrentMinute() : 0;
             const wasInLineup = (o[speler.id] && o[speler.id].status === 'in');
 
             // Eerst: als er al iemand op die positie staat, naar bank
             const huidig = spelerOpPositie(positie.key);
+            const lopend1 = (typeof isRunning !== 'undefined' && isRunning);
             if (huidig && huidig.spelerId !== speler.id) {
                 // Bereken speeltijd voor uitgaande speler
-                if (isRunning) {
+                if (lopend1) {
                     const sinds = huidig.minuutIn != null ? huidig.minuutIn : 0;
                     const newMin = (huidig.minutenGespeeld || 0) + Math.max(0, minuut - sinds);
                     o[huidig.spelerId] = { ...huidig, status:'bank', positie:null, minuutIn:null, minutenGespeeld:newMin };
@@ -1959,7 +1964,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             };
             entry.status = 'in';
             entry.positie = positie.key;
-            entry.minuutIn = isRunning ? minuut : 0;
+            entry.minuutIn = (typeof isRunning !== 'undefined' && isRunning) ? minuut : 0;
             entry.bijgewerkt = Date.now();
             o[speler.id] = entry;
             window._opstelling = o;
@@ -1976,20 +1981,25 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                 await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + speler.id), entry);
 
                 // Log wissel-event als wedstrijd loopt
-                if (isRunning) {
+                const lopend2 = (typeof isRunning !== 'undefined' && isRunning);
+                if (lopend2) {
                     if (huidig && huidig.spelerId !== speler.id) {
                         const desc = '🔄 Wissel: #' + (huidig.rugnummer ?? '?') + ' ' + (huidig.voornaam || '') +
                                      ' eruit, #' + (speler.rugnummer ?? '?') + ' ' + (speler.voornaam || '') + ' erin (' + positie.label + ')';
-                        events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
-                        renderEvents();
+                        if (typeof events !== 'undefined') {
+                            events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
+                            if (typeof renderEvents === 'function') renderEvents();
+                        }
                         await m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
                             type:'wissel', minuut, omschrijving: desc, tijdstip: Date.now(),
                             uitSpeler: huidig.spelerId, inSpeler: speler.id, positie: positie.key
                         });
                     } else if (!wasInLineup) {
                         const desc = '🔄 #' + (speler.rugnummer ?? '?') + ' ' + (speler.voornaam || '') + ' het veld in (' + positie.label + ')';
-                        events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
-                        renderEvents();
+                        if (typeof events !== 'undefined') {
+                            events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
+                            if (typeof renderEvents === 'function') renderEvents();
+                        }
                         await m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
                             type:'wissel', minuut, omschrijving: desc, tijdstip: Date.now(),
                             inSpeler: speler.id, positie: positie.key
@@ -2001,13 +2011,15 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
         async function clearPickerPosition() {
             if (!opstellingPickerPositie) return;
-            const wId = huidigWedstrijdId;
+            const wId = (typeof window._getWedstrijdId === 'function') ? window._getWedstrijdId() : null;
+            if (!wId) return;
             const o = window._opstelling || {};
             const sp = spelerOpPositie(opstellingPickerPositie.key);
             if (!sp) { closeOpstPicker(); return; }
 
-            const minuut = isRunning ? getCurrentMinute() : 0;
-            if (isRunning) {
+            const lopend = (typeof isRunning !== 'undefined' && isRunning && typeof getCurrentMinute === 'function');
+            const minuut = lopend ? getCurrentMinute() : 0;
+            if (lopend) {
                 const sinds = sp.minuutIn != null ? sp.minuutIn : 0;
                 const newMin = (sp.minutenGespeeld || 0) + Math.max(0, minuut - sinds);
                 o[sp.spelerId] = { ...sp, status:'bank', positie:null, minuutIn:null, minutenGespeeld:newMin };
@@ -2021,10 +2033,12 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             try {
                 const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
                 await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + sp.spelerId), o[sp.spelerId]);
-                if (isRunning) {
+                if (lopend) {
                     const desc = '🔄 #' + (sp.rugnummer ?? '?') + ' ' + (sp.voornaam || '') + ' uit het veld';
-                    events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
-                    renderEvents();
+                    if (typeof events !== 'undefined') {
+                        events.unshift({ minute: minuut, type: 'wissel', description: desc, team: null });
+                        if (typeof renderEvents === 'function') renderEvents();
+                    }
                     await m.push(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/events'), {
                         type:'wissel', minuut, omschrijving: desc, tijdstip: Date.now(),
                         uitSpeler: sp.spelerId, positie: sp.positie

@@ -1626,7 +1626,11 @@ window._selecteerThuisUit = function(keuze) {
         try {
           onValue(ref(db, 'teams/' + huidigTeamId + '/spelers'), (snap) => {
             const lijst = [];
-            if (snap.exists()) snap.forEach(c => lijst.push({ id: c.key, ...c.val() }));
+            if (snap.exists()) {
+              // BELANGRIJK: gebruik {} body — als de callback truthy returnt
+              // stopt Firebase's snap.forEach, en push() returnt de length.
+              snap.forEach((c) => { lijst.push({ id: c.key, ...c.val() }); });
+            }
             lijst.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
             window._huidigSelectie = lijst;
             // Als event modal open is, render opnieuw

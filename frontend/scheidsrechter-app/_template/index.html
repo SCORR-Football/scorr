@@ -2469,6 +2469,15 @@ awayScore.textContent = 0;
       document.getElementById('scorr-popup-overlay').style.display = 'none';
 
       toonBanner({ thuisteam: thuisOfUit === 'thuis' ? teamNaam : tegenstander, uitteam: thuisOfUit === 'thuis' ? tegenstander : teamNaam, klasse, datum, tijdstip }, teamNaam, user);
+
+      // Open opstelling-popup automatisch voor nieuwe wedstrijd
+      if (typeof window._loadOpstellingVoorMatch === 'function') {
+        window._loadOpstellingVoorMatch(wedstrijdId).then((heeft) => {
+          if (!heeft && typeof window.openOpstellingModal === 'function') {
+            setTimeout(() => window.openOpstellingModal(true), 350);
+          }
+        });
+      }
     };
   }
 </script>

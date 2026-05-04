@@ -1,0 +1,15 @@
+{
+  "name": "RKAV Volendam - SCORR",
+  "short_name": "RKAV SCORR",
+  "start_url": "/frontend/scheidsrechter-app/rkav-volendam/index.html",
+  "display": "standalone",
+  "background_color": "#0A0E27",
+  "theme_color": "#00FF88",
+  "icons": [
+    {
+      "src": "/frontend/clubs/icons/rkav-volendam-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

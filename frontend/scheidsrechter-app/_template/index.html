@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SCORR - Fc Purmerend Scheidsrechter</title>
+    <title>SCORR - Wedstrijd app</title>
+    <link id="manifestLink" rel="manifest" href="/frontend/clubs/manifests/fc-purmerend.json">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -240,17 +241,26 @@
             justify-content: center;
             font-weight: 700;
         }
-        .timer-btn-small.play {
+        .timer-btn-small.timeout {
+            background: #FF3D71;
+            color: white;
+            border: none;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            width: 52px;
+            height: 36px;
+            border-radius: 8px;
+        }
+        .timer-btn-small.timeout:active { background: #E6345E; transform: scale(0.95); }
+        .timer-btn-small.timeout.resuming {
             background: #00FF88;
             color: #0A0E27;
+            font-size: 18px;
+            letter-spacing: 0;
         }
-        .timer-btn-small.play:active { background: #00DD77; }
-        .timer-btn-small.pause {
-            background: #1E2749;
-            color: #00FF88;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-        }
-        .timer-btn-small.pause:active { background: #2A3460; }
+        .timer-btn-small.timeout.resuming:active { background: #00DD77; }
 
         .timer-sub-row {
             display: flex;
@@ -630,7 +640,7 @@
     <div class="app-shell">
         <!-- HEADER -->
         <div class="header-bar">
-            <img src="data:image/png;base64,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" class="club-badge" alt="FC Purmerend" onerror="this.style.display='none'">
+            <img id="clubLogo" class="club-badge" alt="Club" onerror="this.style.display='none'">
             <span class="logo-text">SCORR</span>
             <button class="share-btn" onclick="shareApp()">📤</button>
             <button class="share-btn" id="logoutBtn" style="right:52px;" title="Uitloggen">🚪</button>
@@ -665,7 +675,7 @@
             <div class="timer-row">
                 <div class="timer-display" id="timerDisplay">00:00</div>
                 <div class="timer-controls-inline">
-                    <button class="timer-btn-small pause" id="pauseBtn">⏸</button>
+                   <button class="timer-btn-small timeout" id="pauseBtn">TIME-OUT</button>
                 </div>
             </div>
  
@@ -738,6 +748,23 @@
     </div>
 
     <script>
+
+        // Club logo op basis van URL parameter
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const club = params.get('club') || 'fc-purmerend';
+            const logos = {
+                'fc-purmerend': '/frontend/clubs/icons/fc-purmerend-512.png',
+                'vv-monnickendam': '/frontend/clubs/icons/vv-monnickendam-512.png',
+                'rkav-volendam': '/frontend/clubs/icons/rkav-volendam-512.png'
+            };
+            document.addEventListener('DOMContentLoaded', function() {
+            const logo = document.getElementById('clubLogo');
+            if (logo && logos[club]) logo.src = logos[club];
+            const manifestLink = document.getElementById('manifestLink');
+            if (manifestLink) manifestLink.href = '/frontend/clubs/manifests/' + club + '.json';
+        });
+        })();
         // ===== STATE =====
         console.log('🚀 SCORR Scheidsrechter App loaded');
 
@@ -788,15 +815,29 @@
         }
 
         function saveTimerState() {
-            localStorage.setItem('scorr_timer_wedstrijdId', localStorage.getItem('wedstrijdId') || '');
-            localStorage.setItem('scorr_timer_state', JSON.stringify({
-                startTime: timerStartTime,
-                pausedAt: timerPausedAt,
-                accumulated: accumulatedSeconds,
-                isRunning: isRunning,
-                half: currentHalf
-            }));
-        }
+    localStorage.setItem('scorr_timer_wedstrijdId', localStorage.getItem('wedstrijdId') || '');
+    localStorage.setItem('scorr_timer_state', JSON.stringify({
+        startTime: timerStartTime,
+        pausedAt: timerPausedAt,
+        accumulated: accumulatedSeconds,
+        isRunning: isRunning,
+        half: currentHalf
+    }));
+    // Sync naar Firebase
+    var wId = localStorage.getItem('wedstrijdId');
+    if (wId && window._firebaseDb) {
+        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
+            m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
+                startTijd: timerStartTime || null,
+                accumulatedSeconds: accumulatedSeconds,
+                currentHalf: currentHalf,
+                currentMinuut: isRunning && timerStartTime
+            ? Math.floor((Date.now() - timerStartTime) / 60000) + Math.floor(accumulatedSeconds / 60) + 1
+            : null
+                    });
+                });
+            }
+    }
 
         function getCurrentSeconds() {
             if (!timerStartTime) return accumulatedSeconds;
@@ -872,7 +913,7 @@
             timerDisplay.textContent = formatTime(getCurrentSeconds());
             if (currentHalf === 0) halfIndicator.textContent = 'Klaar om te starten';
         else if (currentHalf === 1) halfIndicator.textContent = '1e Helft';
-        else halfIndicator.textConxtent = '2e Helft';
+        else halfIndicator.textContent = '2e Helft';
         }
 
         // ===== TIMER =====
@@ -888,33 +929,38 @@
         }
 
         async function startTimer() {
-            if (!isRunning) {
-                isRunning = true;
-                timerStartTime = Date.now();
-                localStorage.setItem('startTijd', Date.now());
-timerStartTime = Date.now();
-var wId = localStorage.getItem('wedstrijdId');
-if (wId && window._firebaseDb) {
-    import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
-        m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
-    startTijd: Date.now(),
-    accumulatedSeconds: accumulatedSeconds,
-    status: 'bezig'
-});
-    });
-}
-                initAudioContext();
-                await requestWakeLock();
-                timerInterval = setInterval(() => {
-                    updateDisplay();
-                    checkTimeExpired();
-                    saveTimerState();
-                }, 100);
-saveTimerState();
-    }
-}
+        if (!isRunning) {
+        isRunning = true;
+        timerStartTime = Date.now();
+        localStorage.setItem('startTijd', timerStartTime);
 
-        let timeExpiredTriggered = false;
+        var wId = localStorage.getItem('wedstrijdId');
+        if (wId && window._firebaseDb) {
+            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
+                m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
+                    startTijd: timerStartTime,
+                    accumulatedSeconds: accumulatedSeconds,
+                    status: 'bezig'
+                });
+            });
+        }
+
+        initAudioContext();
+        await requestWakeLock();
+
+        let saveCounter = 0;
+        timerInterval = setInterval(() => {
+            updateDisplay();
+            checkTimeExpired();
+            saveCounter++;
+            if (saveCounter >= 50) { saveTimerState(); saveCounter = 0; }
+        }, 100);
+
+        saveTimerState();
+        }
+    }
+
+let timeExpiredTriggered = false;
 
         function checkTimeExpired() {
             const currentSeconds = getCurrentSeconds();
@@ -981,31 +1027,18 @@ saveTimerState();
         }
 
         function showTimeExpiredNotification() {
-    timerDisplay.style.animation = 'flash 0.6s ease-in-out 4';
-    const isHalftime = currentHalf === 1;
-    const title = isHalftime ? '📣 RUSTSIGNAAL!' : '🏆 EINDSIGNAAL!';
-    const message = isHalftime
-        ? `1e helft afgelopen.\n(${halfDuration}+${injuryTime} min)\n\nDruk op Volgende Helft.`
-        : `Wedstrijd afgelopen!\n(${halfDuration}+${injuryTime} min)`;
+        timerDisplay.style.animation = 'flash 0.6s ease-in-out 4';
+        const isHalftime = currentHalf === 1;
+        const title = isHalftime ? '📣 RUSTSIGNAAL!' : '🏆 EINDSIGNAAL!';
+        const message = isHalftime
+            ? `1e helft afgelopen.\n(${halfDuration}+${injuryTime} min)\n\nDruk op Volgende Helft.`
+            : `Wedstrijd afgelopen!\n(${halfDuration}+${injuryTime} min)`;
 
-    setTimeout(() => {
-        timerDisplay.style.animation = '';
-        alert(`${title}\n\n${message}`);
-        pauseTimer();
-
-        // Firebase status updaten bij eindsignaal
-        if (!isHalftime) {
-            var wId = localStorage.getItem('wedstrijdId');
-            if (wId && window._firebaseDb) {
-                import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
-                    m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), {
-                        status: 'afgelopen'
-                    });
-                });
+            setTimeout(() => {
+            timerDisplay.style.animation = '';
+            alert(`${title}\n\n${message}`);
+            }, 2000);
             }
-        }
-    }, 2000);
-}
 
         async function pauseTimer() {
             if (isRunning) {
@@ -1071,6 +1104,12 @@ saveTimerState();
                 updateInjuryTimeDisplay();
                 addEvent('half', null, null, 'Rust');
                 saveTimerState();
+                var wIdRust = localStorage.getItem('wedstrijdId');
+                if (wIdRust && window._firebaseDb) {
+                    import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
+                        m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wIdRust), { status: 'rust' });
+                    });
+                }
                 btn.textContent = '▶ STARTEN 2E HELFT';
                 updateDisplay();
             } else if (currentHalf === 2 && !isRunning) {
@@ -1342,9 +1381,20 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
     }
 }
 
+        
         // ===== EVENT LISTENERS =====
-        // ===== EVENT LISTENERS =====
-        document.getElementById('pauseBtn').addEventListener('click', pauseTimer);
+        document.getElementById('pauseBtn').addEventListener('click', async function() {
+    const btn = document.getElementById('pauseBtn');
+    if (isRunning) {
+        await pauseTimer();
+        btn.textContent = '▶';
+        btn.classList.add('resuming');
+    } else if (currentHalf > 0) {
+        await startTimer();
+        btn.textContent = 'TIME-OUT';
+        btn.classList.remove('resuming');
+    }
+});
         document.getElementById('resetBtn').addEventListener('click', async () => {
         if (!confirm('⚠️ Timer resetten? De wedstrijd blijft bewaard.')) return;
         await pauseTimer();
@@ -1526,68 +1576,110 @@ document.getElementById('logoutBtnBanner').addEventListener('click', async () =>
     overlay.innerHTML = html;
   }
 
-  function wedstrijdKaart(w, isBezig) {
+    function wedstrijdKaart(w, isBezig) {
     const borderColor = isBezig ? '#00FF88' : 'rgba(255,255,255,0.1)';
     const badge = isBezig 
-      ? `<span style="background:#FF3B5C; color:white; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:1px;">LIVE</span>`
-      : `<span style="background:rgba(255,214,0,0.2); color:#FFD600; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; border:1px solid rgba(255,214,0,0.3);">${w.datum} · ${w.tijdstip}</span>`;
-
+        ? `<span style="background:#FF3B5C; color:white; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:1px;">LIVE</span>`
+        : `<span style="background:rgba(255,214,0,0.2); color:#FFD600; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; border:1px solid rgba(255,214,0,0.3);">${w.datum} · ${w.tijdstip}</span>`;
+    const wJson = JSON.stringify(w).replace(/`/g, '\\`').replace(/\$/g, '\\$');
     return `
-      <div style="background:rgba(255,255,255,0.04); border:1px solid ${borderColor}; border-radius:10px; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-        <div style="flex:1; cursor:pointer;" onclick="window._kiesWedstrijd('${w.id}')">
-          ${badge}
-          <div style="font-size:14px; font-weight:700; color:#F0F4FF; margin-top:6px;">${w.uitteam}</div>
-          <div style="font-size:11px; color:rgba(240,244,255,0.4); margin-top:2px;">${w.klasse} · Veld ${w.veld || '?'}</div>
-        </div>
-        <button onclick="window._verwijderWedstrijd('${w.id}')" style="background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); color:#FF3B5C; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">
-          🗑 Verwijder
-        </button>
-      </div>`;
-  }
+        <div style="background:rgba(255,255,255,0.04); border:1px solid ${borderColor}; border-radius:10px; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="flex:1; cursor:pointer;" onclick="window._kiesWedstrijd('${w.id}')">
+                ${badge}
+                <div style="font-size:14px; font-weight:700; color:#F0F4FF; margin-top:6px;">${w.uitteam}</div>
+                <div style="font-size:11px; color:rgba(240,244,255,0.4); margin-top:2px;">${w.klasse} · Veld ${w.veld || '?'}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <button onclick="window._wijzigWedstrijd('${w.id}')" style="background:rgba(255,214,0,0.1); border:1px solid rgba(255,214,0,0.3); color:#FFD600; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">✎ Wijzig</button>
+                <button onclick="window._verwijderWedstrijd('${w.id}')" style="background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); color:#FF3B5C; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; white-space:nowrap;">🗑 Verwijder</button>
+            </div>
+        </div>`;
+    }
 
-  window._kiesWedstrijd = function(wedstrijdId) {
+    window._wijzigWedstrijd = function(wedstrijdId) {
+    huidigWedstrijdId = wedstrijdId;
     get(ref(db, 'wedstrijden/' + wedstrijdId)).then((snap) => {
-      if (!snap.exists()) return;
-      const w = snap.val();
-      console.log('Firebase data:', w);
-    console.log('Events:', w.events);
-      huidigWedstrijdId = wedstrijdId;
-      localStorage.setItem('wedstrijdId', wedstrijdId);
-      localStorage.setItem('thuisteam', w.thuisteam);
-      localStorage.setItem('uitteam', w.uitteam);
-      document.getElementById('homeTeamName').value = w.thuisteam;
-document.getElementById('awayTeamName').value = w.uitteam;
-if (w.helfttijd) halfDuration = w.helfttijd;
-homeScoreValue = w.thuisscore || 0;
-awayScoreValue = w.uitscore || 0;
-document.getElementById('homeScore').textContent = homeScoreValue;
-document.getElementById('awayScore').textContent = awayScoreValue;
+        if (!snap.exists()) return;
+        document.getElementById('scorr-selectie-overlay').style.display = 'none';
+        toonPopup(huidigTeamNaam, huidigUser, snap.val());
+    });
+};
 
-// Events herladen uit Firebase
-events = [];
-if (w.events) {
-    const geladen = Object.values(w.events).sort((a, b) => b.tijdstip - a.tijdstip);
-    geladen.forEach(ev => {
-        const type = ev.type === 'yellow-card' ? 'yellow' : ev.type === 'red-card' ? 'red' : 'goal';
-        const team = ev.omschrijving && ev.omschrijving.indexOf(w.thuisteam) !== -1 ? 'home' : 'away';
-        events.push({ minute: ev.minuut, type, description: ev.omschrijving, team });
+window._kiesWedstrijd = function(wedstrijdId) {
+    get(ref(db, 'wedstrijden/' + wedstrijdId)).then((snap) => {
+        if (!snap.exists()) return;
+        const w = snap.val();
+        huidigWedstrijdId = wedstrijdId;
+        localStorage.setItem('wedstrijdId', wedstrijdId);
+        localStorage.setItem('thuisteam', w.thuisteam);
+        localStorage.setItem('uitteam', w.uitteam);
+        document.getElementById('homeTeamName').value = w.thuisteam;
+        document.getElementById('awayTeamName').value = w.uitteam;
+        if (w.helfttijd) halfDuration = w.helfttijd;
+        homeScoreValue = w.thuisscore || 0;
+        awayScoreValue = w.uitscore || 0;
+        document.getElementById('homeScore').textContent = homeScoreValue;
+        document.getElementById('awayScore').textContent = awayScoreValue;
+
+        // Events herladen
+        events = [];
+        if (w.events) {
+            const geladen = Object.values(w.events).sort((a, b) => b.tijdstip - a.tijdstip);
+            geladen.forEach(ev => {
+                const type = ev.type === 'yellow-card' ? 'yellow' : ev.type === 'red-card' ? 'red' : 'goal';
+                const team = ev.omschrijving && ev.omschrijving.indexOf(w.thuisteam) !== -1 ? 'home' : 'away';
+                events.push({ minute: ev.minuut, type, description: ev.omschrijving, team });
+            });
+            renderEvents();
+        }
+
+        // ✅ Timer herstel vanuit Firebase als wedstrijd bezig is
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        localStorage.removeItem('scorr_timer_state');
+
+        if (w.status === 'bezig' && w.startTijd) {
+        currentHalf = w.currentHalf || 1;
+        accumulatedSeconds = w.accumulatedSeconds || 0;
+        timerStartTime = w.startTijd;
+        isRunning = true;
+        const btn = document.getElementById('nextHalfBtn');
+        btn.style.display = 'block';
+        btn.textContent = currentHalf === 1 ? '⏭️ EINDE 1E HELFT' : '⏹ EINDE WEDSTRIJD';
+        initAudioContext();
+        requestWakeLock();
+        let saveCounter = 0;
+        timerInterval = setInterval(() => {
+            updateDisplay();
+            checkTimeExpired();
+            saveCounter++;
+            if (saveCounter >= 50) { saveTimerState(); saveCounter = 0; }
+        }, 100);
+        updateDisplay();
+        } else if (w.status === 'rust') {
+            currentHalf = 2;
+            accumulatedSeconds = (w.helfttijd || 45) * 60;
+            timerStartTime = null;
+            isRunning = false;
+            updateDisplay();
+            const btn = document.getElementById('nextHalfBtn');
+            btn.style.display = 'block';
+            btn.textContent = '▶ STARTEN 2E HELFT';
+        } else {
+            accumulatedSeconds = 0;
+            timerStartTime = null;
+            timerPausedAt = null;
+            isRunning = false;
+            currentHalf = 0;
+            updateDisplay();
+            const btn = document.getElementById('nextHalfBtn');
+            btn.style.display = 'block';
+            btn.textContent = '▶ STARTEN WEDSTRIJD';
+        }
+
+        document.getElementById('scorr-selectie-overlay').style.display = 'none';
+        toonBanner(w, huidigTeamNaam, huidigUser);
     });
-    renderEvents();
-    accumulatedSeconds = 0;
-timerStartTime = null;
-timerPausedAt = null;
-isRunning = false;
-currentHalf = 0;
-if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-localStorage.removeItem('scorr_timer_state');
-updateDisplay();
-document.getElementById('nextHalfBtn').style.display = 'block';
-document.getElementById('nextHalfBtn').textContent = '▶ STARTEN WEDSTRIJD';
-}
-      document.getElementById('scorr-selectie-overlay').style.display = 'none';
-      toonBanner(w, huidigTeamNaam, huidigUser);
-    });
-  };
+};
 
   window._verwijderWedstrijd = async function(wedstrijdId) {
     if (!confirm('Weet je zeker dat je deze wedstrijd wilt verwijderen?')) return;
@@ -1645,6 +1737,22 @@ document.getElementById('popup-tegenstander').value = bestaandeData ? bestaandeD
 document.getElementById('popup-klasse').value = bestaandeData ? bestaandeData.klasse : '';
 thuisOfUit = 'thuis';
 window._selecteerThuisUit('thuis');
+
+// Afgelast knop tonen bij bestaande wedstrijd
+const afgelastContainer = document.getElementById('popup-afgelast-container');
+afgelastContainer.style.display = huidigWedstrijdId ? 'block' : 'none';
+
+document.getElementById('popup-afgelast-btn').onclick = () => {
+    if (!confirm('⚠️ Weet je zeker dat je deze wedstrijd als AFGELAST wil melden?\n\nDit is zichtbaar voor ouders en in de kantine.')) return;
+    var wId = huidigWedstrijdId;
+    if (wId && window._firebaseDb) {
+        import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
+            m.update(m.ref(window._firebaseDb, 'wedstrijden/' + wId), { status: 'afgelast' });
+        });
+    }
+    document.getElementById('scorr-popup-overlay').style.display = 'none';
+    alert('✅ Wedstrijd gemeld als afgelast.');
+};
     document.getElementById('popup-start-btn').onclick = () => {
       const tegenstander = document.getElementById('popup-tegenstander').value.trim();
       const klasse = document.getElementById('popup-klasse').value.trim();
@@ -1660,6 +1768,7 @@ window._selecteerThuisUit('thuis');
 
       const wedstrijdId = huidigWedstrijdId || `${user.uid}_${datum}_${tijdstip.replace(':','')}`;
       huidigWedstrijdId = wedstrijdId;
+
         // Reset alles:
         accumulatedSeconds = 0;
         timerStartTime = null;
@@ -1675,8 +1784,6 @@ window._selecteerThuisUit('thuis');
         btn.textContent = '▶ STARTEN WEDSTRIJD';
         updateDisplay();
 
-
-
       set(ref(db, `wedstrijden/${wedstrijdId}`), {
         thuisteam: thuisOfUit === 'thuis' ? teamNaam : tegenstander,
         uitteam: thuisOfUit === 'thuis' ? tegenstander : teamNaam,
@@ -1688,8 +1795,12 @@ window._selecteerThuisUit('thuis');
         thuisscore: 0,
         uitscore: 0,
         status: 'gepland',
-        club: 'fc-purmerend'
-      });
+        club: huidigTeamId.indexOf('vvm') !== -1 ? 'vv-monnickendam' 
+        : huidigTeamId.indexOf('rkav') !== -1 ? 'rkav-volendam' 
+        : 'fc-purmerend',
+        teamId: huidigTeamId,
+        teamNaam: teamNaam
+        });
 
       localStorage.setItem('wedstrijdId', wedstrijdId);
       localStorage.setItem('thuisteam', teamNaam);
@@ -1750,7 +1861,7 @@ awayScore.textContent = 0;
 </div>
 
 <!-- Popup HTML -->
-<div id="scorr-popup-overlay" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+<div id="scorr-popup-overlay" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
   <div style="background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:32px; width:100%; max-width:420px; font-family:'Lexend',sans-serif;">
     
     <div style="text-align:center; margin-bottom:28px;">
@@ -1762,13 +1873,15 @@ awayScore.textContent = 0;
       <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#00FF88; font-weight:600; display:block; margin-bottom:6px;">Jouw team</label>
       <div id="popup-team-naam" style="background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); border-radius:8px; padding:12px 16px; font-size:15px; font-weight:600; color:#F0F4FF;"></div>
     </div>
+
     <div style="margin-bottom:16px;">
-  <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Wij spelen</label>
-  <div style="display:flex; gap:8px;">
-    <button type="button" id="popup-thuis-btn" onclick="window._selecteerThuisUit('thuis')" style="flex:1; padding:12px; border:2px solid #00FF88; border-radius:8px; background:rgba(0,255,136,0.1); color:#00FF88; font-size:14px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer;">🏠 Thuis</button>
-    <button type="button" id="popup-uit-btn" onclick="window._selecteerThuisUit('uit')" style="flex:1; padding:12px; border:2px solid rgba(255,255,255,0.15); border-radius:8px; background:rgba(255,255,255,0.05); color:rgba(240,244,255,0.5); font-size:14px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer;">✈️ Uit</button>
-  </div>
-</div>
+      <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Wij spelen</label>
+      <div style="display:flex; gap:8px;">
+        <button type="button" id="popup-thuis-btn" onclick="window._selecteerThuisUit('thuis')" style="flex:1; padding:12px; border:2px solid #00FF88; border-radius:8px; background:rgba(0,255,136,0.1); color:#00FF88; font-size:14px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer;">🏠 Thuis</button>
+        <button type="button" id="popup-uit-btn" onclick="window._selecteerThuisUit('uit')" style="flex:1; padding:12px; border:2px solid rgba(255,255,255,0.15); border-radius:8px; background:rgba(255,255,255,0.05); color:rgba(240,244,255,0.5); font-size:14px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer;">✈️ Uit</button>
+      </div>
+    </div>
+
     <div style="margin-bottom:16px;">
       <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Tegenstander *</label>
       <input id="popup-tegenstander" type="text" placeholder="bijv. Ajax O14-3" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
@@ -1780,23 +1893,23 @@ awayScore.textContent = 0;
     </div>
 
     <div style="margin-bottom:16px;">
-  <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Veld</label>
-  <select id="popup-veld" style="width:100%; background:#1E2749; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none; appearance:none;">
-    <option value="A">Veld A</option>
-    <option value="B">Veld B</option>
-    <option value="C">Veld C</option>
-    <option value="D">Veld D</option>
-    <option value="E">Veld E</option>
-    <option value="F">Veld F</option>
-    <option value="n.v.t.">n.v.t.</option>
-  </select>
-</div>
+      <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Veld</label>
+      <select id="popup-veld" style="width:100%; background:#1E2749; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none; appearance:none;">
+        <option value="A">Veld A</option>
+        <option value="B">Veld B</option>
+        <option value="C">Veld C</option>
+        <option value="D">Veld D</option>
+        <option value="E">Veld E</option>
+        <option value="F">Veld F</option>
+        <option value="n.v.t.">n.v.t.</option>
+      </select>
+    </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
-        <div style="margin-bottom:16px;">
-  <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Duur per helft (min)</label>
-  <input id="popup-helfttijd" type="number" value="45" min="10" max="90" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
-</div>
+      <div>
+        <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Duur per helft (min)</label>
+        <input id="popup-helfttijd" type="number" value="45" min="10" max="90" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
+      </div>
       <div>
         <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Datum</label>
         <input id="popup-datum" type="date" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:14px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
@@ -1812,8 +1925,15 @@ awayScore.textContent = 0;
     </div>
 
     <button id="popup-start-btn" style="width:100%; background:#00FF88; color:#0A0E27; border:none; border-radius:8px; padding:16px; font-size:16px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; letter-spacing:1px;">
-      ▶ START WEDSTRIJD
+      ▶ GA NAAR DE WEDSTRIJD
     </button>
+
+    <!-- Afgelast knop — alleen zichtbaar bij bestaande wedstrijd -->
+    <div id="popup-afgelast-container" style="display:none; margin-top:12px;">
+      <button id="popup-afgelast-btn" style="width:100%; background:transparent; border:1px solid rgba(255,59,92,0.4); color:#FF3B5C; border-radius:8px; padding:12px; font-size:13px; font-weight:700; font-family:'Lexend',sans-serif; cursor:pointer; letter-spacing:1px;">
+        ⛔ WEDSTRIJD AFGELASTEN
+      </button>
+    </div>
 
   </div>
 </div>

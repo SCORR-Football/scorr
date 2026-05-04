@@ -158,6 +158,14 @@
 
         .vs { font-size: 14px; font-weight: 700; color: rgba(240,244,255,0.2); }
 
+        .team-logo {
+        width: 56px; height: 56px;
+        border-radius: 50%;
+        object-fit: contain;
+        margin: 0 auto 8px;
+        display: block;
+        }
+
         .timer-section {
             margin: 0 16px 16px;
             background: rgba(30,39,73,0.8);
@@ -277,15 +285,17 @@
                 <div class="match-title" id="matchTitle">WEDSTRIJD</div>
                 <div class="match-datetime" id="matchDatetime"></div>
                 <div class="teams-container">
-                    <div class="team">
-                        <div class="team-name" id="homeTeam">—</div>
-                        <div class="score-display" id="homeScore">-</div>
-                    </div>
-                    <div class="vs">VS</div>
-                    <div class="team">
-                        <div class="team-name" id="awayTeam">—</div>
-                        <div class="score-display" id="awayScore">-</div>
-                    </div>
+                                <div class="team">
+                <img id="homeLogo" class="team-logo" src="" style="display:none;" onerror="this.style.display='none'">
+                <div class="team-name" id="homeTeam">—</div>
+                <div class="score-display" id="homeScore">-</div>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team">
+                <img id="awayLogo" class="team-logo" src="" style="display:none;" onerror="this.style.display='none'">
+                <div class="team-name" id="awayTeam">—</div>
+                <div class="score-display" id="awayScore">-</div>
+            </div>
                 </div>
             </div>
 
@@ -314,6 +324,43 @@
     </div>
 
     <script>
+    
+function getLogo(naam) {
+    if (!naam) return null;
+    var lower = naam.toLowerCase();
+    if (lower.indexOf('purmersteijn') !== -1) return '/frontend/clubs/icons/purmersteijn-512.png';
+    if (lower.indexOf('purmerend') !== -1) return '/frontend/clubs/icons/fc-purmerend-512.png';
+    if (lower.indexOf('monnickendam') !== -1) return '/frontend/clubs/icons/vv-monnickendam-512.png';
+    if (lower.indexOf('volendam') !== -1 || lower.indexOf('rkav') !== -1) return '/frontend/clubs/icons/rkav-volendam-512.png';
+    if (lower.indexOf('vva') !== -1 || lower.indexOf('spartaan') !== -1) return '/frontend/clubs/icons/vva-spartaan-512.png';
+    if (lower.indexOf('wsv') !== -1) return '/frontend/clubs/icons/wsv-1930-512.png';
+    if (lower.indexOf('hauwert') !== -1) return '/frontend/clubs/icons/vv-hauwert-65-512.png';
+    if (lower.indexOf('wherevogels') !== -1) return '/frontend/clubs/icons/vv-de-wherevogels-512.jpeg';
+    if (lower.indexOf('ucs') !== -1 || lower.indexOf('edo') !== -1) return '/frontend/clubs/icons/ucs-edo-512.png';
+    if (lower.indexOf('sdob') !== -1) return '/frontend/clubs/icons/sdob-512.jpg';
+    if (lower.indexOf('sdw') !== -1) return '/frontend/clubs/icons/sdw-512.png';
+    if (lower.indexOf('graveland') !== -1) return '/frontend/clubs/icons/s-graveland-512.png';
+    if (lower.indexOf('reiger') !== -1) return '/frontend/clubs/icons/reiger-boys-512.png';
+    if (lower.indexOf('kolping') !== -1) return '/frontend/clubs/icons/kolping-boys-512.png';
+    if (lower.indexOf('beemster') !== -1) return '/frontend/clubs/icons/beemster-512.png';
+    if (lower.indexOf('waterwijk') !== -1) return '/frontend/clubs/icons/asc-waterwijk-512.png';
+    if (lower.indexOf('zwaluwen') !== -1) return '/frontend/clubs/icons/zwaluwen-30-512.png';
+    if (lower.indexOf('dzs') !== -1) return '/frontend/clubs/icons/dzs-512.jpg';
+    if (lower.indexOf('schagen') !== -1) return '/frontend/clubs/icons/schagen-united-512.png';
+    if (lower.indexOf('odysseus') !== -1) return '/frontend/clubs/icons/odysseus-91-512.jpg';
+    if (lower.indexOf('westfriezen') !== -1) return '/frontend/clubs/icons/westfriezen-512.png';
+    if (lower.indexOf('evc') !== -1 || lower.indexOf('edam') !== -1) return '/frontend/clubs/icons/evc-edam-512.png';
+    if (lower.indexOf('castricum') !== -1) return '/frontend/clubs/icons/castricum-512.png';
+    if (lower.indexOf('jong holland') !== -1 || lower.indexOf('jong-holland') !== -1) return '/frontend/clubs/icons/jong-holland-512.jpeg';
+    if (lower.indexOf('fortuna') !== -1 || lower.indexOf('wormerveer') !== -1) return '/frontend/clubs/icons/fortuna-wormerveer-512.jpeg';
+    if (lower.indexOf('zob') !== -1) return '/frontend/clubs/icons/zob-512.png';
+    if (lower.indexOf('abcoude') !== -1) return '/frontend/clubs/icons/fc-abcoude-512.png';
+    if (lower.indexOf("afc '34") !== -1 || lower.indexOf('afc 34') !== -1 || lower.indexOf('afc34') !== -1) return '/frontend/clubs/icons/afc-34-512.png';
+    if (lower.indexOf('afc') !== -1) return '/frontend/clubs/icons/afc-amsterdam-512.png';
+    if (lower.indexOf('sranang') !== -1) return '/frontend/clubs/icons/real-sranang-512.jpg';
+    return null;
+}
+
         var DB_BASE = 'https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app';
         var urlParams = new URLSearchParams(window.location.search);
         var wedstrijdId = urlParams.get('id');
@@ -356,23 +403,27 @@
         }
 
         // ===== TIMER =====
+        function updateTimer() {
+        if (!huidigeData || !huidigeData.startTijd) return;
+        var nu = Date.now();
+        var verstreken = Math.floor((nu - huidigeData.startTijd) / 1000) + (huidigeData.accumulatedSeconds || 0);
+        var helfttijd = huidigeData.helfttijd || 45;
+        var maxMinuut = (huidigeData.currentHalf || 1) === 1 ? helfttijd : helfttijd * 2;
+        var minuutRaw = Math.floor(verstreken / 60);
+        var display;
+        if (minuutRaw >= maxMinuut) {
+            var blessure = minuutRaw - maxMinuut + 1;
+            display = maxMinuut + '+' + blessure;
+        } else {
+        var seconden = verstreken % 60;
+        display = (minuutRaw < 10 ? '0' : '') + minuutRaw + ':' + (seconden < 10 ? '0' : '') + seconden;
+    }
+        document.getElementById('timerDisplay').textContent = display;
+    }
+
         function startLiveTimer(data) {
             if (timerInterval) clearInterval(timerInterval);
-            if (data.status !== 'bezig' && data.status !== 'rust') return;
-
-            function updateTimer() {
-                if (!huidigeData || !huidigeData.startTijd) return;
-                var nu = Date.now();
-                var verstreken = Math.floor((nu - huidigeData.startTijd) / 1000) + (huidigeData.accumulatedSeconds || 0);
-                var helfttijd = (huidigeData.helfttijd || 45) * 60;
-                var maxTijd = (huidigeData.currentHalf || 1) === 1 ? helfttijd : helfttijd * 2;
-                var seconden = Math.min(verstreken, maxTijd);
-                var min = Math.floor(seconden / 60);
-                var sec = seconden % 60;
-                var display = (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
-                document.getElementById('timerDisplay').textContent = display;
-            }
-
+            if (data.status !== 'bezig') return;
             updateTimer();
             timerInterval = setInterval(updateTimer, 1000);
         }
@@ -424,6 +475,14 @@
 
             document.getElementById('homeTeam').textContent = data.thuisteam || 'Thuis';
             document.getElementById('awayTeam').textContent = data.uitteam || 'Uit';
+            var thuisLogo = getLogo(data.thuisteam);
+            var uitLogo = getLogo(data.uitteam);
+            var thuisLogoEl = document.getElementById('homeLogo');
+            var uitLogoEl = document.getElementById('awayLogo');
+            if (thuisLogoEl) thuisLogoEl.src = thuisLogo || '';
+            if (thuisLogoEl) thuisLogoEl.style.display = thuisLogo ? 'block' : 'none';
+            if (uitLogoEl) uitLogoEl.src = uitLogo || '';
+            if (uitLogoEl) uitLogoEl.style.display = uitLogo ? 'block' : 'none';
             document.getElementById('homeScore').textContent = data.status === 'gepland' ? '-' : (data.thuisscore !== undefined ? data.thuisscore : 0);
             document.getElementById('awayScore').textContent = data.status === 'gepland' ? '-' : (data.uitscore !== undefined ? data.uitscore : 0);
             document.getElementById('matchTitle').textContent = data.klasse || 'WEDSTRIJD';
@@ -443,13 +502,13 @@
                 liveBadge.className = 'live-badge';
                 liveBadge.innerHTML = '<div class="live-dot"></div> RUST';
                 if (timerInterval) clearInterval(timerInterval);
-                timerDisplay.textContent = 'RUST';
+                timerDisplay.textContent = 'HT';
             } else if (data.status === 'afgelopen') {
                 halfIndicator.textContent = 'Afgelopen';
                 liveBadge.className = 'live-badge afgelopen';
                 liveBadge.innerHTML = 'AFGELOPEN';
                 if (timerInterval) clearInterval(timerInterval);
-                timerDisplay.textContent = 'AFG';
+                timerDisplay.textContent = 'FT';
             } else {
                 halfIndicator.textContent = 'Gepland';
                 liveBadge.className = 'live-badge gepland';

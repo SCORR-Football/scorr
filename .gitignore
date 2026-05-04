@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# Archives / lokale rommel
+**/Archief.zip
+*.zip
+
+# Node
+node_modules/
+
+# Editor
+.vscode/
+.idea/

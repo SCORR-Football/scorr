@@ -72,6 +72,18 @@
   .home-card .home-card-arrow { font-size: 22px; color: rgba(240,244,255,0.3); flex-shrink: 0; }
 
   .home-loading { text-align: center; padding: 80px 20px; color: rgba(240,244,255,0.5); }
+
+  @media (max-width: 480px) {
+    body { padding-top: 54px; padding-bottom: 30px; }
+    .home-container { padding: 0 14px; }
+    .home-card { padding: 20px 18px; gap: 14px; }
+    .home-card .home-card-icon { width: 48px; height: 48px; font-size: 24px; border-radius: 12px; }
+    .home-card .home-card-title { font-size: 17px; }
+    .home-card .home-card-sub { font-size: 12px; }
+    .home-club-badge { width: 56px; height: 56px; }
+    .home-scorr { font-size: 28px; }
+  }
+  .home-card { touch-action: manipulation; }
 </style>
 </head>
 <body>

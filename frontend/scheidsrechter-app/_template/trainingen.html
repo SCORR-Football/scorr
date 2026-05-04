@@ -6,19 +6,148 @@
 <title>SCORR — Trainingen</title>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --scorr-electric: #00FF88; --scorr-deep: #0A0E27; --scorr-slate: #1E2749; --scorr-text: #F0F4FF; }
+  :root {
+    --scorr-electric: #00FF88;
+    --scorr-deep: #0A0E27;
+    --scorr-slate: #1E2749;
+    --scorr-accent: #FF3B5C;
+    --scorr-yellow: #FFB800;
+    --scorr-text: #F0F4FF;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 20px 40px 20px; }
-  .page { max-width:520px; margin:0 auto; }
-  .page-header { text-align:center; margin-bottom:32px; }
+  body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 16px 60px 16px; }
+  .page { max-width:560px; margin:0 auto; }
+
+  .page-header { text-align:center; margin-bottom:24px; }
   .page-header .scorr { font-size:28px; font-weight:900; color:var(--scorr-electric); letter-spacing:-1px; }
   .page-header .sub { font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
-  .placeholder { background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:32px 24px; text-align:center; }
-  .placeholder .icon { font-size:42px; margin-bottom:16px; }
-  .placeholder h2 { font-size:18px; font-weight:700; margin-bottom:10px; }
-  .placeholder p { font-size:14px; color:rgba(240,244,255,0.6); line-height:1.5; }
-  .placeholder ul { text-align:left; font-size:13px; color:rgba(240,244,255,0.55); margin-top:18px; padding-left:18px; line-height:1.7; }
-  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); }
+
+  .section-title { font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin:24px 4px 10px 4px; }
+
+  /* === Weekschema === */
+  .schedule-list { display:flex; flex-direction:column; gap:6px; }
+  .day-row {
+    background:var(--scorr-slate);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .day-row.actief { border-color:rgba(0,255,136,0.25); background:#232C54; }
+  .day-row .row-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .day-row .day-name { font-size:14px; font-weight:700; color:var(--scorr-text); flex:1; }
+  .day-row .day-name .dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.15); margin-right:8px; vertical-align:middle; }
+  .day-row.actief .day-name .dot { background:var(--scorr-electric); }
+  .day-row .toggle {
+    width:42px; height:24px; border-radius:14px; background:rgba(255,255,255,0.1);
+    border:none; cursor:pointer; padding:0; position:relative; transition:background .15s ease;
+    flex-shrink:0;
+  }
+  .day-row.actief .toggle { background:var(--scorr-electric); }
+  .day-row .toggle::after {
+    content:''; position:absolute; top:3px; left:3px; width:18px; height:18px;
+    border-radius:50%; background:white; transition:transform .15s ease;
+  }
+  .day-row.actief .toggle::after { transform:translateX(18px); }
+
+  .day-row .row-fields {
+    display:none;
+    margin-top:12px;
+    grid-template-columns:1fr 1fr 90px;
+    gap:8px;
+  }
+  .day-row.actief .row-fields { display:grid; }
+  .day-row .field-mini label { display:block; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.5); font-weight:600; margin-bottom:4px; }
+  .day-row .field-mini input,
+  .day-row .field-mini select {
+    width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+    border-radius:7px; padding:8px 10px; font-size:13px; color:var(--scorr-text);
+    font-family:'Lexend',sans-serif; outline:none;
+  }
+  .day-row .field-mini select { appearance:none; background:rgba(30,39,73,0.9); }
+  .day-row .field-mini input:focus,
+  .day-row .field-mini select:focus { border-color:rgba(0,255,136,0.5); }
+
+  /* === Vormen === */
+  .vorm-toolbar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .filter-chip {
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    border-radius:18px; padding:7px 12px; font-size:11px; font-weight:600;
+    color:rgba(240,244,255,0.7); cursor:pointer; font-family:'Lexend',sans-serif;
+    letter-spacing:0.5px;
+  }
+  .filter-chip.active { background:rgba(0,255,136,0.12); border-color:rgba(0,255,136,0.4); color:var(--scorr-electric); }
+
+  .vorm-list { display:flex; flex-direction:column; gap:8px; }
+  .vorm-row {
+    background:var(--scorr-slate);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;
+    padding:12px 14px;
+    display:flex; align-items:center; gap:12px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .vorm-row:hover { border-color:rgba(0,255,136,0.25); }
+  .vorm-row .icon {
+    width:42px; height:42px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; flex-shrink:0;
+    background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2);
+  }
+  .vorm-row.eigen .icon { background:rgba(255,184,0,0.1); border-color:rgba(255,184,0,0.3); }
+  .vorm-row .info { flex:1; min-width:0; }
+  .vorm-row .info .naam { font-size:14px; font-weight:700; color:var(--scorr-text); }
+  .vorm-row .info .meta { font-size:11px; color:rgba(240,244,255,0.5); margin-top:2px; }
+  .vorm-row .arrow { color:rgba(240,244,255,0.3); font-size:18px; flex-shrink:0; }
+  .vorm-row .badge-eigen {
+    background:rgba(255,184,0,0.15); border:1px solid rgba(255,184,0,0.3);
+    color:var(--scorr-yellow); font-size:9px; font-weight:700;
+    padding:2px 6px; border-radius:6px; letter-spacing:1px; margin-left:6px;
+  }
+
+  .add-vorm-btn {
+    width:100%; background:rgba(255,184,0,0.08); color:var(--scorr-yellow);
+    border:1px dashed rgba(255,184,0,0.4); border-radius:12px;
+    padding:13px; font-size:13px; font-weight:700; font-family:'Lexend',sans-serif;
+    cursor:pointer; letter-spacing:1px; margin-top:8px;
+  }
+  .add-vorm-btn:active { transform:translateY(1px); }
+
+  /* === Modal === */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+  .modal-overlay.open { display:flex; }
+  .modal-card { position:relative; background:var(--scorr-slate); border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:28px 22px 22px 22px; width:100%; max-width:480px; }
+  .modal-card .close-x { position:absolute; top:12px; right:12px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0; }
+  .modal-card .v-header { display:flex; align-items:center; gap:14px; margin-bottom:18px; padding-right:30px; }
+  .modal-card .v-icon { width:48px; height:48px; border-radius:12px; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+  .modal-card.eigen-mode .v-icon { background:rgba(255,184,0,0.1); border-color:rgba(255,184,0,0.3); }
+  .modal-card h3 { font-size:18px; font-weight:700; color:var(--scorr-text); }
+  .modal-card .v-meta { font-size:11px; color:rgba(240,244,255,0.5); margin-top:2px; letter-spacing:0.5px; }
+
+  .field { margin-bottom:14px; }
+  .field label { display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin-bottom:5px; }
+  .field input, .field textarea, .field select { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:11px 14px; font-size:14px; color:var(--scorr-text); font-family:'Lexend',sans-serif; outline:none; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color:rgba(0,255,136,0.5); }
+  .field textarea { resize:vertical; min-height:90px; line-height:1.5; }
+  .field select { appearance:none; background:rgba(30,39,73,0.9); cursor:pointer; }
+  .field-row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+
+  .read-section { margin-bottom:14px; }
+  .read-section .label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin-bottom:5px; }
+  .read-section .body { font-size:14px; color:var(--scorr-text); line-height:1.55; white-space:pre-wrap; }
+
+  .modal-actions { display:flex; gap:10px; margin-top:18px; }
+  .modal-actions button { flex:1; padding:13px; border:none; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:0.5px; }
+  .btn-primary { background:var(--scorr-electric); color:var(--scorr-deep); }
+  .btn-secondary { background:transparent; border:1px solid rgba(255,255,255,0.2)!important; color:var(--scorr-text); }
+  .btn-danger { background:transparent; border:1px solid rgba(255,59,92,0.4)!important; color:var(--scorr-accent); flex:0 0 auto; padding:13px 16px; }
+
+  .error-box { display:none; background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); border-radius:8px; padding:9px 12px; font-size:12px; color:var(--scorr-accent); margin-bottom:12px; }
+  .error-box.show { display:block; }
+
+  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); font-size:13px; letter-spacing:1px; }
+
+  .empty-hint { text-align:center; color:rgba(240,244,255,0.4); font-size:12px; padding:18px 0; }
 </style>
 </head>
 <body>
@@ -32,16 +161,99 @@
       <div class="sub" id="team-naam">Trainingen</div>
     </div>
 
-    <div class="placeholder">
-      <div class="icon">🏋️</div>
-      <h2>Trainingen — binnenkort</h2>
-      <p>Hier komt straks het trainingsschema en de vormen-bibliotheek. Voor pilot-fase 3 staat op de planning:</p>
-      <ul>
-        <li>Vast weekschema (ma/di/do van x tot x)</li>
-        <li>Eigen trainingsvormen toevoegen</li>
-        <li>10 starter-vormen klaar voor gebruik</li>
-        <li>Vormen kiezen per training</li>
-      </ul>
+    <!-- Weekschema -->
+    <div class="section-title">📅 Weekschema</div>
+    <div id="schedule-list" class="schedule-list"></div>
+
+    <!-- Vormen -->
+    <div class="section-title" style="margin-top:32px;">🏋️ Trainingsvormen</div>
+    <div id="vorm-toolbar" class="vorm-toolbar"></div>
+    <div id="vorm-list" class="vorm-list"></div>
+    <button type="button" id="add-vorm-btn" class="add-vorm-btn">+ Eigen vorm toevoegen</button>
+  </div>
+</div>
+
+<!-- Vorm modal -->
+<div id="vorm-modal" class="modal-overlay">
+  <div class="modal-card" id="vorm-modal-card">
+    <button type="button" class="close-x" aria-label="Sluiten" id="vorm-modal-close">×</button>
+    <div class="v-header">
+      <div class="v-icon" id="vorm-modal-icon">⚽</div>
+      <div style="flex:1; min-width:0;">
+        <h3 id="vorm-modal-title">Vorm</h3>
+        <div class="v-meta" id="vorm-modal-meta"></div>
+      </div>
+    </div>
+
+    <div id="vorm-modal-error" class="error-box"></div>
+
+    <!-- Read-only weergave (basis-vormen) -->
+    <div id="vorm-readonly" style="display:none;">
+      <div class="read-section">
+        <div class="label">Doel</div>
+        <div class="body" id="ro-doel"></div>
+      </div>
+      <div class="read-section">
+        <div class="label">Beschrijving</div>
+        <div class="body" id="ro-beschrijving"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="ro-close">Sluiten</button>
+      </div>
+    </div>
+
+    <!-- Edit-form (eigen vormen) -->
+    <div id="vorm-edit" style="display:none;">
+      <div class="field">
+        <label for="v-naam">Naam *</label>
+        <input id="v-naam" type="text" placeholder="bijv. Pass-trio met diepte" maxlength="60">
+      </div>
+
+      <div class="field">
+        <label for="v-categorie">Categorie</label>
+        <select id="v-categorie">
+          <option value="warming-up">Warming-up</option>
+          <option value="techniek">Techniek</option>
+          <option value="afwerken">Afwerken</option>
+          <option value="partij">Partij</option>
+          <option value="tactiek">Tactiek</option>
+          <option value="aanvallend">Aanvallend</option>
+          <option value="verdedigend">Verdedigend</option>
+          <option value="conditie">Conditie</option>
+          <option value="anders">Anders</option>
+        </select>
+      </div>
+
+      <div class="field-row3">
+        <div class="field">
+          <label for="v-duur">Duur (min)</label>
+          <input id="v-duur" type="number" min="1" max="120" inputmode="numeric" placeholder="15">
+        </div>
+        <div class="field">
+          <label for="v-spelers-min">Spelers min</label>
+          <input id="v-spelers-min" type="number" min="1" max="30" inputmode="numeric" placeholder="6">
+        </div>
+        <div class="field">
+          <label for="v-spelers-max">Spelers max</label>
+          <input id="v-spelers-max" type="number" min="1" max="30" inputmode="numeric" placeholder="12">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="v-doel">Doel</label>
+        <input id="v-doel" type="text" placeholder="bijv. Eerste aanname onder druk" maxlength="80">
+      </div>
+
+      <div class="field">
+        <label for="v-beschrijving">Beschrijving</label>
+        <textarea id="v-beschrijving" placeholder="Beschrijf de oefening, opstelling, regels..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-danger" id="v-delete" style="display:none;">🗑</button>
+        <button type="button" class="btn-secondary" id="v-cancel">Annuleren</button>
+        <button type="button" class="btn-primary" id="v-save">Opslaan</button>
+      </div>
     </div>
   </div>
 </div>
@@ -51,7 +263,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  import { getDatabase, ref, get, set, push, remove, onValue, update } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
   const app = initializeApp({
     apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
@@ -72,6 +284,53 @@
     'rkav-1@rkav-volendam.scorr':  'RKAV Volendam 1'
   };
 
+  // ===== 10 Starter trainingsvormen (hardcoded — basis library) =====
+  const BASIS_VORMEN = [
+    { id:'b1', icon:'🏃',  naam:'Pylonenparcours',           categorie:'warming-up', duur:10, spelersMin:6,  spelersMax:16, doel:'Coördinatie, lichaamscontrole en activatie',
+      beschrijving:'Zet 6 pylonen in een parcours: zigzag, sidestep en een korte versnelling. Spelers gaan om de 15 sec in groepjes van 2. Eerst rustig, daarna in tempo. Sluit af met een kort sprintje.' },
+    { id:'b2', icon:'⚽',  naam:'4 tegen 4 op klein veld',   categorie:'partij',     duur:15, spelersMin:8,  spelersMax:8,  doel:'Druk zetten en snel omschakelen',
+      beschrijving:'Veld 20×15 m, 2 mini-doeltjes per kant. Geen keepers. Bij balverlies meteen druk zetten. Wissel om de 3 min van team. Geen buitenspel; bal achter de eigen lijn = bal andere team.' },
+    { id:'b3', icon:'🎯',  naam:'Pass & Move',               categorie:'techniek',   duur:12, spelersMin:8,  spelersMax:16, doel:'Eerste aanname en kort-kort spelen',
+      beschrijving:'Vierkant van 15×15 m, 1 speler per zijde plus extra in het midden. Pass + meebewegen naar volgende positie. Eerst 2 contacten verplicht, daarna 1 contact. Variatie: tegenpartij erin als pressing.' },
+    { id:'b4', icon:'🥅',  naam:'Schot uit voorzet',         categorie:'afwerken',   duur:15, spelersMin:6,  spelersMax:14, doel:'Schot uit beweging na voorzet',
+      beschrijving:'Twee rijen op 16-meter, voorzet vanaf links én rechts afwisselend. Aanvaller maakt loopactie kort-lang. Doel: 1e contact áltijd richting goal. Keeper actief. Maximaal 2 contacten.' },
+    { id:'b5', icon:'🔁',  naam:'Positiespel 6+2 vs 6+2',    categorie:'tactiek',    duur:20, spelersMin:12, spelersMax:16, doel:'Balcirculatie en ruimte herkennen',
+      beschrijving:'Veld 30×25 m, 2 neutrale spelers in het midden. Doel: 8 passes achter elkaar = punt. Bij balverlies omdraaien. Verboden lange ballen. Coach roept “druk!” of “ruimte!” om aandacht te sturen.' },
+    { id:'b6', icon:'➡️',  naam:'Loopvormen buitenspeler',   categorie:'aanvallend', duur:12, spelersMin:4,  spelersMax:10, doel:'Diepte zoeken en juiste timing voorzet',
+      beschrijving:'Spits zet zich kort, buitenspeler maakt diagonale loop in de ruimte. Pass + voorzet eerste tijd. 2 herhalingen per speler, dan wisselen. Variatie: verdediger erbij die de buitenspeler probeert te volgen.' },
+    { id:'b7', icon:'🛡️',  naam:'1 tegen 1 verdedigen',      categorie:'verdedigend',duur:12, spelersMin:4,  spelersMax:12, doel:'Lichaamspositie en duel-management',
+      beschrijving:'Aanvaller start met bal op 15 m, verdediger schuift in. Doel verdediger: bal afpakken of buiten de zone werken. Coach let op zij-positie, korte stappen, niet vroeg insteken. Wissel rollen elke beurt.' },
+    { id:'b8', icon:'🔺',  naam:'Pass-trio met diepte',      categorie:'techniek',   duur:10, spelersMin:6,  spelersMax:12, doel:'Triangulatie en diep aanspelen',
+      beschrijving:'3 spelers in een driehoek. Speler A passt op B (kaatsen), B op C (diep). Daarna positie wisselen. Variatie: 2-touch verplicht, of pass + sprint naar volgende positie.' },
+    { id:'b9', icon:'⚡',  naam:'Hoog druk zetten',          categorie:'tactiek',    duur:15, spelersMin:10, spelersMax:16, doel:'Pressing als team, jagen op signaal',
+      beschrijving:'8 vs 8 op half veld. Coach roept “persen!” → team zonder bal zet 5 sec hoog druk, dwingt naar buiten. Doel: bal binnen 5 sec afpakken of buiten de lijn werken. Daarna inzakken en herhalen.' },
+    { id:'b10',icon:'🏁',  naam:'Klein partijspel zonder keepers', categorie:'partij', duur:15, spelersMin:8,  spelersMax:14, doel:'Snel omschakelen en afronden',
+      beschrijving:'Veld 25×20 m. 2 mini-doeltjes per kant op de doellijn. Bij doelpunt direct opnieuw inspelen vanaf eigen mini-doel. Geen vrije trappen, snel herstart. Wissel team na 3 min, korte rust 1 min.' }
+  ];
+
+  const CATEGORIE_LABELS = {
+    'warming-up':'Warming-up','techniek':'Techniek','afwerken':'Afwerken','partij':'Partij',
+    'tactiek':'Tactiek','aanvallend':'Aanvallend','verdedigend':'Verdedigend',
+    'conditie':'Conditie','anders':'Anders'
+  };
+
+  const DAGEN = [
+    { key:'ma', label:'Maandag' },
+    { key:'di', label:'Dinsdag' },
+    { key:'wo', label:'Woensdag' },
+    { key:'do', label:'Donderdag' },
+    { key:'vr', label:'Vrijdag' },
+    { key:'za', label:'Zaterdag' },
+    { key:'zo', label:'Zondag' }
+  ];
+
+  let huidigTeamId = null;
+  let eigenVormen  = [];      // dynamisch uit Firebase
+  let scheduleData = {};      // dynamisch uit Firebase
+  let activeFilter = 'alle';
+  let editingVormId = null;   // null = nieuwe, anders edit
+
+  // ===== Auth =====
   window.addEventListener('scorr:sidebar-logout', async () => {
     if (!confirm('Wil je uitloggen?')) return;
     try { await signOut(auth); } catch (e) {}
@@ -80,16 +339,303 @@
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
-    const teamId = user.email.split('@')[0];
-    let teamNaam = teamId;
+    huidigTeamId = user.email.split('@')[0];
+
+    let teamNaam = huidigTeamId;
     try {
-      const snap = await get(ref(db, 'teams/' + teamId));
-      if (snap.exists()) teamNaam = snap.val().naam || teamMapping[user.email] || teamId;
-      else teamNaam = teamMapping[user.email] || teamId;
-    } catch(e) { teamNaam = teamMapping[user.email] || teamId; }
+      const snap = await get(ref(db, 'teams/' + huidigTeamId));
+      if (snap.exists()) teamNaam = snap.val().naam || teamMapping[user.email] || huidigTeamId;
+      else teamNaam = teamMapping[user.email] || huidigTeamId;
+    } catch (e) { teamNaam = teamMapping[user.email] || huidigTeamId; }
+
     document.getElementById('team-naam').textContent = teamNaam;
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
+
+    listenToSchedule();
+    listenToEigenVormen();
+    renderSchedule();
+    renderToolbar();
+    renderVormen();
+  });
+
+  // ===== Weekschema =====
+  function listenToSchedule() {
+    onValue(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema'), (snap) => {
+      scheduleData = snap.exists() ? snap.val() : {};
+      renderSchedule();
+    });
+  }
+
+  function renderSchedule() {
+    const list = document.getElementById('schedule-list');
+    if (!list) return;
+    list.innerHTML = '';
+    DAGEN.forEach(d => {
+      const cfg = scheduleData[d.key] || {};
+      const actief = !!cfg.actief;
+      const row = document.createElement('div');
+      row.className = 'day-row' + (actief ? ' actief' : '');
+      row.innerHTML =
+        '<div class="row-top">' +
+          '<div class="day-name"><span class="dot"></span>' + d.label + '</div>' +
+          '<button type="button" class="toggle" aria-label="Aan of uit" data-dag="' + d.key + '"></button>' +
+        '</div>' +
+        '<div class="row-fields">' +
+          '<div class="field-mini"><label>Start</label><input type="time" data-dag="' + d.key + '" data-veld="start" value="' + (cfg.start || '19:00') + '"></div>' +
+          '<div class="field-mini"><label>Eind</label><input type="time" data-dag="' + d.key + '" data-veld="eind" value="' + (cfg.eind || '20:30') + '"></div>' +
+          '<div class="field-mini"><label>Veld</label><select data-dag="' + d.key + '" data-veld="veld">' +
+            ['A','B','C','D','E','F','n.v.t.'].map(v =>
+              '<option value="' + v + '"' + ((cfg.veld || 'A') === v ? ' selected' : '') + '>' + v + '</option>'
+            ).join('') +
+          '</select></div>' +
+        '</div>';
+      list.appendChild(row);
+    });
+
+    // Wire up toggles
+    list.querySelectorAll('.toggle').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const dag = btn.dataset.dag;
+        const huidig = !!(scheduleData[dag] && scheduleData[dag].actief);
+        const nieuwe = !huidig;
+        const data = Object.assign({ start:'19:00', eind:'20:30', veld:'A' }, scheduleData[dag] || {}, { actief: nieuwe });
+        try {
+          await set(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema/' + dag), data);
+        } catch (e) { console.warn('Schedule toggle mislukt', e); }
+      });
+    });
+
+    // Wire up field changes (debounced)
+    list.querySelectorAll('.row-fields input, .row-fields select').forEach(el => {
+      el.addEventListener('change', async () => {
+        const dag = el.dataset.dag;
+        const veld = el.dataset.veld;
+        const data = Object.assign({ start:'19:00', eind:'20:30', veld:'A', actief:true }, scheduleData[dag] || {});
+        data[veld] = el.value;
+        try {
+          await update(ref(db, 'teams/' + huidigTeamId + '/trainingen/schema/' + dag), data);
+        } catch (e) { console.warn('Schedule update mislukt', e); }
+      });
+    });
+  }
+
+  // ===== Eigen vormen =====
+  function listenToEigenVormen() {
+    onValue(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen'), (snap) => {
+      const lijst = [];
+      if (snap.exists()) snap.forEach(c => { lijst.push({ id: c.key, eigen: true, ...c.val() }); });
+      eigenVormen = lijst;
+      renderToolbar();
+      renderVormen();
+    });
+  }
+
+  // ===== Toolbar (filters) =====
+  function renderToolbar() {
+    const toolbar = document.getElementById('vorm-toolbar');
+    if (!toolbar) return;
+
+    const cats = new Set(['alle']);
+    BASIS_VORMEN.forEach(v => cats.add(v.categorie));
+    eigenVormen.forEach(v => v.categorie && cats.add(v.categorie));
+    if (eigenVormen.length > 0) cats.add('eigen');
+
+    const order = ['alle','eigen','warming-up','techniek','afwerken','partij','tactiek','aanvallend','verdedigend','conditie','anders'];
+    const sorted = order.filter(c => cats.has(c));
+
+    toolbar.innerHTML = '';
+    sorted.forEach(c => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'filter-chip' + (activeFilter === c ? ' active' : '');
+      chip.textContent = c === 'alle' ? 'Alle' : c === 'eigen' ? '⭐ Eigen' : (CATEGORIE_LABELS[c] || c);
+      chip.addEventListener('click', () => {
+        activeFilter = c;
+        renderToolbar();
+        renderVormen();
+      });
+      toolbar.appendChild(chip);
+    });
+  }
+
+  // ===== Vormen lijst =====
+  function renderVormen() {
+    const list = document.getElementById('vorm-list');
+    if (!list) return;
+
+    let alles = BASIS_VORMEN.map(v => ({ ...v, eigen: false }))
+      .concat(eigenVormen.map(v => ({ ...v, eigen: true, icon: v.icon || '⭐' })));
+
+    if (activeFilter === 'eigen') alles = alles.filter(v => v.eigen);
+    else if (activeFilter !== 'alle') alles = alles.filter(v => v.categorie === activeFilter);
+
+    list.innerHTML = '';
+
+    if (alles.length === 0) {
+      const e = document.createElement('div');
+      e.className = 'empty-hint';
+      e.textContent = 'Geen vormen in deze categorie.';
+      list.appendChild(e);
+      return;
+    }
+
+    alles.forEach(v => {
+      const row = document.createElement('div');
+      row.className = 'vorm-row' + (v.eigen ? ' eigen' : '');
+      const spelers = v.spelersMin && v.spelersMax
+        ? (v.spelersMin === v.spelersMax ? v.spelersMin + ' sp.' : v.spelersMin + '-' + v.spelersMax + ' sp.')
+        : (v.spelers || '');
+      const meta = [
+        CATEGORIE_LABELS[v.categorie] || v.categorie || '',
+        v.duur ? v.duur + ' min' : '',
+        spelers
+      ].filter(Boolean).join(' · ');
+      row.innerHTML =
+        '<div class="icon">' + (v.icon || '⚽') + '</div>' +
+        '<div class="info">' +
+          '<div class="naam">' + escapeHtml(v.naam || 'Onbekend') + (v.eigen ? '<span class="badge-eigen">EIGEN</span>' : '') + '</div>' +
+          '<div class="meta">' + escapeHtml(meta) + '</div>' +
+        '</div>' +
+        '<div class="arrow">›</div>';
+      row.addEventListener('click', () => openVormModal(v));
+      list.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  // ===== Vorm modal =====
+  const vModal     = document.getElementById('vorm-modal');
+  const vModalCard = document.getElementById('vorm-modal-card');
+  const vModalErr  = document.getElementById('vorm-modal-error');
+  const vTitle     = document.getElementById('vorm-modal-title');
+  const vMeta      = document.getElementById('vorm-modal-meta');
+  const vIcon      = document.getElementById('vorm-modal-icon');
+  const vRO        = document.getElementById('vorm-readonly');
+  const vED        = document.getElementById('vorm-edit');
+  const vBtnDel    = document.getElementById('v-delete');
+  const vBtnSave   = document.getElementById('v-save');
+
+  function openVormModal(v) {
+    editingVormId = v && v.eigen ? v.id : null;
+    vModalErr.classList.remove('show');
+
+    vIcon.textContent = v && v.icon ? v.icon : '⚽';
+    vTitle.textContent = (v && v.naam) || 'Nieuwe vorm';
+    const spelers = v && v.spelersMin && v.spelersMax
+      ? (v.spelersMin === v.spelersMax ? v.spelersMin + ' sp.' : v.spelersMin + '-' + v.spelersMax + ' sp.')
+      : '';
+    vMeta.textContent = v
+      ? [CATEGORIE_LABELS[v.categorie] || v.categorie, v.duur ? v.duur + ' min' : '', spelers].filter(Boolean).join(' · ')
+      : '';
+
+    if (!v) {
+      // Nieuwe eigen vorm
+      vModalCard.classList.add('eigen-mode');
+      vIcon.textContent = '⭐';
+      vRO.style.display = 'none';
+      vED.style.display = 'block';
+      vBtnDel.style.display = 'none';
+      document.getElementById('v-naam').value         = '';
+      document.getElementById('v-categorie').value    = 'techniek';
+      document.getElementById('v-duur').value         = '';
+      document.getElementById('v-spelers-min').value  = '';
+      document.getElementById('v-spelers-max').value  = '';
+      document.getElementById('v-doel').value         = '';
+      document.getElementById('v-beschrijving').value = '';
+    } else if (v.eigen) {
+      // Bewerk eigen vorm
+      vModalCard.classList.add('eigen-mode');
+      vRO.style.display = 'none';
+      vED.style.display = 'block';
+      vBtnDel.style.display = 'inline-flex';
+      document.getElementById('v-naam').value         = v.naam || '';
+      document.getElementById('v-categorie').value    = v.categorie || 'techniek';
+      document.getElementById('v-duur').value         = v.duur ?? '';
+      document.getElementById('v-spelers-min').value  = v.spelersMin ?? '';
+      document.getElementById('v-spelers-max').value  = v.spelersMax ?? '';
+      document.getElementById('v-doel').value         = v.doel || '';
+      document.getElementById('v-beschrijving').value = v.beschrijving || '';
+    } else {
+      // Read-only basis-vorm
+      vModalCard.classList.remove('eigen-mode');
+      vRO.style.display = 'block';
+      vED.style.display = 'none';
+      document.getElementById('ro-doel').textContent = v.doel || '—';
+      document.getElementById('ro-beschrijving').textContent = v.beschrijving || '—';
+    }
+
+    vModal.classList.add('open');
+  }
+
+  function closeVormModal() {
+    vModal.classList.remove('open');
+    editingVormId = null;
+  }
+
+  function showErr(msg) {
+    vModalErr.textContent = msg;
+    vModalErr.classList.add('show');
+  }
+
+  document.getElementById('add-vorm-btn').addEventListener('click', () => openVormModal(null));
+  document.getElementById('vorm-modal-close').addEventListener('click', closeVormModal);
+  document.getElementById('ro-close').addEventListener('click', closeVormModal);
+  document.getElementById('v-cancel').addEventListener('click', closeVormModal);
+  vModal.addEventListener('click', (e) => { if (e.target === vModal) closeVormModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && vModal.classList.contains('open')) closeVormModal(); });
+
+  vBtnSave.addEventListener('click', async () => {
+    const naam = document.getElementById('v-naam').value.trim();
+    if (!naam) return showErr('Vul een naam in.');
+
+    const data = {
+      naam,
+      categorie: document.getElementById('v-categorie').value,
+      duur: parseInt(document.getElementById('v-duur').value) || null,
+      spelersMin: parseInt(document.getElementById('v-spelers-min').value) || null,
+      spelersMax: parseInt(document.getElementById('v-spelers-max').value) || null,
+      doel: document.getElementById('v-doel').value.trim(),
+      beschrijving: document.getElementById('v-beschrijving').value.trim(),
+      icon: '⭐',
+      bijgewerkt: Date.now()
+    };
+
+    vBtnSave.disabled = true;
+    vBtnSave.textContent = 'Opslaan...';
+    try {
+      if (editingVormId) {
+        await set(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen/' + editingVormId), {
+          ...data,
+          aangemaakt: data.aangemaakt || data.bijgewerkt
+        });
+      } else {
+        const newRef = push(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen'));
+        await set(newRef, { ...data, aangemaakt: data.bijgewerkt });
+      }
+      closeVormModal();
+    } catch (e) {
+      showErr('Opslaan mislukt: ' + (e.message || e));
+    } finally {
+      vBtnSave.disabled = false;
+      vBtnSave.textContent = 'Opslaan';
+    }
+  });
+
+  vBtnDel.addEventListener('click', async () => {
+    if (!editingVormId) return;
+    if (!confirm('Eigen trainingsvorm verwijderen?')) return;
+    try {
+      await remove(ref(db, 'teams/' + huidigTeamId + '/trainingsvormen/' + editingVormId));
+      closeVormModal();
+    } catch (e) {
+      showErr('Verwijderen mislukt: ' + (e.message || e));
+    }
   });
 </script>
 

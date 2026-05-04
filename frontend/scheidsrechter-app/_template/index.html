@@ -1666,21 +1666,29 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             }
         };
 
-        document.getElementById('wisselBtn').addEventListener('click', () => window.openOpstellingModal(false));
-        document.getElementById('wisselCloseBtn').addEventListener('click', closeOpstellingModal);
-        document.getElementById('wisselSluitBtn').addEventListener('click', closeOpstellingModal);
-        document.getElementById('wissel-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'wissel-modal') closeOpstellingModal();
-        });
-
-        // Formatie-chip clicks
-        document.querySelectorAll('.formatie-chip').forEach(btn => {
-            btn.addEventListener('click', () => switchFormatie(btn.dataset.formatie));
-        });
-
-        // Picker buttons
-        document.getElementById('opst-picker-cancel').addEventListener('click', closeOpstPicker);
-        document.getElementById('opst-picker-clear').addEventListener('click', clearPickerPosition);
+        // Modal HTML staat verderop in body — bind via DOMContentLoaded
+        function _setupOpstellingHandlers() {
+            const wBtn   = document.getElementById('wisselBtn');
+            const closeB = document.getElementById('wisselCloseBtn');
+            const klaarB = document.getElementById('wisselSluitBtn');
+            const modalE = document.getElementById('wissel-modal');
+            const cancelP = document.getElementById('opst-picker-cancel');
+            const clearP  = document.getElementById('opst-picker-clear');
+            if (wBtn)    wBtn.addEventListener('click', () => window.openOpstellingModal(false));
+            if (closeB)  closeB.addEventListener('click', closeOpstellingModal);
+            if (klaarB)  klaarB.addEventListener('click', closeOpstellingModal);
+            if (modalE)  modalE.addEventListener('click', (e) => { if (e.target.id === 'wissel-modal') closeOpstellingModal(); });
+            if (cancelP) cancelP.addEventListener('click', closeOpstPicker);
+            if (clearP)  clearP.addEventListener('click', clearPickerPosition);
+            document.querySelectorAll('.formatie-chip').forEach(btn => {
+                btn.addEventListener('click', () => switchFormatie(btn.dataset.formatie));
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', _setupOpstellingHandlers);
+        } else {
+            _setupOpstellingHandlers();
+        }
 
         function closeOpstellingModal() {
             document.getElementById('wissel-modal').style.display = 'none';

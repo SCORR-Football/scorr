@@ -1628,21 +1628,8 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         document.getElementById('downloadBtn').addEventListener('click', downloadMatchReport);
 
         // ===== WISSELBELEID — Opstelling met formatie =====
-        // Formaties per aantal veldspelers (KNVB jeugdrichtlijnen).
+        // Formaties per aantal veldspelers (KNVB jeugdrichtlijnen vanaf JO8).
         const FORMATIES = {
-            // 4v4 voor JO7
-            '1-1-2': { aantal: 4, posities: [
-                { key:'gk',  label:'GK',  x:110, y:280 },
-                { key:'cv',  label:'V',   x:110, y:200 },
-                { key:'la',  label:'A',   x:75,  y:90 },
-                { key:'ra',  label:'A',   x:145, y:90 }
-            ]},
-            '2-1-1': { aantal: 4, posities: [
-                { key:'lv',  label:'V',   x:80,  y:240 },
-                { key:'rv',  label:'V',   x:140, y:240 },
-                { key:'cm',  label:'M',   x:110, y:155 },
-                { key:'st',  label:'A',   x:110, y:75 }
-            ]},
             // 6v6 voor JO8-JO10
             '1-2-2-1': { aantal: 6, posities: [
                 { key:'gk',  label:'GK',  x:110, y:288 },
@@ -1757,7 +1744,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             return f.aantal || (Array.isArray(f) ? f.length : 11);
         }
 
-        // KNVB leeftijdcategorieën
+        // KNVB leeftijdcategorieën (vanaf JO8 — JO7 doet niet mee in deze app)
         function detectLeeftijdsCategorie() {
             const teamId   = (window._huidigTeamId || '').toLowerCase();
             const teamNaam = (window._huidigTeamNaam || '').toLowerCase();
@@ -1765,27 +1752,25 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             const m1 = teamId.match(/^[a-z]+(\d{1,2})-/);
             if (m1) {
                 const n = parseInt(m1[1], 10);
-                if (n >= 4 && n <= 19) return { jeugd: true, leeftijd: n };
+                if (n >= 8 && n <= 19) return { jeugd: true, leeftijd: n };
                 // n=1/2/3 = senior team-nummers, geen leeftijd
             }
             // Pattern 2: teamNaam zoals "JO10-2" of "Onder 10" of "MO12"
             const m2 = teamNaam.match(/(?:jo|mo|onder)\s?(\d{1,2})/);
             if (m2) {
                 const n = parseInt(m2[1], 10);
-                if (n >= 4 && n <= 19) return { jeugd: true, leeftijd: n };
+                if (n >= 8 && n <= 19) return { jeugd: true, leeftijd: n };
             }
             return { jeugd: false, leeftijd: 19 }; // default senior (11v11)
         }
 
         function aantalSpelersInVeld(leeftijd) {
-            if (leeftijd <= 7)  return 4;
             if (leeftijd <= 10) return 6;
             if (leeftijd <= 12) return 8;
             return 11;
         }
 
         function defaultFormatieVoorAantal(aantal) {
-            if (aantal === 4)  return '1-1-2';
             if (aantal === 6)  return '1-2-2-1';
             if (aantal === 8)  return '1-3-3-1';
             return '4-3-3';

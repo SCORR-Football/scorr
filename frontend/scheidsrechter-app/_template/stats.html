@@ -18,13 +18,34 @@
   body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 16px 40px 16px; }
   .page { max-width:560px; margin:0 auto; }
 
-  .page-header { text-align:center; margin-bottom:20px; }
+  .page-header { text-align:center; margin-bottom:18px; }
   .page-header .scorr { font-size:28px; font-weight:900; color:var(--scorr-electric); letter-spacing:-1px; }
   .page-header .sub { font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
 
-  .summary-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding:0 4px; gap:10px; flex-wrap:wrap; }
-  .summary-bar .count { font-size:13px; color:rgba(240,244,255,0.55); letter-spacing:1.5px; text-transform:uppercase; }
-  .summary-bar .sort { display:flex; gap:6px; flex-wrap:wrap; }
+  /* Summary metrics rij */
+  .metrics { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:14px; }
+  .metric {
+    background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
+    border-radius:10px; padding:10px 8px; text-align:center;
+  }
+  .metric .v { font-size:22px; font-weight:900; color:var(--scorr-text); line-height:1; }
+  .metric .l { font-size:10px; color:rgba(240,244,255,0.55); margin-top:4px; letter-spacing:1px; text-transform:uppercase; }
+
+  /* Tabs */
+  .tabs { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+  .tab-btn {
+    flex:1; min-width:90px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+    border-radius:10px; padding:11px 8px; font-size:12px; font-weight:700;
+    color:rgba(240,244,255,0.7); cursor:pointer; font-family:'Lexend',sans-serif;
+    letter-spacing:0.3px; min-height:44px;
+  }
+  .tab-btn.active { background:rgba(0,255,136,0.12); border-color:rgba(0,255,136,0.4); color:var(--scorr-electric); }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* Sort row binnen Spelers tab */
+  .sort-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
   .sort-chip {
     background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
     border-radius:14px; padding:6px 10px; font-size:11px; font-weight:700;
@@ -33,76 +54,161 @@
   }
   .sort-chip.active { background:rgba(0,255,136,0.12); border-color:rgba(0,255,136,0.4); color:var(--scorr-electric); }
 
+  /* Topscorers */
+  .ts-list { display:flex; flex-direction:column; gap:6px; }
+  .ts-row {
+    display:flex; align-items:center; gap:12px;
+    background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px; padding:11px 14px;
+  }
+  .ts-row.top { background:#232C54; border-color:rgba(0,255,136,0.25); }
+  .ts-row .pos {
+    width:32px; height:32px; border-radius:50%;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:900; color:rgba(240,244,255,0.6);
+    flex-shrink:0;
+  }
+  .ts-row.top.r1 .pos { background:rgba(255,184,0,0.2); border-color:#FFB800; color:#FFB800; }
+  .ts-row.top.r2 .pos { background:rgba(192,192,192,0.2); border-color:#C0C0C0; color:#E0E0E0; }
+  .ts-row.top.r3 .pos { background:rgba(205,127,50,0.25); border-color:#CD7F32; color:#E0A06B; }
+  .ts-row .info { flex:1; min-width:0; }
+  .ts-row .info .naam { font-size:14px; font-weight:700; color:var(--scorr-text); }
+  .ts-row .info .meta { font-size:11px; color:rgba(240,244,255,0.5); margin-top:2px; }
+  .ts-row .goals {
+    background:rgba(0,255,136,0.12); border:1px solid rgba(0,255,136,0.35);
+    color:var(--scorr-electric); border-radius:8px; padding:5px 10px;
+    font-size:14px; font-weight:900; letter-spacing:0.3px;
+    display:inline-flex; align-items:center; gap:4px;
+  }
+  .ts-toggle {
+    width:100%; background:rgba(0,255,136,0.06); color:var(--scorr-electric);
+    border:1px dashed rgba(0,255,136,0.3); border-radius:10px;
+    padding:11px; font-size:12px; font-weight:700; font-family:'Lexend',sans-serif;
+    cursor:pointer; letter-spacing:0.5px; margin-top:8px;
+  }
+
+  /* Wedstrijden lijst */
+  .w-list { display:flex; flex-direction:column; gap:8px; }
+  .w-row {
+    background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px; padding:12px 14px; cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+    display:flex; align-items:center; gap:12px;
+  }
+  .w-row:hover { border-color:rgba(0,255,136,0.25); background:#232C54; }
+  .w-row .datum {
+    width:50px; flex-shrink:0; text-align:center;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px; padding:6px 4px;
+  }
+  .w-row .datum .dag { font-size:18px; font-weight:900; color:var(--scorr-text); line-height:1; }
+  .w-row .datum .mnd { font-size:9px; text-transform:uppercase; color:rgba(240,244,255,0.55); letter-spacing:1px; margin-top:2px; }
+  .w-row .info { flex:1; min-width:0; }
+  .w-row .info .teams { font-size:14px; font-weight:700; color:var(--scorr-text); }
+  .w-row .info .meta  { font-size:11px; color:rgba(240,244,255,0.5); margin-top:2px; }
+  .w-row .uitslag {
+    font-size:18px; font-weight:900; color:var(--scorr-text);
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px; padding:6px 10px; text-align:center; min-width:50px;
+  }
+  .w-row .uitslag.win  { background:rgba(0,255,136,0.1); border-color:rgba(0,255,136,0.3); color:#00FF88; }
+  .w-row .uitslag.lose { background:rgba(255,59,92,0.1); border-color:rgba(255,59,92,0.3); color:#FF3B5C; }
+  .w-row .uitslag.tie  { background:rgba(255,184,0,0.1); border-color:rgba(255,184,0,0.3); color:#FFB800; }
+  .w-row .arrow { color:rgba(240,244,255,0.3); font-size:18px; flex-shrink:0; }
+
+  /* Spelers tab (bestaand) */
   .stats-list { display:flex; flex-direction:column; gap:8px; }
   .speler-card {
     background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
-    border-radius:12px; overflow:hidden;
-    transition:border-color .15s ease;
+    border-radius:12px; overflow:hidden; transition:border-color .15s ease;
   }
-  .speler-card:hover { border-color:rgba(0,255,136,0.25); }
   .speler-card.open { border-color:rgba(0,255,136,0.35); }
-  .speler-head {
-    display:flex; align-items:center; gap:14px; padding:13px 14px; cursor:pointer; user-select:none;
-  }
+  .speler-head { display:flex; align-items:center; gap:12px; padding:12px 14px; cursor:pointer; user-select:none; }
   .speler-head .nr { width:42px; height:42px; border-radius:10px; background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.25); color:var(--scorr-electric); font-weight:900; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .speler-head .info { flex:1; min-width:0; }
   .speler-head .info .naam { font-size:15px; font-weight:700; color:var(--scorr-text); }
   .speler-head .info .meta { font-size:11px; color:rgba(240,244,255,0.5); margin-top:2px; }
-  .speler-head .quick-stats { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .speler-head .quick-stats { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
   .speler-head .stat-badge {
     background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
     color:rgba(240,244,255,0.85); border-radius:7px;
     padding:3px 7px; font-size:11px; font-weight:700; letter-spacing:0.3px;
-    display:inline-flex; align-items:center; gap:3px;
   }
   .speler-head .stat-badge.goal { background:rgba(0,255,136,0.1); border-color:rgba(0,255,136,0.3); color:var(--scorr-electric); }
   .speler-head .stat-badge.yel  { background:rgba(255,184,0,0.12); border-color:rgba(255,184,0,0.35); color:var(--scorr-yellow); }
   .speler-head .stat-badge.red  { background:rgba(255,59,92,0.12); border-color:rgba(255,59,92,0.35); color:var(--scorr-accent); }
   .speler-head .arrow { color:rgba(240,244,255,0.3); font-size:18px; flex-shrink:0; transition:transform .2s ease; }
   .speler-card.open .speler-head .arrow { transform:rotate(90deg); }
-
   .speler-body { display:none; padding:0 14px 14px 14px; border-top:1px solid rgba(255,255,255,0.06); }
   .speler-card.open .speler-body { display:block; padding-top:12px; }
-
-  .totaal-grid {
-    display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:14px;
-  }
-  .totaal-cell {
-    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
-    border-radius:8px; padding:8px 6px; text-align:center;
-  }
+  .totaal-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:12px; }
+  .totaal-cell { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:8px 6px; text-align:center; }
   .totaal-cell .v { font-size:18px; font-weight:900; color:var(--scorr-text); line-height:1.1; }
   .totaal-cell .l { font-size:9px; color:rgba(240,244,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
 
-  .wedstrijd-block { margin-bottom:10px; padding:10px 12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:10px; }
-  .wedstrijd-block .wh { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; }
-  .wedstrijd-block .wh .t { font-size:13px; font-weight:700; color:var(--scorr-text); }
-  .wedstrijd-block .wh .d { font-size:10px; color:rgba(240,244,255,0.5); margin-top:1px; letter-spacing:0.5px; }
-  .wedstrijd-block .wh .uitslag { font-size:13px; font-weight:900; color:var(--scorr-text); white-space:nowrap; }
-  .wedstrijd-block .stats-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
-  .wedstrijd-block .stat-pill {
-    font-size:10px; font-weight:600; padding:3px 7px; border-radius:5px;
-    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-    color:rgba(240,244,255,0.85); display:inline-flex; align-items:center; gap:3px;
-  }
-  .wedstrijd-block .stat-pill.muted { color:rgba(240,244,255,0.45); }
+  /* Wedstrijd detail modal */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
+  .modal-overlay.open { display:flex; }
+  .modal-card { position:relative; background:var(--scorr-slate); border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:24px 18px 18px 18px; width:100%; max-width:520px; }
+  .modal-card .close-x { position:absolute; top:10px; right:10px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:50%; color:rgba(240,244,255,0.7); font-size:18px; line-height:1; cursor:pointer; padding:0; }
 
-  .empty-stats { text-align:center; background:var(--scorr-slate); border:1px dashed rgba(255,255,255,0.12); border-radius:14px; padding:32px 20px; }
-  .empty-stats .ico { font-size:36px; margin-bottom:10px; }
-  .empty-stats h3 { font-size:15px; font-weight:700; margin-bottom:6px; }
-  .empty-stats p { font-size:13px; color:rgba(240,244,255,0.55); line-height:1.5; }
+  .det-header { text-align:center; margin-bottom:16px; padding-right:30px; }
+  .det-header .teams { font-size:18px; font-weight:700; color:var(--scorr-text); }
+  .det-header .uitslag { font-size:36px; font-weight:900; color:var(--scorr-text); margin-top:6px; line-height:1; letter-spacing:-1px; }
+  .det-header .meta { font-size:11px; color:rgba(240,244,255,0.5); margin-top:6px; letter-spacing:0.5px; }
+
+  .det-section { margin-top:14px; }
+  .det-section .label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.55); font-weight:700; margin-bottom:8px; }
+
+  .timeline { display:flex; flex-direction:column; gap:5px; }
+  .tl-event {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:8px 10px; border-radius:9px;
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+  }
+  .tl-event.goal-eigen { background:rgba(0,255,136,0.08); border-color:rgba(0,255,136,0.25); }
+  .tl-event.goal-tegen { background:rgba(255,59,92,0.08); border-color:rgba(255,59,92,0.25); }
+  .tl-event.kaart      { background:rgba(255,184,0,0.06); border-color:rgba(255,184,0,0.2); }
+  .tl-event.wissel     { background:rgba(123,97,255,0.06); border-color:rgba(123,97,255,0.2); }
+  .tl-event.half       { background:rgba(255,255,255,0.04); border-style:dashed; }
+  .tl-event .min { font-size:13px; font-weight:900; color:rgba(240,244,255,0.85); min-width:36px; text-align:right; padding-top:1px; }
+  .tl-event .ico { font-size:14px; flex-shrink:0; }
+  .tl-event .txt { flex:1; min-width:0; font-size:12.5px; color:var(--scorr-text); line-height:1.45; }
+  .tl-event .stand { font-size:11px; color:rgba(240,244,255,0.55); font-weight:700; margin-left:4px; }
+
+  .empty-events { text-align:center; padding:14px 8px; color:rgba(240,244,255,0.4); font-size:12px; }
+
+  .det-opstelling-pills { display:flex; flex-wrap:wrap; gap:5px; }
+  .det-opstelling-pills .ppl {
+    font-size:11px; padding:4px 8px; border-radius:10px;
+    background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.25);
+    color:var(--scorr-text); display:inline-flex; align-items:center; gap:4px;
+  }
+  .det-opstelling-pills .ppl .nr { font-weight:900; color:var(--scorr-electric); font-size:10px; }
+  .det-opstelling-pills .ppl.bank { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.12); }
+  .det-opstelling-pills .ppl.bank .nr { color:rgba(240,244,255,0.6); }
+
+  .empty-state {
+    text-align:center; background:var(--scorr-slate); border:1px dashed rgba(255,255,255,0.12);
+    border-radius:14px; padding:32px 20px;
+  }
+  .empty-state .ico { font-size:36px; margin-bottom:10px; }
+  .empty-state h3 { font-size:15px; font-weight:700; margin-bottom:6px; }
+  .empty-state p { font-size:13px; color:rgba(240,244,255,0.55); line-height:1.5; }
 
   .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); font-size:13px; letter-spacing:1px; }
 
   @media (max-width: 480px) {
     body { padding:54px 12px 30px 12px; }
-    .speler-head { padding:11px 12px; gap:10px; }
-    .speler-head .nr { width:40px; height:40px; font-size:14px; }
-    .speler-head .info .naam { font-size:14px; }
-    .totaal-grid { gap:5px; }
-    .totaal-cell .v { font-size:16px; }
-    .speler-card, .speler-head, .sort-chip { touch-action: manipulation; }
+    .metric .v { font-size:18px; }
+    .speler-head, .ts-row, .w-row { padding:11px 12px; }
+    .w-row .datum { width:46px; }
+    .w-row .uitslag { font-size:16px; min-width:46px; }
+    .det-header .uitslag { font-size:30px; }
+    .modal-card { padding:22px 14px 14px 14px; }
   }
+  .tab-btn, .sort-chip, .ts-row, .w-row, .speler-card, .speler-head { touch-action: manipulation; }
 </style>
 </head>
 <body>
@@ -116,23 +222,67 @@
       <div class="sub" id="team-naam">Statistieken</div>
     </div>
 
-    <div class="summary-bar">
-      <div class="count" id="speler-count">0 spelers · 0 wedstrijden</div>
-      <div class="sort">
+    <!-- Summary metrics -->
+    <div class="metrics">
+      <div class="metric"><div class="v" id="m-wedstrijden">0</div><div class="l">Wedstrijden</div></div>
+      <div class="metric"><div class="v" id="m-goals">0</div><div class="l">Doelpunten</div></div>
+      <div class="metric"><div class="v" id="m-spelers">0</div><div class="l">Spelers</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button type="button" class="tab-btn active" data-tab="topscorers">🏆 Topscorers</button>
+      <button type="button" class="tab-btn" data-tab="wedstrijden">📅 Wedstrijden</button>
+      <button type="button" class="tab-btn" data-tab="spelers">👥 Spelers</button>
+    </div>
+
+    <!-- Tab: Topscorers -->
+    <div id="tab-topscorers" class="tab-content active">
+      <div id="ts-list" class="ts-list"></div>
+      <button type="button" id="ts-toggle-btn" class="ts-toggle" style="display:none;">▾ Toon alle</button>
+    </div>
+
+    <!-- Tab: Wedstrijden -->
+    <div id="tab-wedstrijden" class="tab-content">
+      <div id="w-list" class="w-list"></div>
+    </div>
+
+    <!-- Tab: Spelers -->
+    <div id="tab-spelers" class="tab-content">
+      <div class="sort-row">
         <button type="button" class="sort-chip active" data-sort="rugnr">Rugnr</button>
         <button type="button" class="sort-chip"        data-sort="goals">Goals</button>
         <button type="button" class="sort-chip"        data-sort="minuten">Minuten</button>
         <button type="button" class="sort-chip"        data-sort="wedstrijden">Wedstr.</button>
       </div>
+      <div id="stats-list" class="stats-list"></div>
     </div>
 
-    <div id="empty-state" class="empty-stats" style="display:none;">
+    <div id="empty-state" class="empty-state" style="display:none;">
       <div class="ico">📊</div>
       <h3>Nog geen statistieken</h3>
       <p>Speel een paar wedstrijden met je opstelling samengesteld en hier verschijnen automatisch alle stats per speler.</p>
     </div>
+  </div>
+</div>
 
-    <div id="stats-list" class="stats-list"></div>
+<!-- Wedstrijd-detail modal -->
+<div id="w-detail-modal" class="modal-overlay">
+  <div class="modal-card">
+    <button type="button" class="close-x" id="wd-close">×</button>
+    <div class="det-header">
+      <div class="teams" id="wd-teams">—</div>
+      <div class="uitslag" id="wd-uitslag">–</div>
+      <div class="meta" id="wd-meta"></div>
+    </div>
+    <div class="det-section">
+      <div class="label">⏱ Score-verloop</div>
+      <div id="wd-timeline" class="timeline"></div>
+    </div>
+    <div class="det-section" id="wd-opstelling-section" style="display:none;">
+      <div class="label">📋 Opstelling</div>
+      <div id="wd-opstelling" class="det-opstelling-pills"></div>
+    </div>
   </div>
 </div>
 
@@ -163,10 +313,12 @@
   };
 
   let huidigTeamId = null;
-  let teamNaam = '';
-  let alleSpelers = [];      // {id, voornaam, rugnummer, ...}
-  let alleWedstrijden = [];  // [{id, ...wData}]
+  let huidigTeamNaam = '';
+  let alleSpelers = [];
+  let alleWedstrijden = [];
+  let activeTab = 'topscorers';
   let activeSort = 'rugnr';
+  let topscorersExpanded = false;
 
   window.addEventListener('scorr:sidebar-logout', async () => {
     if (!confirm('Wil je uitloggen?')) return;
@@ -184,21 +336,21 @@
       if (snap.exists()) tNaam = snap.val().naam || teamMapping[user.email] || huidigTeamId;
       else tNaam = teamMapping[user.email] || huidigTeamId;
     } catch (e) { tNaam = teamMapping[user.email] || huidigTeamId; }
-    teamNaam = tNaam;
-    document.getElementById('team-naam').textContent = teamNaam;
+    huidigTeamNaam = tNaam;
+    document.getElementById('team-naam').textContent = huidigTeamNaam;
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
 
     listenToData();
+    wireTabs();
     wireSort();
+    wireDetailModal();
   });
 
   function listenToData() {
     onValue(ref(db, 'teams/' + huidigTeamId + '/spelers'), (snap) => {
       const lijst = [];
-      if (snap.exists()) {
-        snap.forEach((c) => { lijst.push({ id: c.key, ...c.val() }); });
-      }
+      if (snap.exists()) snap.forEach(c => { lijst.push({ id: c.key, ...c.val() }); });
       lijst.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
       alleSpelers = lijst;
       laadWedstrijden();
@@ -210,22 +362,29 @@
       const snap = await get(ref(db, 'wedstrijden'));
       const lijst = [];
       if (snap.exists()) {
-        snap.forEach((child) => {
+        snap.forEach(child => {
           const d = child.val();
-          if (d && d.teamId === huidigTeamId) {
-            lijst.push({ id: child.key, ...d });
-          }
+          if (d && d.teamId === huidigTeamId) lijst.push({ id: child.key, ...d });
         });
       }
-      // Sorteer op datum desc
-      lijst.sort((a, b) => (b.datum + (b.tijdstip || '') ).localeCompare(a.datum + (a.tijdstip || '')));
+      lijst.sort((a, b) => (b.datum + (b.tijdstip || '')).localeCompare(a.datum + (a.tijdstip || '')));
       alleWedstrijden = lijst;
-      render();
+      renderAll();
     } catch (e) {
       console.warn('Laden wedstrijden mislukt', e);
       alleWedstrijden = [];
-      render();
+      renderAll();
     }
+  }
+
+  function wireTabs() {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        activeTab = b.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.toggle('active', x.dataset.tab === activeTab));
+        document.querySelectorAll('.tab-content').forEach(x => x.classList.toggle('active', x.id === 'tab-' + activeTab));
+      });
+    });
   }
 
   function wireSort() {
@@ -233,8 +392,22 @@
       c.addEventListener('click', () => {
         activeSort = c.dataset.sort;
         document.querySelectorAll('.sort-chip').forEach(x => x.classList.toggle('active', x.dataset.sort === activeSort));
-        render();
+        renderSpelers();
       });
+    });
+    document.getElementById('ts-toggle-btn').addEventListener('click', () => {
+      topscorersExpanded = !topscorersExpanded;
+      renderTopscorers();
+    });
+  }
+
+  function wireDetailModal() {
+    document.getElementById('wd-close').addEventListener('click', closeDetailModal);
+    document.getElementById('w-detail-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'w-detail-modal') closeDetailModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('w-detail-modal').classList.contains('open')) closeDetailModal();
     });
   }
 
@@ -244,10 +417,8 @@
     }[c]));
   }
 
-  // Probeer een speler-id te vinden voor een event obv rugnummer + naam
   function matchSpelerForEvent(ev, spelersById) {
     if (ev.spelerId && spelersById[ev.spelerId]) return ev.spelerId;
-    // Parse rugnummer uit omschrijving "#9 Tim"
     const m = (ev.omschrijving || '').match(/#(\d+)\s+([^\s(]+)/);
     if (m) {
       const nr = Number(m[1]);
@@ -255,18 +426,19 @@
       for (const id in spelersById) {
         const s = spelersById[id];
         if (Number(s.rugnummer) === nr && (s.voornaam || '').toLowerCase() === naam) return id;
-        if (Number(s.rugnummer) === nr) return id; // fallback alleen op rugnummer
+      }
+      // fallback alleen op rugnummer
+      for (const id in spelersById) {
+        const s = spelersById[id];
+        if (Number(s.rugnummer) === nr) return id;
       }
     }
     return null;
   }
 
   function aggregeer() {
-    // spelersById index
     const spelersById = {};
     alleSpelers.forEach(s => { spelersById[s.id] = s; });
-
-    // Per speler: stats + per-wedstrijd record
     const stats = {};
     alleSpelers.forEach(s => {
       stats[s.id] = {
@@ -276,12 +448,9 @@
         perWedstrijd: []
       };
     });
-
     alleWedstrijden.forEach(w => {
       const opst = w.opstelling || {};
       const events = w.events ? Object.values(w.events) : [];
-
-      // Per speler in deze wedstrijd
       const wPerSpeler = {};
       Object.keys(opst).forEach(sId => {
         const o = opst[sId];
@@ -294,21 +463,15 @@
           goals: [], geleKaarten: [], rodeKaarten: []
         };
       });
-
-      // Verwerk events
       events.forEach(ev => {
         const sId = matchSpelerForEvent(ev, spelersById);
         if (!sId) return;
-        if (!wPerSpeler[sId]) wPerSpeler[sId] = {
-          minGespeeld: 0, minBank: 0, goals: [], geleKaarten: [], rodeKaarten: []
-        };
+        if (!wPerSpeler[sId]) wPerSpeler[sId] = { minGespeeld:0, minBank:0, goals:[], geleKaarten:[], rodeKaarten:[] };
         const minuut = ev.minuut != null ? ev.minuut : '?';
         if (ev.type === 'goal') wPerSpeler[sId].goals.push(minuut);
         else if (ev.type === 'yellow-card' || ev.type === 'yellow') wPerSpeler[sId].geleKaarten.push(minuut);
         else if (ev.type === 'red-card' || ev.type === 'red') wPerSpeler[sId].rodeKaarten.push(minuut);
       });
-
-      // Aggregeer naar speler-stats
       Object.keys(wPerSpeler).forEach(sId => {
         const s = stats[sId];
         if (!s) return;
@@ -322,67 +485,173 @@
         s.rodeKaarten     += w_.rodeKaarten.length;
         if (meedaan || w_.minBank > 0) {
           s.perWedstrijd.push({
-            wId: w.id,
-            datum: w.datum,
-            thuis: w.thuisteam,
-            uit: w.uitteam,
+            wId: w.id, datum: w.datum,
+            thuis: w.thuisteam, uit: w.uitteam,
             score: (w.thuisscore != null && w.uitscore != null) ? (w.thuisscore + '–' + w.uitscore) : null,
             ...w_
           });
         }
       });
     });
-
     return Object.values(stats);
   }
 
-  function sorteerStats(arr) {
-    const sorted = arr.slice();
-    if (activeSort === 'rugnr') {
-      sorted.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
-    } else if (activeSort === 'goals') {
-      sorted.sort((a, b) => b.goals - a.goals || (Number(a.rugnummer||0) - Number(b.rugnummer||0)));
-    } else if (activeSort === 'minuten') {
-      sorted.sort((a, b) => b.minutenGespeeld - a.minutenGespeeld);
-    } else if (activeSort === 'wedstrijden') {
-      sorted.sort((a, b) => b.wedstrijden - a.wedstrijden);
-    }
-    return sorted;
-  }
+  function renderAll() {
+    const wTotaal = alleWedstrijden.length;
+    let totalGoals = 0;
+    alleWedstrijden.forEach(w => {
+      // tel goals via events of via uitslag-thuisscore-eigen-team
+      if (w.events) {
+        Object.values(w.events).forEach(ev => { if (ev.type === 'goal' && eventIsEigenTeam(ev, w)) totalGoals++; });
+      }
+    });
+    document.getElementById('m-wedstrijden').textContent = wTotaal;
+    document.getElementById('m-goals').textContent = totalGoals;
+    document.getElementById('m-spelers').textContent = alleSpelers.length;
 
-  function render() {
-    const list = document.getElementById('stats-list');
     const empty = document.getElementById('empty-state');
-    const countEl = document.getElementById('speler-count');
-
-    if (alleSpelers.length === 0) {
-      list.innerHTML = '';
+    if (alleSpelers.length === 0 && alleWedstrijden.length === 0) {
       empty.style.display = 'block';
-      countEl.textContent = '0 spelers · ' + alleWedstrijden.length + ' wedstrijden';
+      document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
       return;
     }
     empty.style.display = 'none';
-    countEl.textContent = alleSpelers.length + (alleSpelers.length === 1 ? ' speler · ' : ' spelers · ')
-                       + alleWedstrijden.length + (alleWedstrijden.length === 1 ? ' wedstrijd' : ' wedstrijden');
+    // Re-apply active state
+    document.querySelectorAll('.tab-content').forEach(x => x.style.display = '');
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.toggle('active', x.id === 'tab-' + activeTab));
 
-    const stats = sorteerStats(aggregeer());
+    renderTopscorers();
+    renderWedstrijden();
+    renderSpelers();
+  }
+
+  function eventIsEigenTeam(ev, w) {
+    // Event 'goal' met omschrijving die het eigen team noemt
+    const desc = (ev.omschrijving || '').toLowerCase();
+    const ownNaam = (huidigTeamNaam || '').toLowerCase();
+    return ownNaam && desc.includes(ownNaam);
+  }
+
+  function renderTopscorers() {
+    const tsList = document.getElementById('ts-list');
+    const toggleBtn = document.getElementById('ts-toggle-btn');
+    const stats = aggregeer().filter(s => s.goals > 0).sort((a,b) => b.goals - a.goals || (Number(a.rugnummer||0)-Number(b.rugnummer||0)));
+
+    if (stats.length === 0) {
+      tsList.innerHTML = '<div class="empty-events">Nog geen doelpunten geregistreerd.</div>';
+      toggleBtn.style.display = 'none';
+      return;
+    }
+    const totaal = stats.length;
+    const top5  = stats.slice(0, 5);
+    const rest  = stats.slice(5);
+    const visible = topscorersExpanded ? stats : top5;
+
+    tsList.innerHTML = '';
+    visible.forEach((s, idx) => {
+      const row = document.createElement('div');
+      const isTop = idx < 3;
+      row.className = 'ts-row' + (isTop ? ' top r' + (idx + 1) : '');
+      row.innerHTML =
+        '<div class="pos">' + (idx + 1) + '</div>' +
+        '<div class="info">' +
+          '<div class="naam">' + escapeHtml(s.voornaam || 'Onbekend') + '</div>' +
+          '<div class="meta">#' + (s.rugnummer ?? '?') + ' · ' + s.wedstrijden + ' wedstr.</div>' +
+        '</div>' +
+        '<div class="goals">⚽ ' + s.goals + '</div>';
+      tsList.appendChild(row);
+    });
+
+    if (totaal > 5) {
+      toggleBtn.style.display = 'block';
+      toggleBtn.textContent = topscorersExpanded ? '▴ Toon alleen top 5' : '▾ Toon alle ' + totaal;
+    } else {
+      toggleBtn.style.display = 'none';
+    }
+  }
+
+  function renderWedstrijden() {
+    const wList = document.getElementById('w-list');
+    if (alleWedstrijden.length === 0) {
+      wList.innerHTML = '<div class="empty-events">Nog geen wedstrijden gespeeld.</div>';
+      return;
+    }
+    const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    wList.innerHTML = '';
+    alleWedstrijden.forEach(w => {
+      const row = document.createElement('div');
+      row.className = 'w-row';
+      let dag = '?', mnd = '';
+      try {
+        const d = new Date(w.datum);
+        if (!isNaN(d.getTime())) { dag = d.getDate(); mnd = months[d.getMonth()]; }
+      } catch (e) {}
+
+      // Bepaal uitslag-kleur
+      const eigenIsThuis = (w.thuisteam || '').toLowerCase() === (huidigTeamNaam || '').toLowerCase();
+      let uitslagClass = '', uitslagTxt = '–';
+      const tScore = w.thuisscore, uScore = w.uitscore;
+      if (tScore != null && uScore != null) {
+        uitslagTxt = tScore + '–' + uScore;
+        const eigen = eigenIsThuis ? tScore : uScore;
+        const tegen = eigenIsThuis ? uScore : tScore;
+        if (eigen > tegen) uitslagClass = 'win';
+        else if (eigen < tegen) uitslagClass = 'lose';
+        else uitslagClass = 'tie';
+      }
+
+      const meta = [
+        w.klasse || '',
+        w.veld ? 'Veld ' + w.veld : '',
+        w.tijdstip || ''
+      ].filter(Boolean).join(' · ');
+
+      row.innerHTML =
+        '<div class="datum"><div class="dag">' + dag + '</div><div class="mnd">' + mnd + '</div></div>' +
+        '<div class="info">' +
+          '<div class="teams">' + escapeHtml(w.thuisteam || '?') + ' vs ' + escapeHtml(w.uitteam || '?') + '</div>' +
+          '<div class="meta">' + escapeHtml(meta) + '</div>' +
+        '</div>' +
+        '<div class="uitslag ' + uitslagClass + '">' + uitslagTxt + '</div>' +
+        '<div class="arrow">›</div>';
+      row.addEventListener('click', () => openDetailModal(w));
+      wList.appendChild(row);
+    });
+  }
+
+  function renderSpelers() {
+    const list = document.getElementById('stats-list');
+    if (alleSpelers.length === 0) {
+      list.innerHTML = '<div class="empty-events">Nog geen spelers in selectie.</div>';
+      return;
+    }
+    let stats = aggregeer();
+    if (activeSort === 'rugnr') {
+      stats.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
+    } else if (activeSort === 'goals') {
+      stats.sort((a, b) => b.goals - a.goals || (Number(a.rugnummer||0) - Number(b.rugnummer||0)));
+    } else if (activeSort === 'minuten') {
+      stats.sort((a, b) => b.minutenGespeeld - a.minutenGespeeld);
+    } else if (activeSort === 'wedstrijden') {
+      stats.sort((a, b) => b.wedstrijden - a.wedstrijden);
+    }
 
     list.innerHTML = '';
     stats.forEach(s => {
       const card = document.createElement('div');
       card.className = 'speler-card';
-
       const head = document.createElement('div');
       head.className = 'speler-head';
-      const naamHtml = '<div class="naam">' + escapeHtml(s.voornaam || 'Onbekend') + '</div>' +
-                       '<div class="meta">' + s.wedstrijden + ' ' + (s.wedstrijden === 1 ? 'wedstrijd' : 'wedstrijden') + ' · ' + s.minutenGespeeld + " min gespeeld</div>";
       var quick = '';
-      if (s.goals > 0)        quick += '<span class="stat-badge goal">⚽ ' + s.goals + '</span>';
-      if (s.geleKaarten > 0)  quick += '<span class="stat-badge yel">🟨 ' + s.geleKaarten + '</span>';
-      if (s.rodeKaarten > 0)  quick += '<span class="stat-badge red">🟥 ' + s.rodeKaarten + '</span>';
+      if (s.goals > 0)       quick += '<span class="stat-badge goal">⚽ ' + s.goals + '</span>';
+      if (s.geleKaarten > 0) quick += '<span class="stat-badge yel">🟨 ' + s.geleKaarten + '</span>';
+      if (s.rodeKaarten > 0) quick += '<span class="stat-badge red">🟥 ' + s.rodeKaarten + '</span>';
       head.innerHTML =
         '<div class="nr">' + (s.rugnummer ?? '?') + '</div>' +
-        '<div class="info">' + naamHtml + '</div>' +
+        '<div class="info">' +
+          '<div class="naam">' + escapeHtml(s.voornaam || 'Onbekend') + '</div>' +
+          '<div class="meta">' + s.wedstrijden + ' ' + (s.wedstrijden === 1 ? 'wedstrijd' : 'wedstrijden') + ' · ' + s.minutenGespeeld + " min</div>" +
+        '</div>' +
         '<div class="quick-stats">' + quick + '</div>' +
         '<div class="arrow">›</div>';
       head.addEventListener('click', () => card.classList.toggle('open'));
@@ -393,47 +662,158 @@
       body.innerHTML =
         '<div class="totaal-grid">' +
           '<div class="totaal-cell"><div class="v">' + s.wedstrijden + '</div><div class="l">Wedstr.</div></div>' +
-          '<div class="totaal-cell"><div class="v">' + s.minutenGespeeld + "'" + '</div><div class="l">Veld</div></div>' +
-          '<div class="totaal-cell"><div class="v">' + s.minutenOpBank + "'" + '</div><div class="l">Bank</div></div>' +
+          '<div class="totaal-cell"><div class="v">' + s.minutenGespeeld + "'</div><div class=\"l\">Veld</div></div>" +
+          '<div class="totaal-cell"><div class="v">' + s.minutenOpBank + "'</div><div class=\"l\">Bank</div></div>" +
           '<div class="totaal-cell"><div class="v">' + s.goals + '</div><div class="l">Goals</div></div>' +
         '</div>';
-
       if (s.perWedstrijd.length === 0) {
-        body.innerHTML += '<div style="text-align:center; color:rgba(240,244,255,0.4); font-size:12px; padding:14px 0;">Nog geen wedstrijden gespeeld.</div>';
+        body.innerHTML += '<div class="empty-events">Nog geen wedstrijden.</div>';
       } else {
+        const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
         s.perWedstrijd.forEach(w => {
-          const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
           let datumStr = w.datum || '?';
-          try {
-            const d = new Date(w.datum);
-            if (!isNaN(d.getTime())) datumStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-          } catch (e) {}
-
-          let pills = '';
-          pills += '<span class="stat-pill">⏱ ' + w.minGespeeld + "' veld</span>";
-          if (w.minBank > 0) pills += '<span class="stat-pill muted">🪑 ' + w.minBank + "' bank</span>";
-          (w.goals || []).forEach(m => { pills += '<span class="stat-pill">⚽ ' + m + "'</span>"; });
-          (w.geleKaarten || []).forEach(m => { pills += '<span class="stat-pill">🟨 ' + m + "'</span>"; });
-          (w.rodeKaarten || []).forEach(m => { pills += '<span class="stat-pill">🟥 ' + m + "'</span>"; });
-
-          const scoreStr = w.score ? w.score : '–';
-
-          body.innerHTML += '<div class="wedstrijd-block">' +
-            '<div class="wh">' +
-              '<div>' +
-                '<div class="t">' + escapeHtml(w.thuis || '?') + ' vs ' + escapeHtml(w.uit || '?') + '</div>' +
-                '<div class="d">' + escapeHtml(datumStr) + '</div>' +
-              '</div>' +
-              '<div class="uitslag">' + scoreStr + '</div>' +
-            '</div>' +
-            '<div class="stats-row">' + pills + '</div>' +
-          '</div>';
+          try { const d = new Date(w.datum); if (!isNaN(d.getTime())) datumStr = d.getDate() + ' ' + months[d.getMonth()]; } catch (e) {}
+          let pills = '<span class="stat-badge">⏱ ' + w.minGespeeld + "'</span>";
+          if (w.minBank > 0) pills += '<span class="stat-badge">🪑 ' + w.minBank + "'</span>";
+          (w.goals || []).forEach(m => { pills += '<span class="stat-badge goal">⚽ ' + m + "'</span>"; });
+          (w.geleKaarten || []).forEach(m => { pills += '<span class="stat-badge yel">🟨 ' + m + "'</span>"; });
+          (w.rodeKaarten || []).forEach(m => { pills += '<span class="stat-badge red">🟥 ' + m + "'</span>"; });
+          const score = w.score ? w.score : '–';
+          body.innerHTML += '<div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:9px; padding:9px 11px; margin-bottom:6px;">' +
+            '<div style="display:flex; justify-content:space-between; gap:8px;"><div style="font-size:12px; font-weight:700;">' + escapeHtml(w.thuis || '?') + ' vs ' + escapeHtml(w.uit || '?') + '</div><div style="font-size:13px; font-weight:900;">' + score + '</div></div>' +
+            '<div style="font-size:10px; color:rgba(240,244,255,0.5); margin-top:2px;">' + escapeHtml(datumStr) + '</div>' +
+            '<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;">' + pills + '</div>' +
+            '</div>';
         });
       }
-
       card.appendChild(body);
       list.appendChild(card);
     });
+  }
+
+  // ===== Wedstrijd-detail modal =====
+  function openDetailModal(w) {
+    const modal = document.getElementById('w-detail-modal');
+    document.getElementById('wd-teams').textContent = (w.thuisteam || '?') + ' vs ' + (w.uitteam || '?');
+    const tScore = w.thuisscore, uScore = w.uitscore;
+    document.getElementById('wd-uitslag').textContent = (tScore != null && uScore != null) ? (tScore + ' – ' + uScore) : '–';
+    const months = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+    let datumStr = w.datum || '';
+    try { const d = new Date(w.datum); if (!isNaN(d.getTime())) datumStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear(); } catch (e) {}
+    const meta = [datumStr, w.tijdstip, w.klasse, w.veld ? 'Veld ' + w.veld : null, w.formatie].filter(Boolean).join(' · ');
+    document.getElementById('wd-meta').textContent = meta;
+
+    renderTimeline(w);
+    renderOpstellingDetail(w);
+
+    modal.classList.add('open');
+  }
+
+  function closeDetailModal() {
+    document.getElementById('w-detail-modal').classList.remove('open');
+  }
+
+  function renderTimeline(w) {
+    const tlEl = document.getElementById('wd-timeline');
+    const events = w.events ? Object.values(w.events) : [];
+    if (events.length === 0) {
+      tlEl.innerHTML = '<div class="empty-events">Geen events geregistreerd.</div>';
+      return;
+    }
+    // Sort op minuut, dan tijdstip
+    events.sort((a, b) => {
+      const ma = a.minuut != null ? a.minuut : 9999;
+      const mb = b.minuut != null ? b.minuut : 9999;
+      if (ma !== mb) return ma - mb;
+      return (a.tijdstip || 0) - (b.tijdstip || 0);
+    });
+
+    // Track score-verloop
+    let homeScore = 0, awayScore = 0;
+    const homeNaamLow = (w.thuisteam || '').toLowerCase();
+    const awayNaamLow = (w.uitteam || '').toLowerCase();
+    const eigenIsThuis = (w.thuisteam || '').toLowerCase() === (huidigTeamNaam || '').toLowerCase();
+
+    tlEl.innerHTML = '';
+    events.forEach(ev => {
+      const minuut = ev.minuut != null ? (ev.minuut + "'") : '?';
+      let cls = '', ico = '', txt = '', stand = '';
+      const desc = ev.omschrijving || '';
+
+      if (ev.type === 'goal') {
+        const isHome = desc.toLowerCase().includes(homeNaamLow) && homeNaamLow;
+        const isOwn  = (eigenIsThuis ? isHome : !isHome);
+        if (isHome) homeScore++; else awayScore++;
+        cls = isOwn ? 'goal-eigen' : 'goal-tegen';
+        ico = '⚽';
+        txt = escapeHtml(desc);
+        stand = '<span class="stand">' + homeScore + '–' + awayScore + '</span>';
+      } else if (ev.type === 'yellow-card' || ev.type === 'yellow') {
+        cls = 'kaart'; ico = '🟨'; txt = escapeHtml(desc);
+      } else if (ev.type === 'red-card' || ev.type === 'red') {
+        cls = 'kaart'; ico = '🟥'; txt = escapeHtml(desc);
+      } else if (ev.type === 'wissel') {
+        cls = 'wissel'; ico = '🔄'; txt = escapeHtml(desc);
+      } else if (ev.type === 'half') {
+        cls = 'half'; ico = '⏸️'; txt = escapeHtml(desc || 'Rust');
+      } else if (ev.type === 'end') {
+        cls = 'half'; ico = '🏁'; txt = escapeHtml(desc || 'Einde wedstrijd');
+      } else {
+        ico = '•'; txt = escapeHtml(desc);
+      }
+
+      const row = document.createElement('div');
+      row.className = 'tl-event ' + cls;
+      row.innerHTML =
+        '<div class="min">' + minuut + '</div>' +
+        '<div class="ico">' + ico + '</div>' +
+        '<div class="txt">' + txt + stand + '</div>';
+      tlEl.appendChild(row);
+    });
+  }
+
+  function renderOpstellingDetail(w) {
+    const sec = document.getElementById('wd-opstelling-section');
+    const list = document.getElementById('wd-opstelling');
+    const opst = w.opstelling || {};
+    const ids = Object.keys(opst);
+    if (ids.length === 0) { sec.style.display = 'none'; return; }
+    sec.style.display = 'block';
+
+    // Sort: eerst veld-spelers, dan bank, beide op rugnummer
+    const inVeld = [], opBank = [];
+    ids.forEach(sId => {
+      const e = opst[sId];
+      if (!e) return;
+      const item = { rugnummer: e.rugnummer, voornaam: e.voornaam, status: e.status, positie: e.positie };
+      if (e.status === 'in' || e.minutenGespeeld > 0) inVeld.push(item);
+      else opBank.push(item);
+    });
+    const byRugnr = (a,b) => Number(a.rugnummer||0) - Number(b.rugnummer||0);
+    inVeld.sort(byRugnr); opBank.sort(byRugnr);
+
+    list.innerHTML = '';
+    inVeld.forEach(p => {
+      const pill = document.createElement('span');
+      pill.className = 'ppl';
+      pill.innerHTML = '<span class="nr">#' + (p.rugnummer ?? '?') + '</span>' +
+                       '<span>' + escapeHtml(p.voornaam || '?') + '</span>' +
+                       (p.positie ? '<span style="opacity:0.6;font-size:10px;">' + escapeHtml(p.positie) + '</span>' : '');
+      list.appendChild(pill);
+    });
+    if (opBank.length > 0) {
+      const sep = document.createElement('span');
+      sep.style.cssText = 'font-size:10px; color:rgba(240,244,255,0.4); padding:0 4px; align-self:center;';
+      sep.textContent = '🪑';
+      list.appendChild(sep);
+      opBank.forEach(p => {
+        const pill = document.createElement('span');
+        pill.className = 'ppl bank';
+        pill.innerHTML = '<span class="nr">#' + (p.rugnummer ?? '?') + '</span>' +
+                         '<span>' + escapeHtml(p.voornaam || '?') + '</span>';
+        list.appendChild(pill);
+      });
+    }
   }
 </script>
 

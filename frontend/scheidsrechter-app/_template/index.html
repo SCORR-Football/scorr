@@ -1157,6 +1157,9 @@ let timeExpiredTriggered = false;
     addEvent('end', null, null, 'Einde Wedstrijd');
     document.getElementById('nextHalfBtn').style.display = 'none';
 
+    // Finaliseer speeltijden (spelers die door speelden krijgen max duur)
+    eindeWedstrijdFinalize();
+
     // Timer reset:
     accumulatedSeconds = 0;
     timerStartTime = null;
@@ -1176,6 +1179,43 @@ let timeExpiredTriggered = false;
         });
     }
 }
+
+        // Finalize speeltijd voor spelers die nog op het veld stonden bij eindewedstrijd.
+        // Gebruikt halfDuration*2 als maximum (= speeltijd KNVB-richtlijn voor leeftijdscat.).
+        function eindeWedstrijdFinalize() {
+            const wId = (typeof window._getWedstrijdId === 'function') ? window._getWedstrijdId() : null;
+            if (!wId || !window._opstelling) return;
+            const totaalMin = (typeof halfDuration === 'number' && halfDuration > 0) ? halfDuration * 2 : 90;
+
+            const o = window._opstelling;
+            const ids = Object.keys(o);
+            const updates = {};
+            ids.forEach(sId => {
+                const e = o[sId];
+                if (!e) return;
+                if (e.status === 'in' && e.minuutIn != null) {
+                    const sinds = e.minuutIn;
+                    const speel = (e.minutenGespeeld || 0) + Math.max(0, totaalMin - sinds);
+                    updates[sId] = { ...e, minutenGespeeld: speel, minuutIn: null };
+                } else if (e.status === 'bank' && e.bankStartMinuut != null) {
+                    const sinds = e.bankStartMinuut;
+                    const bank  = (e.minutenOpBank || 0) + Math.max(0, totaalMin - sinds);
+                    updates[sId] = { ...e, minutenOpBank: bank, bankStartMinuut: null };
+                }
+            });
+            if (Object.keys(updates).length === 0) return;
+            // In-memory bijwerken
+            Object.keys(updates).forEach(sId => { o[sId] = updates[sId]; });
+            window._opstelling = o;
+            // Firebase async opslaan
+            try {
+                import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js").then(function(m) {
+                    Object.keys(updates).forEach(sId => {
+                        m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + sId), updates[sId]).catch(function(){});
+                    });
+                });
+            } catch (e) { console.warn('Finalize speeltijd mislukt', e); }
+        }
 
         let nextHalfBusy = false;
         async function nextHalf() {
@@ -1219,6 +1259,7 @@ let timeExpiredTriggered = false;
                 if (!confirm('⚠️ Wil je de wedstrijd beëindigen?')) return;
                 await pauseTimer();
                 addEvent('end', null, null, 'Einde Wedstrijd');
+                eindeWedstrijdFinalize();
                 btn.style.display = 'none';
                 accumulatedSeconds = 0; timerStartTime = null; timerPausedAt = null;
                 isRunning = false; currentHalf = 0;

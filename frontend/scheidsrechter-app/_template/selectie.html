@@ -48,9 +48,10 @@
   .modal-card h3 { font-size:18px; font-weight:700; margin-bottom:18px; color:var(--scorr-text); }
   .field { margin-bottom:14px; }
   .field label { display:block; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; margin-bottom:6px; }
-  .field input, .field textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:11px 14px; font-size:15px; color:var(--scorr-text); font-family:'Lexend',sans-serif; outline:none; }
-  .field input:focus, .field textarea:focus { border-color:rgba(0,255,136,0.5); }
+  .field input, .field textarea, .field select { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:11px 14px; font-size:15px; color:var(--scorr-text); font-family:'Lexend',sans-serif; outline:none; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color:rgba(0,255,136,0.5); }
   .field textarea { resize:vertical; min-height:64px; }
+  .field select { appearance:none; background-color:rgba(30,39,73,0.95); cursor:pointer; }
   .field-row { display:grid; grid-template-columns:1fr 110px; gap:10px; }
   .modal-actions { display:flex; gap:10px; margin-top:18px; }
   .modal-actions button { flex:1; padding:13px; border:none; border-radius:10px; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:0.5px; }
@@ -72,7 +73,7 @@
     .modal-overlay { padding:12px; }
     .modal-card { padding:24px 16px 16px 16px; max-height:92vh; }
     .modal-card h3 { font-size:16px; }
-    .field input, .field textarea { padding:12px 12px; font-size:15px; min-height:46px; }
+    .field input, .field textarea, .field select { padding:12px 12px; font-size:15px; min-height:46px; }
     .field-row { grid-template-columns:1fr 90px; gap:8px; }
     .modal-actions button { padding:14px 10px; font-size:13px; min-height:48px; }
   }
@@ -120,7 +121,7 @@
       </div>
       <div class="field">
         <label for="m-rugnummer">Rugnr *</label>
-        <input id="m-rugnummer" type="number" min="0" max="99" inputmode="numeric" placeholder="9">
+        <select id="m-rugnummer"><option value="">Kies…</option></select>
       </div>
     </div>
 
@@ -197,6 +198,9 @@
     listenToSpelers();
   });
 
+  // Cache van geladen spelers om gebruikte rugnummers te kennen
+  let alleSpelers = [];
+
   // ===== Spelers laden =====
   function listenToSpelers() {
     const spelersRef = ref(db, 'teams/' + huidigTeamId + '/spelers');
@@ -209,8 +213,36 @@
       }
       // Sorteer op rugnummer (numeriek)
       spelers.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
+      alleSpelers = spelers;
       renderSpelers(spelers);
+      // Modal-options herbouwen als modal openstaat
+      if (modalEl && modalEl.classList.contains('open')) bouwRugnrDropdown();
     });
+  }
+
+  function gebruikteRugnummers(excludeSpelerId) {
+    const used = new Set();
+    alleSpelers.forEach(s => {
+      if (s.id === excludeSpelerId) return;
+      if (s.rugnummer != null && s.rugnummer !== '') used.add(Number(s.rugnummer));
+    });
+    return used;
+  }
+
+  function bouwRugnrDropdown(huidigeWaarde) {
+    const sel = document.getElementById('m-rugnummer');
+    if (!sel) return;
+    const used = gebruikteRugnummers(editingSpelerId);
+    const targetVal = huidigeWaarde != null ? Number(huidigeWaarde) : (sel.value !== '' ? Number(sel.value) : null);
+    sel.innerHTML = '<option value="">Kies…</option>';
+    for (let n = 1; n <= 99; n++) {
+      if (used.has(n) && n !== targetVal) continue;
+      const opt = document.createElement('option');
+      opt.value = String(n);
+      opt.textContent = '#' + n;
+      if (targetVal != null && n === targetVal) opt.selected = true;
+      sel.appendChild(opt);
+    }
   }
 
   function renderSpelers(spelers) {
@@ -269,7 +301,7 @@
     editingSpelerId = speler ? speler.id : null;
     titleEl.textContent = speler ? 'Speler bewerken' : 'Speler toevoegen';
     inpVoornaam.value = speler?.voornaam || '';
-    inpRugnr.value    = speler?.rugnummer ?? '';
+    bouwRugnrDropdown(speler?.rugnummer);
     inpSterk.value    = speler?.notitie_sterk || '';
     inpGroei.value    = speler?.notitie_groei || '';
     btnDelete.style.display = speler ? 'inline-flex' : 'none';
@@ -296,16 +328,19 @@
 
   btnSave.addEventListener('click', async () => {
     const voornaam = inpVoornaam.value.trim();
-    const rugRaw   = inpRugnr.value.trim();
+    const rugRaw   = inpRugnr.value;
     const sterk    = inpSterk.value.trim();
     const groei    = inpGroei.value.trim();
 
     if (!voornaam) return showError('Vul een voornaam in.');
-    if (rugRaw === '') return showError('Vul een rugnummer in.');
+    if (rugRaw === '' || rugRaw == null) return showError('Kies een rugnummer.');
     const rugnummer = Number(rugRaw);
-    if (!Number.isFinite(rugnummer) || rugnummer < 0 || rugnummer > 99) {
-      return showError('Rugnummer moet tussen 0 en 99 zijn.');
+    if (!Number.isFinite(rugnummer) || rugnummer < 1 || rugnummer > 99) {
+      return showError('Rugnummer moet tussen 1 en 99 zijn.');
     }
+    // Defensieve dubbele-check (mocht iemand via DevTools een gebruikt nummer kiezen)
+    const dubbel = alleSpelers.find(s => s.id !== editingSpelerId && Number(s.rugnummer) === rugnummer);
+    if (dubbel) return showError('Rugnummer ' + rugnummer + ' is al van ' + (dubbel.voornaam || 'iemand anders') + '.');
 
     btnSave.disabled = true;
     btnSave.textContent = 'Opslaan...';

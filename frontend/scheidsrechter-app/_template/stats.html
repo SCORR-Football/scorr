@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SCORR — Statistieken</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --scorr-electric: #00FF88;
+    --scorr-deep: #0A0E27;
+    --scorr-slate: #1E2749;
+    --scorr-accent: #FF3B5C;
+    --scorr-yellow: #FFB800;
+    --scorr-text: #F0F4FF;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Lexend',sans-serif; background:var(--scorr-deep); color:var(--scorr-text); min-height:100vh; padding:60px 16px 40px 16px; }
+  .page { max-width:560px; margin:0 auto; }
+
+  .page-header { text-align:center; margin-bottom:20px; }
+  .page-header .scorr { font-size:28px; font-weight:900; color:var(--scorr-electric); letter-spacing:-1px; }
+  .page-header .sub { font-size:12px; color:rgba(240,244,255,0.5); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
+
+  .summary-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding:0 4px; gap:10px; flex-wrap:wrap; }
+  .summary-bar .count { font-size:13px; color:rgba(240,244,255,0.55); letter-spacing:1.5px; text-transform:uppercase; }
+  .summary-bar .sort { display:flex; gap:6px; flex-wrap:wrap; }
+  .sort-chip {
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    border-radius:14px; padding:6px 10px; font-size:11px; font-weight:700;
+    color:rgba(240,244,255,0.7); cursor:pointer; font-family:'Lexend',sans-serif;
+    letter-spacing:0.5px; min-height:30px;
+  }
+  .sort-chip.active { background:rgba(0,255,136,0.12); border-color:rgba(0,255,136,0.4); color:var(--scorr-electric); }
+
+  .stats-list { display:flex; flex-direction:column; gap:8px; }
+  .speler-card {
+    background:var(--scorr-slate); border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px; overflow:hidden;
+    transition:border-color .15s ease;
+  }
+  .speler-card:hover { border-color:rgba(0,255,136,0.25); }
+  .speler-card.open { border-color:rgba(0,255,136,0.35); }
+  .speler-head {
+    display:flex; align-items:center; gap:14px; padding:13px 14px; cursor:pointer; user-select:none;
+  }
+  .speler-head .nr { width:42px; height:42px; border-radius:10px; background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.25); color:var(--scorr-electric); font-weight:900; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .speler-head .info { flex:1; min-width:0; }
+  .speler-head .info .naam { font-size:15px; font-weight:700; color:var(--scorr-text); }
+  .speler-head .info .meta { font-size:11px; color:rgba(240,244,255,0.5); margin-top:2px; }
+  .speler-head .quick-stats { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .speler-head .stat-badge {
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    color:rgba(240,244,255,0.85); border-radius:7px;
+    padding:3px 7px; font-size:11px; font-weight:700; letter-spacing:0.3px;
+    display:inline-flex; align-items:center; gap:3px;
+  }
+  .speler-head .stat-badge.goal { background:rgba(0,255,136,0.1); border-color:rgba(0,255,136,0.3); color:var(--scorr-electric); }
+  .speler-head .stat-badge.yel  { background:rgba(255,184,0,0.12); border-color:rgba(255,184,0,0.35); color:var(--scorr-yellow); }
+  .speler-head .stat-badge.red  { background:rgba(255,59,92,0.12); border-color:rgba(255,59,92,0.35); color:var(--scorr-accent); }
+  .speler-head .arrow { color:rgba(240,244,255,0.3); font-size:18px; flex-shrink:0; transition:transform .2s ease; }
+  .speler-card.open .speler-head .arrow { transform:rotate(90deg); }
+
+  .speler-body { display:none; padding:0 14px 14px 14px; border-top:1px solid rgba(255,255,255,0.06); }
+  .speler-card.open .speler-body { display:block; padding-top:12px; }
+
+  .totaal-grid {
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:14px;
+  }
+  .totaal-cell {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+    border-radius:8px; padding:8px 6px; text-align:center;
+  }
+  .totaal-cell .v { font-size:18px; font-weight:900; color:var(--scorr-text); line-height:1.1; }
+  .totaal-cell .l { font-size:9px; color:rgba(240,244,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+
+  .wedstrijd-block { margin-bottom:10px; padding:10px 12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:10px; }
+  .wedstrijd-block .wh { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; }
+  .wedstrijd-block .wh .t { font-size:13px; font-weight:700; color:var(--scorr-text); }
+  .wedstrijd-block .wh .d { font-size:10px; color:rgba(240,244,255,0.5); margin-top:1px; letter-spacing:0.5px; }
+  .wedstrijd-block .wh .uitslag { font-size:13px; font-weight:900; color:var(--scorr-text); white-space:nowrap; }
+  .wedstrijd-block .stats-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+  .wedstrijd-block .stat-pill {
+    font-size:10px; font-weight:600; padding:3px 7px; border-radius:5px;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    color:rgba(240,244,255,0.85); display:inline-flex; align-items:center; gap:3px;
+  }
+  .wedstrijd-block .stat-pill.muted { color:rgba(240,244,255,0.45); }
+
+  .empty-stats { text-align:center; background:var(--scorr-slate); border:1px dashed rgba(255,255,255,0.12); border-radius:14px; padding:32px 20px; }
+  .empty-stats .ico { font-size:36px; margin-bottom:10px; }
+  .empty-stats h3 { font-size:15px; font-weight:700; margin-bottom:6px; }
+  .empty-stats p { font-size:13px; color:rgba(240,244,255,0.55); line-height:1.5; }
+
+  .loading { text-align:center; padding:80px 20px; color:rgba(240,244,255,0.5); font-size:13px; letter-spacing:1px; }
+
+  @media (max-width: 480px) {
+    body { padding:54px 12px 30px 12px; }
+    .speler-head { padding:11px 12px; gap:10px; }
+    .speler-head .nr { width:40px; height:40px; font-size:14px; }
+    .speler-head .info .naam { font-size:14px; }
+    .totaal-grid { gap:5px; }
+    .totaal-cell .v { font-size:16px; }
+    .speler-card, .speler-head, .sort-chip { touch-action: manipulation; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div id="loading" class="loading">Laden...</div>
+
+  <div id="content" style="display:none;">
+    <div class="page-header">
+      <div class="scorr">SCORR</div>
+      <div class="sub" id="team-naam">Statistieken</div>
+    </div>
+
+    <div class="summary-bar">
+      <div class="count" id="speler-count">0 spelers · 0 wedstrijden</div>
+      <div class="sort">
+        <button type="button" class="sort-chip active" data-sort="rugnr">Rugnr</button>
+        <button type="button" class="sort-chip"        data-sort="goals">Goals</button>
+        <button type="button" class="sort-chip"        data-sort="minuten">Minuten</button>
+        <button type="button" class="sort-chip"        data-sort="wedstrijden">Wedstr.</button>
+      </div>
+    </div>
+
+    <div id="empty-state" class="empty-stats" style="display:none;">
+      <div class="ico">📊</div>
+      <h3>Nog geen statistieken</h3>
+      <p>Speel een paar wedstrijden met je opstelling samengesteld en hier verschijnen automatisch alle stats per speler.</p>
+    </div>
+
+    <div id="stats-list" class="stats-list"></div>
+  </div>
+</div>
+
+<script src="sidebar.js" defer></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+  import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyAputZcr7XyKRQL4-566a8gpS5R6SEL79U",
+    authDomain: "scorr-c604a.firebaseapp.com",
+    databaseURL: "https://scorr-c604a-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "scorr-c604a",
+    storageBucket: "scorr-c604a.firebasestorage.app",
+    messagingSenderId: "413840042688",
+    appId: "1:413840042688:web:3183c36fd20f27ac925b25"
+  });
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  const teamMapping = {
+    'fcp-1@fc-purmerend.scorr':    'FC Purmerend 1',
+    'fcp-2@fc-purmerend.scorr':    'FC Purmerend 2',
+    'vvm-1@vv-monnickendam.scorr': 'VV Monnickendam 1',
+    'rkav-1@rkav-volendam.scorr':  'RKAV Volendam 1'
+  };
+
+  let huidigTeamId = null;
+  let teamNaam = '';
+  let alleSpelers = [];      // {id, voornaam, rugnummer, ...}
+  let alleWedstrijden = [];  // [{id, ...wData}]
+  let activeSort = 'rugnr';
+
+  window.addEventListener('scorr:sidebar-logout', async () => {
+    if (!confirm('Wil je uitloggen?')) return;
+    try { await signOut(auth); } catch (e) {}
+    window.location.href = '/frontend/auth/login.html';
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/frontend/auth/login.html'; return; }
+    huidigTeamId = user.email.split('@')[0];
+
+    let tNaam = huidigTeamId;
+    try {
+      const snap = await get(ref(db, 'teams/' + huidigTeamId));
+      if (snap.exists()) tNaam = snap.val().naam || teamMapping[user.email] || huidigTeamId;
+      else tNaam = teamMapping[user.email] || huidigTeamId;
+    } catch (e) { tNaam = teamMapping[user.email] || huidigTeamId; }
+    teamNaam = tNaam;
+    document.getElementById('team-naam').textContent = teamNaam;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+
+    listenToData();
+    wireSort();
+  });
+
+  function listenToData() {
+    onValue(ref(db, 'teams/' + huidigTeamId + '/spelers'), (snap) => {
+      const lijst = [];
+      if (snap.exists()) {
+        snap.forEach((c) => { lijst.push({ id: c.key, ...c.val() }); });
+      }
+      lijst.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
+      alleSpelers = lijst;
+      laadWedstrijden();
+    });
+  }
+
+  async function laadWedstrijden() {
+    try {
+      const snap = await get(ref(db, 'wedstrijden'));
+      const lijst = [];
+      if (snap.exists()) {
+        snap.forEach((child) => {
+          const d = child.val();
+          if (d && d.teamId === huidigTeamId) {
+            lijst.push({ id: child.key, ...d });
+          }
+        });
+      }
+      // Sorteer op datum desc
+      lijst.sort((a, b) => (b.datum + (b.tijdstip || '') ).localeCompare(a.datum + (a.tijdstip || '')));
+      alleWedstrijden = lijst;
+      render();
+    } catch (e) {
+      console.warn('Laden wedstrijden mislukt', e);
+      alleWedstrijden = [];
+      render();
+    }
+  }
+
+  function wireSort() {
+    document.querySelectorAll('.sort-chip').forEach(c => {
+      c.addEventListener('click', () => {
+        activeSort = c.dataset.sort;
+        document.querySelectorAll('.sort-chip').forEach(x => x.classList.toggle('active', x.dataset.sort === activeSort));
+        render();
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  // Probeer een speler-id te vinden voor een event obv rugnummer + naam
+  function matchSpelerForEvent(ev, spelersById) {
+    if (ev.spelerId && spelersById[ev.spelerId]) return ev.spelerId;
+    // Parse rugnummer uit omschrijving "#9 Tim"
+    const m = (ev.omschrijving || '').match(/#(\d+)\s+([^\s(]+)/);
+    if (m) {
+      const nr = Number(m[1]);
+      const naam = m[2].trim().toLowerCase();
+      for (const id in spelersById) {
+        const s = spelersById[id];
+        if (Number(s.rugnummer) === nr && (s.voornaam || '').toLowerCase() === naam) return id;
+        if (Number(s.rugnummer) === nr) return id; // fallback alleen op rugnummer
+      }
+    }
+    return null;
+  }
+
+  function aggregeer() {
+    // spelersById index
+    const spelersById = {};
+    alleSpelers.forEach(s => { spelersById[s.id] = s; });
+
+    // Per speler: stats + per-wedstrijd record
+    const stats = {};
+    alleSpelers.forEach(s => {
+      stats[s.id] = {
+        spelerId: s.id, voornaam: s.voornaam, rugnummer: s.rugnummer,
+        wedstrijden: 0, minutenGespeeld: 0, minutenOpBank: 0,
+        goals: 0, geleKaarten: 0, rodeKaarten: 0,
+        perWedstrijd: []
+      };
+    });
+
+    alleWedstrijden.forEach(w => {
+      const opst = w.opstelling || {};
+      const events = w.events ? Object.values(w.events) : [];
+
+      // Per speler in deze wedstrijd
+      const wPerSpeler = {};
+      Object.keys(opst).forEach(sId => {
+        const o = opst[sId];
+        if (!o) return;
+        wPerSpeler[sId] = {
+          minGespeeld: o.minutenGespeeld || 0,
+          minBank: o.minutenOpBank || 0,
+          startStatus: o.status,
+          positie: o.positie || null,
+          goals: [], geleKaarten: [], rodeKaarten: []
+        };
+      });
+
+      // Verwerk events
+      events.forEach(ev => {
+        const sId = matchSpelerForEvent(ev, spelersById);
+        if (!sId) return;
+        if (!wPerSpeler[sId]) wPerSpeler[sId] = {
+          minGespeeld: 0, minBank: 0, goals: [], geleKaarten: [], rodeKaarten: []
+        };
+        const minuut = ev.minuut != null ? ev.minuut : '?';
+        if (ev.type === 'goal') wPerSpeler[sId].goals.push(minuut);
+        else if (ev.type === 'yellow-card' || ev.type === 'yellow') wPerSpeler[sId].geleKaarten.push(minuut);
+        else if (ev.type === 'red-card' || ev.type === 'red') wPerSpeler[sId].rodeKaarten.push(minuut);
+      });
+
+      // Aggregeer naar speler-stats
+      Object.keys(wPerSpeler).forEach(sId => {
+        const s = stats[sId];
+        if (!s) return;
+        const w_ = wPerSpeler[sId];
+        const meedaan = (w_.minGespeeld > 0) || (w_.startStatus === 'in') || w_.goals.length > 0 || w_.geleKaarten.length > 0 || w_.rodeKaarten.length > 0;
+        if (meedaan) s.wedstrijden++;
+        s.minutenGespeeld += w_.minGespeeld;
+        s.minutenOpBank   += w_.minBank;
+        s.goals           += w_.goals.length;
+        s.geleKaarten     += w_.geleKaarten.length;
+        s.rodeKaarten     += w_.rodeKaarten.length;
+        if (meedaan || w_.minBank > 0) {
+          s.perWedstrijd.push({
+            wId: w.id,
+            datum: w.datum,
+            thuis: w.thuisteam,
+            uit: w.uitteam,
+            score: (w.thuisscore != null && w.uitscore != null) ? (w.thuisscore + '–' + w.uitscore) : null,
+            ...w_
+          });
+        }
+      });
+    });
+
+    return Object.values(stats);
+  }
+
+  function sorteerStats(arr) {
+    const sorted = arr.slice();
+    if (activeSort === 'rugnr') {
+      sorted.sort((a, b) => Number(a.rugnummer || 0) - Number(b.rugnummer || 0));
+    } else if (activeSort === 'goals') {
+      sorted.sort((a, b) => b.goals - a.goals || (Number(a.rugnummer||0) - Number(b.rugnummer||0)));
+    } else if (activeSort === 'minuten') {
+      sorted.sort((a, b) => b.minutenGespeeld - a.minutenGespeeld);
+    } else if (activeSort === 'wedstrijden') {
+      sorted.sort((a, b) => b.wedstrijden - a.wedstrijden);
+    }
+    return sorted;
+  }
+
+  function render() {
+    const list = document.getElementById('stats-list');
+    const empty = document.getElementById('empty-state');
+    const countEl = document.getElementById('speler-count');
+
+    if (alleSpelers.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      countEl.textContent = '0 spelers · ' + alleWedstrijden.length + ' wedstrijden';
+      return;
+    }
+    empty.style.display = 'none';
+    countEl.textContent = alleSpelers.length + (alleSpelers.length === 1 ? ' speler · ' : ' spelers · ')
+                       + alleWedstrijden.length + (alleWedstrijden.length === 1 ? ' wedstrijd' : ' wedstrijden');
+
+    const stats = sorteerStats(aggregeer());
+
+    list.innerHTML = '';
+    stats.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'speler-card';
+
+      const head = document.createElement('div');
+      head.className = 'speler-head';
+      const naamHtml = '<div class="naam">' + escapeHtml(s.voornaam || 'Onbekend') + '</div>' +
+                       '<div class="meta">' + s.wedstrijden + ' ' + (s.wedstrijden === 1 ? 'wedstrijd' : 'wedstrijden') + ' · ' + s.minutenGespeeld + " min gespeeld</div>";
+      var quick = '';
+      if (s.goals > 0)        quick += '<span class="stat-badge goal">⚽ ' + s.goals + '</span>';
+      if (s.geleKaarten > 0)  quick += '<span class="stat-badge yel">🟨 ' + s.geleKaarten + '</span>';
+      if (s.rodeKaarten > 0)  quick += '<span class="stat-badge red">🟥 ' + s.rodeKaarten + '</span>';
+      head.innerHTML =
+        '<div class="nr">' + (s.rugnummer ?? '?') + '</div>' +
+        '<div class="info">' + naamHtml + '</div>' +
+        '<div class="quick-stats">' + quick + '</div>' +
+        '<div class="arrow">›</div>';
+      head.addEventListener('click', () => card.classList.toggle('open'));
+      card.appendChild(head);
+
+      const body = document.createElement('div');
+      body.className = 'speler-body';
+      body.innerHTML =
+        '<div class="totaal-grid">' +
+          '<div class="totaal-cell"><div class="v">' + s.wedstrijden + '</div><div class="l">Wedstr.</div></div>' +
+          '<div class="totaal-cell"><div class="v">' + s.minutenGespeeld + "'" + '</div><div class="l">Veld</div></div>' +
+          '<div class="totaal-cell"><div class="v">' + s.minutenOpBank + "'" + '</div><div class="l">Bank</div></div>' +
+          '<div class="totaal-cell"><div class="v">' + s.goals + '</div><div class="l">Goals</div></div>' +
+        '</div>';
+
+      if (s.perWedstrijd.length === 0) {
+        body.innerHTML += '<div style="text-align:center; color:rgba(240,244,255,0.4); font-size:12px; padding:14px 0;">Nog geen wedstrijden gespeeld.</div>';
+      } else {
+        s.perWedstrijd.forEach(w => {
+          const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+          let datumStr = w.datum || '?';
+          try {
+            const d = new Date(w.datum);
+            if (!isNaN(d.getTime())) datumStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+          } catch (e) {}
+
+          let pills = '';
+          pills += '<span class="stat-pill">⏱ ' + w.minGespeeld + "' veld</span>";
+          if (w.minBank > 0) pills += '<span class="stat-pill muted">🪑 ' + w.minBank + "' bank</span>";
+          (w.goals || []).forEach(m => { pills += '<span class="stat-pill">⚽ ' + m + "'</span>"; });
+          (w.geleKaarten || []).forEach(m => { pills += '<span class="stat-pill">🟨 ' + m + "'</span>"; });
+          (w.rodeKaarten || []).forEach(m => { pills += '<span class="stat-pill">🟥 ' + m + "'</span>"; });
+
+          const scoreStr = w.score ? w.score : '–';
+
+          body.innerHTML += '<div class="wedstrijd-block">' +
+            '<div class="wh">' +
+              '<div>' +
+                '<div class="t">' + escapeHtml(w.thuis || '?') + ' vs ' + escapeHtml(w.uit || '?') + '</div>' +
+                '<div class="d">' + escapeHtml(datumStr) + '</div>' +
+              '</div>' +
+              '<div class="uitslag">' + scoreStr + '</div>' +
+            '</div>' +
+            '<div class="stats-row">' + pills + '</div>' +
+          '</div>';
+        });
+      }
+
+      card.appendChild(body);
+      list.appendChild(card);
+    });
+  }
+</script>
+
+</body>
+</html>

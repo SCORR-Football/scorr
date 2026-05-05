@@ -1050,6 +1050,7 @@
         timerInterval = setInterval(() => {
             updateDisplay();
             checkTimeExpired();
+            checkWisselTrigger();
             saveCounter++;
             if (saveCounter >= 50) { saveTimerState(); saveCounter = 0; }
         }, 100);
@@ -1059,6 +1060,65 @@
     }
 
 let timeExpiredTriggered = false;
+let _getriggerdeWisselMomenten = new Set();
+
+        // Check elke tick of er een wisselmoment is bereikt → speel signaal
+        function checkWisselTrigger() {
+            if (typeof isRunning === 'undefined' || !isRunning) return;
+            // Alleen voor jeugd-categorieën die wisselbeleid hebben
+            const wb = (typeof berekenWisselbeleid === 'function') ? berekenWisselbeleid() : null;
+            if (!wb || !wb.momenten || wb.momenten.length === 0) return;
+            const huidigMin = getCurrentMinute();
+            for (const m of wb.momenten) {
+                if (huidigMin >= m && !_getriggerdeWisselMomenten.has(m)) {
+                    _getriggerdeWisselMomenten.add(m);
+                    triggerWisselSignaal(m, wb);
+                    break; // 1 trigger per tick is genoeg
+                }
+            }
+        }
+
+        function triggerWisselSignaal(minuut, wb) {
+            // Geluid: 3 korte beeps via web audio
+            try {
+                if (typeof audioCtx === 'undefined' || !audioCtx) initAudioContext();
+                const ctx = audioCtx;
+                if (ctx) {
+                    const beep = (t, freq) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine'; osc.frequency.value = freq;
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        gain.gain.setValueAtTime(0, t);
+                        gain.gain.linearRampToValueAtTime(0.5, t + 0.02);
+                        gain.gain.setValueAtTime(0.45, t + 0.18);
+                        gain.gain.linearRampToValueAtTime(0, t + 0.22);
+                        osc.start(t); osc.stop(t + 0.25);
+                    };
+                    const now = ctx.currentTime;
+                    beep(now, 880);
+                    beep(now + 0.30, 988);
+                    beep(now + 0.60, 1175);
+                }
+            } catch (e) {}
+            // Trillen op mobiel
+            try { if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]); } catch (e) {}
+            // Banner tonen
+            const banner = document.getElementById('wissel-banner');
+            const title  = document.getElementById('wissel-banner-title');
+            const sub    = document.getElementById('wissel-banner-sub');
+            if (banner && title && sub) {
+                title.textContent = "🔄 WISSEL TIJD! · " + minuut + "'";
+                sub.textContent = wb.aantalPerWissel + (wb.aantalPerWissel === 1 ? ' speler' : ' spelers') + ' wisselen — tap om te sluiten';
+                banner.style.display = 'block';
+                if (banner._autohide) clearTimeout(banner._autohide);
+                banner._autohide = setTimeout(() => { banner.style.display = 'none'; }, 12000);
+                banner.onclick = () => { banner.style.display = 'none'; if (banner._autohide) clearTimeout(banner._autohide); };
+            }
+        }
+
+        // Reset trigger-set bij nieuwe wedstrijd
+        window._resetWisselTriggers = function() { _getriggerdeWisselMomenten = new Set(); };
 
         function checkTimeExpired() {
             const currentSeconds = getCurrentSeconds();
@@ -1777,34 +1837,47 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         }
 
         // === Wisselbeleid voor jeugd JO11 en lager ===
-        // Geeft een gelijkwaardig wisselschema waarbij iedereen ongeveer
-        // evenveel speelt en niet te lang op de bank zit.
+        // Berekent gelijkwaardig wisselschema; afwezigen worden uitgesloten,
+        // keeper kan optioneel buiten de rotatie blijven.
         function berekenWisselbeleid() {
             const cat = detectLeeftijdsCategorie();
-            // Alleen voor jeugd t/m JO11
             if (!cat.jeugd || cat.leeftijd > 11) return null;
             const inVeld = aantalSpelersInVeld(cat.leeftijd);
-            const totaal = (window._huidigSelectie || []).length;
-            if (totaal <= inVeld) return null; // niemand op bank
-            const bank = totaal - inVeld;
+
+            // Tel alleen aanwezige spelers: niet 'afwezig' in opstelling.
+            const o = window._opstelling || {};
+            const sel = window._huidigSelectie || [];
+            const aanwezig = sel.filter(s => !o[s.id] || o[s.id].status !== 'afwezig');
+            const totaal = aanwezig.length;
+            if (totaal <= inVeld) return null;
+
+            const keeperVast = window._keeperVast !== false; // default true
+            // Roterende spelers (excl keeper als die vast staat)
+            const totaalRot = keeperVast ? Math.max(1, totaal - 1) : totaal;
+            const veldRot   = keeperVast ? Math.max(1, inVeld - 1) : inVeld;
+            const bank      = totaal - inVeld;
+            if (bank <= 0) return null;
+
             const totaleSpeel = (typeof halfDuration === 'number' && halfDuration > 0) ? halfDuration * 2 : 50;
-            // Gelijke verdeling
-            const bankPerSpeler  = Math.round((totaleSpeel * bank) / totaal);
-            const veldPerSpeler  = totaleSpeel - bankPerSpeler;
-            // Doel: bank-spell van max ~7-8 min — kort genoeg voor jeugd
+            const bankPerSpeler = Math.round((totaleSpeel * bank) / totaalRot);
+            const veldPerSpeler = totaleSpeel - bankPerSpeler;
             const targetSpell = 7;
             const spellsPerSpeler = Math.max(1, Math.round(bankPerSpeler / targetSpell));
-            // Aantal wisselmomenten = spellsPerSpeler * (totaal / bank)
-            const aantalRondes = Math.max(1, Math.round(spellsPerSpeler * (totaal / bank)));
+            const aantalRondes = Math.max(1, Math.round(spellsPerSpeler * (totaalRot / bank)));
             const intervalMin = Math.max(2, Math.round(totaleSpeel / aantalRondes));
-            // Wisselmomenten genereren (zonder rust-moment 2x)
+
             const momenten = [];
             let m = intervalMin;
             while (m < totaleSpeel - 1) {
                 momenten.push(m);
                 m += intervalMin;
             }
-            return { totaal, inVeld, bank, totaleSpeel, bankPerSpeler, veldPerSpeler, intervalMin, aantalPerWissel: bank, momenten };
+            return {
+                totaal, inVeld, bank, totaleSpeel,
+                bankPerSpeler, veldPerSpeler,
+                intervalMin, aantalPerWissel: bank, momenten,
+                keeperVast
+            };
         }
 
         function renderWisselbeleidInfo() {
@@ -1815,16 +1888,30 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             box.style.display = 'block';
             const stats = document.getElementById('wb-stats');
             const moms  = document.getElementById('wb-momenten');
+            const keeperLabel = wb.keeperVast ? ' <span style="font-size:11px; color:rgba(240,244,255,0.55);">(keeper vast)</span>' : '';
             stats.innerHTML =
-                '<b>' + wb.totaal + ' spelers</b> · ' + wb.inVeld + ' in het veld, ' + wb.bank + ' op de bank<br>' +
+                '<b>' + wb.totaal + ' spelers</b> aanwezig · ' + wb.inVeld + ' in het veld, ' + wb.bank + ' op de bank' + keeperLabel + '<br>' +
                 'Wissel elke <b>~' + wb.intervalMin + ' min</b> ' + wb.aantalPerWissel + ' speler' + (wb.aantalPerWissel === 1 ? '' : 's') + ' tegelijk.<br>' +
-                'Zo speelt iedereen <b>~' + wb.veldPerSpeler + ' min</b> en zit <b>~' + wb.bankPerSpeler + ' min</b> op de bank.';
+                'Zo speelt elke veldspeler <b>~' + wb.veldPerSpeler + ' min</b> en zit <b>~' + wb.bankPerSpeler + ' min</b> op de bank.';
             const halverwege = Math.round(wb.totaleSpeel / 2);
             const mlabels = wb.momenten.map(m => {
                 const helft = m <= halverwege ? '1e' : '2e';
                 return "<span style=\"display:inline-block; padding:2px 6px; margin:1px 2px; background:rgba(255,184,0,0.15); border-radius:5px;\">" + m + "' <span style=\"opacity:0.55\">(" + helft + ")</span></span>";
             }).join('');
             moms.innerHTML = '<b>Wisselmomenten:</b> ' + (mlabels || '—');
+
+            // Sync checkbox
+            const cb = document.getElementById('wb-keeper-vast');
+            if (cb) {
+                cb.checked = wb.keeperVast;
+                if (!cb._wbWired) {
+                    cb._wbWired = true;
+                    cb.addEventListener('change', () => {
+                        window._keeperVast = cb.checked;
+                        renderWisselbeleidInfo();
+                    });
+                }
+            }
         }
 
         // State
@@ -2072,7 +2159,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             const o = window._opstelling || {};
             const lopend = (typeof isRunning !== 'undefined' && isRunning);
 
-            // Voor kleur-indicator: gemiddelde bank-tijd berekenen
+            // Voor kleur-indicator: gemiddelde bank-tijd berekenen (alleen bank-status)
             const bankTimes = [];
             sel.forEach(s => {
                 const e = o[s.id];
@@ -2085,13 +2172,12 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             sel.forEach(s => {
                 const e = o[s.id];
                 const status = (e && e.status) || 'bank';
-                if (status === 'in') return;
+                if (status !== 'bank') return; // alleen 'bank' status hier
                 bankCount++;
                 const minBank = getMinOpBank(e || { status:'bank' });
                 let timerHtml = '';
                 let extraStyle = '';
                 if (lopend && minBank > 0) {
-                    // Kleur-logica: > 1.5x gemiddelde = "moet er weer in" (rood), > avg = geel, < avg = neutraal
                     let color = 'rgba(240,244,255,0.45)';
                     let bg = 'rgba(255,255,255,0.06)';
                     if (avgBankTime > 0) {
@@ -2104,21 +2190,101 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                     }
                     timerHtml = '<span style="margin-left:4px; font-size:10px; font-weight:700; color:' + color + '; background:' + bg + '; padding:2px 6px; border-radius:8px;">🪑 ' + minBank + "'</span>";
                 }
+                // Wrap chip met afwezig-knop
+                const wrap = document.createElement('span');
+                wrap.style.cssText = 'display:inline-flex; align-items:center; gap:0; position:relative;';
                 const chip = document.createElement('button');
                 chip.type = 'button';
                 chip.className = 'opst-chip bank';
                 chip.dataset.id = s.id;
-                chip.style.cssText = extraStyle;
+                chip.style.cssText = extraStyle + ' padding-right:8px;';
                 chip.innerHTML = '<span class="nr">#' + (s.rugnummer ?? '?') + '</span>' +
                                  '<span>' + escapeHtmlSimple(s.voornaam || 'Onbekend') + '</span>' +
                                  timerHtml;
                 chip.addEventListener('click', () => onBankSpelerClick(s));
-                bankEl.appendChild(chip);
+                const afwBtn = document.createElement('button');
+                afwBtn.type = 'button';
+                afwBtn.title = 'Markeer afwezig';
+                afwBtn.style.cssText = 'background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.25); color:#FF3B5C; border-radius:50%; width:24px; height:24px; padding:0; margin-left:4px; cursor:pointer; font-family:Lexend,sans-serif; font-weight:900; font-size:13px; line-height:1; display:inline-flex; align-items:center; justify-content:center; touch-action:manipulation;';
+                afwBtn.textContent = '✗';
+                afwBtn.addEventListener('click', (e) => { e.stopPropagation(); markeerAfwezig(s); });
+                wrap.appendChild(chip);
+                wrap.appendChild(afwBtn);
+                bankEl.appendChild(wrap);
             });
             document.getElementById('opst-bank-count').textContent = '(' + bankCount + ')';
             if (bankCount === 0) {
                 bankEl.innerHTML = '<div style="font-size:11px; color:rgba(240,244,255,0.4); padding:6px;">Geen spelers op de bank.</div>';
             }
+            renderAfwezig();
+        }
+
+        function renderAfwezig() {
+            const wrap = document.getElementById('opst-afwezig-wrap');
+            const list = document.getElementById('opst-afwezig-list');
+            const count = document.getElementById('opst-afwezig-count');
+            if (!wrap || !list) return;
+
+            const sel = (window._huidigSelectie || []).slice().sort((a,b) => Number(a.rugnummer||0) - Number(b.rugnummer||0));
+            const o = window._opstelling || {};
+            const afwezig = sel.filter(s => o[s.id] && o[s.id].status === 'afwezig');
+
+            if (afwezig.length === 0) {
+                wrap.style.display = 'none';
+                return;
+            }
+            wrap.style.display = 'block';
+            count.textContent = '(' + afwezig.length + ')';
+            list.innerHTML = '';
+            afwezig.forEach(s => {
+                const wrap2 = document.createElement('span');
+                wrap2.style.cssText = 'display:inline-flex; align-items:center; gap:0;';
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'opst-chip bank';
+                chip.dataset.id = s.id;
+                chip.style.cssText = 'opacity:0.55; padding-right:8px;';
+                chip.innerHTML = '<span class="nr">#' + (s.rugnummer ?? '?') + '</span>' +
+                                 '<span>' + escapeHtmlSimple(s.voornaam || 'Onbekend') + '</span>';
+                chip.addEventListener('click', () => markeerAanwezig(s));
+                const aanBtn = document.createElement('button');
+                aanBtn.type = 'button';
+                aanBtn.title = 'Aanwezig: terug naar bank';
+                aanBtn.style.cssText = 'background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3); color:#00FF88; border-radius:50%; width:24px; height:24px; padding:0; margin-left:4px; cursor:pointer; font-family:Lexend,sans-serif; font-weight:900; font-size:14px; line-height:1; display:inline-flex; align-items:center; justify-content:center; touch-action:manipulation;';
+                aanBtn.textContent = '+';
+                aanBtn.addEventListener('click', (e) => { e.stopPropagation(); markeerAanwezig(s); });
+                wrap2.appendChild(chip);
+                wrap2.appendChild(aanBtn);
+                list.appendChild(wrap2);
+            });
+        }
+
+        async function markeerAfwezig(speler) {
+            const wId = (typeof window._getWedstrijdId === 'function') ? window._getWedstrijdId() : null;
+            if (!wId) return;
+            const o = window._opstelling || {};
+            const e = o[speler.id] || { spelerId: speler.id, voornaam: speler.voornaam, rugnummer: speler.rugnummer };
+            o[speler.id] = { ...e, status: 'afwezig', positie: null, minuutIn: null, bankStartMinuut: null, bijgewerkt: Date.now() };
+            window._opstelling = o;
+            renderVeldSVG(); renderBank(); renderWisselbeleidInfo();
+            try {
+                const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
+                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + speler.id), o[speler.id]);
+            } catch (err) { console.warn('Afwezig zetten mislukt', err); }
+        }
+
+        async function markeerAanwezig(speler) {
+            const wId = (typeof window._getWedstrijdId === 'function') ? window._getWedstrijdId() : null;
+            if (!wId) return;
+            const o = window._opstelling || {};
+            const e = o[speler.id] || { spelerId: speler.id, voornaam: speler.voornaam, rugnummer: speler.rugnummer };
+            o[speler.id] = { ...e, status: 'bank', positie: null, minuutIn: null, bankStartMinuut: null, bijgewerkt: Date.now() };
+            window._opstelling = o;
+            renderVeldSVG(); renderBank(); renderWisselbeleidInfo();
+            try {
+                const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
+                await m.set(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/opstelling/' + speler.id), o[speler.id]);
+            } catch (err) { console.warn('Aanwezig zetten mislukt', err); }
         }
 
         // Live bank-tijd refresh: tikt elke 30 sec terwijl modal open is
@@ -2618,6 +2784,9 @@ window._kiesWedstrijd = function(wedstrijdId) {
         document.getElementById('scorr-selectie-overlay').style.display = 'none';
         toonBanner(w, huidigTeamNaam, huidigUser);
 
+        // Reset wissel-triggers bij elke match-load
+        if (typeof window._resetWisselTriggers === 'function') window._resetWisselTriggers();
+
         // Laad opstelling + formatie. Open de opstelling-popup automatisch
         // wanneer er nog niets is samengesteld (alleen voor de wedstrijd).
         if (typeof window._loadOpstellingVoorMatch === 'function') {
@@ -2899,6 +3068,20 @@ awayScore.textContent = 0;
   </div>
 </div>
 
+<!-- Wissel-signaal banner: verschijnt automatisch op een wisselmoment -->
+<div id="wissel-banner" style="display:none; position:fixed; top:60px; left:50%; transform:translateX(-50%); z-index:10001; max-width:90vw; background:linear-gradient(135deg,#FFB800,#FF7A00); color:#0A0E27; border-radius:14px; padding:14px 18px; font-family:'Lexend',sans-serif; font-weight:700; box-shadow:0 8px 24px rgba(255,184,0,0.4); cursor:pointer; touch-action:manipulation; animation:wb-pop 0.3s ease;">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div style="font-size:24px;">🔔</div>
+    <div>
+      <div id="wissel-banner-title" style="font-size:15px; line-height:1.2;">WISSEL TIJD!</div>
+      <div id="wissel-banner-sub" style="font-size:11px; opacity:0.8; font-weight:600; margin-top:2px;">Tap om te sluiten</div>
+    </div>
+  </div>
+</div>
+<style>
+@keyframes wb-pop { from { transform:translate(-50%, -20px); opacity:0; } to { transform:translate(-50%, 0); opacity:1; } }
+</style>
+
 <!-- Opstelling / Wissel modal -->
 <div id="wissel-modal" style="display:none; position:fixed; inset:0; background:rgba(10,14,39,0.95); z-index:9999; align-items:center; justify-content:center; padding:14px; overflow-y:auto; font-family:'Lexend',sans-serif;">
   <div style="position:relative; background:#1E2749; border:1px solid rgba(0,255,136,0.3); border-radius:16px; padding:24px 16px 16px 16px; width:100%; max-width:440px; max-height:94vh; overflow-y:auto; color:#F0F4FF;">
@@ -2936,11 +3119,23 @@ awayScore.textContent = 0;
       <div id="opst-bank-list" style="display:flex; flex-wrap:wrap; gap:5px; min-height:36px; padding:6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px;"></div>
     </div>
 
+    <!-- Afwezig -->
+    <div id="opst-afwezig-wrap" style="margin-bottom:8px; display:none;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+        <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,59,92,0.65); font-weight:700;">🚫 Afwezig <span id="opst-afwezig-count" style="color:rgba(240,244,255,0.4); font-weight:600;">(0)</span></div>
+      </div>
+      <div id="opst-afwezig-list" style="display:flex; flex-wrap:wrap; gap:5px; min-height:36px; padding:6px; background:rgba(255,59,92,0.04); border:1px solid rgba(255,59,92,0.15); border-radius:10px;"></div>
+    </div>
+
     <!-- Wisselbeleid voorstel (jeugd JO11 en lager) -->
     <div id="wisselbeleid-info" style="display:none; margin-top:10px; background:rgba(255,184,0,0.07); border:1px solid rgba(255,184,0,0.3); border-radius:10px; padding:12px 14px;">
       <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#FFB800; font-weight:700; margin-bottom:8px;">💡 Wisselbeleid voorstel</div>
       <div id="wb-stats" style="font-size:13px; color:#F0F4FF; line-height:1.55;"></div>
       <div id="wb-momenten" style="font-size:11px; color:rgba(240,244,255,0.65); margin-top:6px; line-height:1.5;"></div>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer; user-select:none;">
+        <input type="checkbox" id="wb-keeper-vast" checked style="width:18px; height:18px; accent-color:#00FF88;">
+        <span style="font-size:12px; color:rgba(240,244,255,0.85);">🧤 Keeper rouleert <b>niet</b> mee</span>
+      </label>
     </div>
 
     <!-- Speler-picker (verschijnt na tap op positie) -->

@@ -1587,8 +1587,61 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         document.getElementById('downloadBtn').addEventListener('click', downloadMatchReport);
 
         // ===== WISSELBELEID — Opstelling met formatie =====
+        // Formaties per aantal veldspelers (KNVB jeugdrichtlijnen).
         const FORMATIES = {
-            '4-3-3': [
+            // 4v4 voor JO7
+            '1-1-2': { aantal: 4, posities: [
+                { key:'gk',  label:'GK',  x:110, y:280 },
+                { key:'cv',  label:'V',   x:110, y:200 },
+                { key:'la',  label:'A',   x:75,  y:90 },
+                { key:'ra',  label:'A',   x:145, y:90 }
+            ]},
+            '2-1-1': { aantal: 4, posities: [
+                { key:'lv',  label:'V',   x:80,  y:240 },
+                { key:'rv',  label:'V',   x:140, y:240 },
+                { key:'cm',  label:'M',   x:110, y:155 },
+                { key:'st',  label:'A',   x:110, y:75 }
+            ]},
+            // 6v6 voor JO8-JO10
+            '1-2-2-1': { aantal: 6, posities: [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lv',  label:'V',   x:75,  y:230 },
+                { key:'rv',  label:'V',   x:145, y:230 },
+                { key:'lm',  label:'M',   x:75,  y:155 },
+                { key:'rm',  label:'M',   x:145, y:155 },
+                { key:'st',  label:'A',   x:110, y:70 }
+            ]},
+            '1-3-1-1': { aantal: 6, posities: [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lv',  label:'V',   x:60,  y:235 },
+                { key:'cv',  label:'V',   x:110, y:248 },
+                { key:'rv',  label:'V',   x:160, y:235 },
+                { key:'cm',  label:'M',   x:110, y:155 },
+                { key:'st',  label:'A',   x:110, y:70 }
+            ]},
+            // 8v8 voor JO11-JO12
+            '1-3-3-1': { aantal: 8, posities: [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lv',  label:'V',   x:60,  y:235 },
+                { key:'cv',  label:'V',   x:110, y:250 },
+                { key:'rv',  label:'V',   x:160, y:235 },
+                { key:'lm',  label:'M',   x:60,  y:160 },
+                { key:'cm',  label:'M',   x:110, y:160 },
+                { key:'rm',  label:'M',   x:160, y:160 },
+                { key:'st',  label:'A',   x:110, y:65 }
+            ]},
+            '1-2-3-2': { aantal: 8, posities: [
+                { key:'gk',  label:'GK',  x:110, y:288 },
+                { key:'lv',  label:'V',   x:75,  y:240 },
+                { key:'rv',  label:'V',   x:145, y:240 },
+                { key:'lm',  label:'M',   x:50,  y:170 },
+                { key:'cm',  label:'M',   x:110, y:170 },
+                { key:'rm',  label:'M',   x:170, y:170 },
+                { key:'la',  label:'A',   x:80,  y:70 },
+                { key:'ra',  label:'A',   x:140, y:70 }
+            ]},
+            // 11v11 voor JO13+
+            '4-3-3': { aantal: 11, posities: [
                 { key:'gk',  label:'GK',  x:110, y:288 },
                 { key:'lb',  label:'LB',  x:42,  y:230 },
                 { key:'lcb', label:'CB',  x:82,  y:248 },
@@ -1600,8 +1653,8 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                 { key:'lw',  label:'LW',  x:46,  y:80 },
                 { key:'st',  label:'ST',  x:110, y:60 },
                 { key:'rw',  label:'RW',  x:174, y:80 }
-            ],
-            '4-4-2': [
+            ]},
+            '4-4-2': { aantal: 11, posities: [
                 { key:'gk',  label:'GK',  x:110, y:288 },
                 { key:'lb',  label:'LB',  x:42,  y:230 },
                 { key:'lcb', label:'CB',  x:82,  y:248 },
@@ -1613,8 +1666,8 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                 { key:'rm',  label:'RM',  x:178, y:155 },
                 { key:'lst', label:'ST',  x:80,  y:60 },
                 { key:'rst', label:'ST',  x:140, y:60 }
-            ],
-            '3-5-2': [
+            ]},
+            '3-5-2': { aantal: 11, posities: [
                 { key:'gk',  label:'GK',  x:110, y:288 },
                 { key:'lcb', label:'CB',  x:62,  y:250 },
                 { key:'cb',  label:'CB',  x:110, y:258 },
@@ -1626,8 +1679,8 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                 { key:'rwb', label:'RWB', x:188, y:175 },
                 { key:'lst', label:'ST',  x:80,  y:62 },
                 { key:'rst', label:'ST',  x:140, y:62 }
-            ],
-            '4-2-3-1': [
+            ]},
+            '4-2-3-1': { aantal: 11, posities: [
                 { key:'gk',  label:'GK',  x:110, y:288 },
                 { key:'lb',  label:'LB',  x:42,  y:230 },
                 { key:'lcb', label:'CB',  x:82,  y:248 },
@@ -1639,8 +1692,55 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                 { key:'cam', label:'CAM', x:110, y:105 },
                 { key:'ram', label:'RM',  x:170, y:115 },
                 { key:'st',  label:'ST',  x:110, y:55 }
-            ]
+            ]}
         };
+
+        // Geef de posities voor een formatie (backwards-compat met oude code die direct array verwachtte)
+        function getPosities(formatieNaam) {
+            const f = FORMATIES[formatieNaam];
+            if (!f) return [];
+            return Array.isArray(f) ? f : (f.posities || []);
+        }
+
+        function getAantalSpelers(formatieNaam) {
+            const f = FORMATIES[formatieNaam];
+            if (!f) return 11;
+            return f.aantal || (Array.isArray(f) ? f.length : 11);
+        }
+
+        // KNVB leeftijdcategorieën
+        function detectLeeftijdsCategorie() {
+            const teamId   = (window._huidigTeamId || '').toLowerCase();
+            const teamNaam = (window._huidigTeamNaam || '').toLowerCase();
+            // Pattern 1: teamId zoals 'fcp10-2' → onder 10
+            const m1 = teamId.match(/^[a-z]+(\d{1,2})-/);
+            if (m1) {
+                const n = parseInt(m1[1], 10);
+                if (n >= 4 && n <= 19) return { jeugd: true, leeftijd: n };
+                // n=1/2/3 = senior team-nummers, geen leeftijd
+            }
+            // Pattern 2: teamNaam zoals "JO10-2" of "Onder 10" of "MO12"
+            const m2 = teamNaam.match(/(?:jo|mo|onder)\s?(\d{1,2})/);
+            if (m2) {
+                const n = parseInt(m2[1], 10);
+                if (n >= 4 && n <= 19) return { jeugd: true, leeftijd: n };
+            }
+            return { jeugd: false, leeftijd: 19 }; // default senior (11v11)
+        }
+
+        function aantalSpelersInVeld(leeftijd) {
+            if (leeftijd <= 7)  return 4;
+            if (leeftijd <= 10) return 6;
+            if (leeftijd <= 12) return 8;
+            return 11;
+        }
+
+        function defaultFormatieVoorAantal(aantal) {
+            if (aantal === 4)  return '1-1-2';
+            if (aantal === 6)  return '1-2-2-1';
+            if (aantal === 8)  return '1-3-3-1';
+            return '4-3-3';
+        }
 
         // State
         window._opstelling = {};
@@ -1650,6 +1750,9 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
         // Public: wordt aangeroepen vanuit _kiesWedstrijd
         window._loadOpstellingVoorMatch = async function(wId) {
+            const cat = detectLeeftijdsCategorie();
+            const aantal = aantalSpelersInVeld(cat.leeftijd);
+            const def = defaultFormatieVoorAantal(aantal);
             try {
                 const m = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js");
                 const [oSnap, fSnap] = await Promise.all([
@@ -1657,11 +1760,16 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                     m.get(m.ref(window._firebaseDb, 'wedstrijden/' + wId + '/formatie'))
                 ]);
                 window._opstelling = oSnap.exists() ? oSnap.val() : {};
-                huidigeFormatie    = (fSnap.exists() && FORMATIES[fSnap.val()]) ? fSnap.val() : '4-3-3';
+                // Gebruik opgeslagen formatie alleen als 'ie matcht met aantal-spelers van team
+                if (fSnap.exists() && FORMATIES[fSnap.val()] && getAantalSpelers(fSnap.val()) === aantal) {
+                    huidigeFormatie = fSnap.val();
+                } else {
+                    huidigeFormatie = def;
+                }
                 return Object.keys(window._opstelling).length > 0;
             } catch (e) {
                 window._opstelling = {};
-                huidigeFormatie = '4-3-3';
+                huidigeFormatie = def;
                 return false;
             }
         };
@@ -1693,6 +1801,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         function closeOpstellingModal() {
             document.getElementById('wissel-modal').style.display = 'none';
             closeOpstPicker();
+            stopBankTick();
         }
 
         window.openOpstellingModal = async function(autoFromKies) {
@@ -1700,6 +1809,12 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             if (!wId) {
                 if (!autoFromKies) alert('Kies eerst een wedstrijd voordat je een opstelling kunt maken.');
                 return;
+            }
+            // Validate huidigeFormatie tegen leeftijdscategorie
+            const _cat = detectLeeftijdsCategorie();
+            const _aant = aantalSpelersInVeld(_cat.leeftijd);
+            if (!FORMATIES[huidigeFormatie] || getAantalSpelers(huidigeFormatie) !== _aant) {
+                huidigeFormatie = defaultFormatieVoorAantal(_aant);
             }
             // Update subtitle on basis van match-state
             const subEl = document.getElementById('opst-subtitle');
@@ -1719,6 +1834,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             renderVeldSVG();
             renderBank();
             updateNoSelectieMessage();
+            startBankTick();
         };
 
         function updateNoSelectieMessage() {
@@ -1735,17 +1851,36 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         }
 
         function renderFormatieChips() {
-            document.querySelectorAll('.formatie-chip').forEach(c => {
-                c.classList.toggle('active', c.dataset.formatie === huidigeFormatie);
+            const cat = detectLeeftijdsCategorie();
+            const aantalDoelTeam = aantalSpelersInVeld(cat.leeftijd);
+            // Render dynamisch: alleen formaties die matchen met team-aantal
+            const palette = document.querySelectorAll('.formatie-chip')[0]?.parentElement;
+            if (!palette) return;
+            // Vervang chips
+            palette.innerHTML = '';
+            Object.keys(FORMATIES).forEach(naam => {
+                if (getAantalSpelers(naam) !== aantalDoelTeam) return;
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'formatie-chip' + (naam === huidigeFormatie ? ' active' : '');
+                chip.dataset.formatie = naam;
+                chip.textContent = naam;
+                chip.addEventListener('click', () => switchFormatie(naam));
+                palette.appendChild(chip);
             });
+            // Voeg leeftijd-info label toe
+            const info = document.createElement('span');
+            info.style.cssText = 'font-size:10px; color:rgba(240,244,255,0.5); align-self:center; margin-left:4px;';
+            info.textContent = (cat.jeugd ? 'JO' + cat.leeftijd : 'Senioren') + ' · ' + aantalDoelTeam + 'v' + aantalDoelTeam;
+            palette.appendChild(info);
         }
 
         async function switchFormatie(naam) {
             if (!FORMATIES[naam] || naam === huidigeFormatie) return;
             // Bij wisselen van formatie: bestaande spelers blijven gekoppeld waar mogelijk,
             // maar als positie-key niet bestaat in nieuwe formatie → speler naar bank.
-            const oudeKeys = new Set(FORMATIES[huidigeFormatie].map(p => p.key));
-            const nieuweKeys = new Set(FORMATIES[naam].map(p => p.key));
+            const oudeKeys = new Set(getPosities(huidigeFormatie).map(p => p.key));
+            const nieuweKeys = new Set(getPosities(naam).map(p => p.key));
 
             const o = window._opstelling || {};
             Object.keys(o).forEach(spelerId => {
@@ -1788,7 +1923,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
 
         function renderVeldSVG() {
             const svg = document.getElementById('opst-veld');
-            const formatie = FORMATIES[huidigeFormatie] || FORMATIES['4-3-3'];
+            const formatie = getPosities(huidigeFormatie);
             const W = 220, H = 320;
 
             let inner = '';
@@ -1834,10 +1969,31 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
 
+        // Hoeveel minuten staat een speler op dit moment op de bank (cumulatief incl. huidige spell)
+        function getMinOpBank(entry) {
+            if (!entry || entry.status !== 'bank') return 0;
+            let mins = entry.minutenOpBank || 0;
+            const lopend = (typeof isRunning !== 'undefined' && isRunning && typeof getCurrentMinute === 'function');
+            if (lopend && entry.bankStartMinuut != null) {
+                mins += Math.max(0, getCurrentMinute() - entry.bankStartMinuut);
+            }
+            return mins;
+        }
+
         function renderBank() {
             const bankEl = document.getElementById('opst-bank-list');
             const sel = (window._huidigSelectie || []).slice().sort((a,b) => Number(a.rugnummer||0) - Number(b.rugnummer||0));
             const o = window._opstelling || {};
+            const lopend = (typeof isRunning !== 'undefined' && isRunning);
+
+            // Voor kleur-indicator: gemiddelde bank-tijd berekenen
+            const bankTimes = [];
+            sel.forEach(s => {
+                const e = o[s.id];
+                if (e && e.status === 'bank') bankTimes.push(getMinOpBank(e));
+            });
+            const avgBankTime = bankTimes.length ? bankTimes.reduce((a,b)=>a+b,0) / bankTimes.length : 0;
+
             bankEl.innerHTML = '';
             let bankCount = 0;
             sel.forEach(s => {
@@ -1845,12 +2001,31 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
                 const status = (e && e.status) || 'bank';
                 if (status === 'in') return;
                 bankCount++;
+                const minBank = getMinOpBank(e || { status:'bank' });
+                let timerHtml = '';
+                let extraStyle = '';
+                if (lopend && minBank > 0) {
+                    // Kleur-logica: > 1.5x gemiddelde = "moet er weer in" (rood), > avg = geel, < avg = neutraal
+                    let color = 'rgba(240,244,255,0.45)';
+                    let bg = 'rgba(255,255,255,0.06)';
+                    if (avgBankTime > 0) {
+                        if (minBank >= avgBankTime * 1.5 && minBank >= 4) {
+                            color = '#FF3B5C'; bg = 'rgba(255,59,92,0.15)';
+                            extraStyle = 'box-shadow: 0 0 0 1px rgba(255,59,92,0.4) inset;';
+                        } else if (minBank >= avgBankTime && minBank >= 3) {
+                            color = '#FFB800'; bg = 'rgba(255,184,0,0.12)';
+                        }
+                    }
+                    timerHtml = '<span style="margin-left:4px; font-size:10px; font-weight:700; color:' + color + '; background:' + bg + '; padding:2px 6px; border-radius:8px;">🪑 ' + minBank + "'</span>";
+                }
                 const chip = document.createElement('button');
                 chip.type = 'button';
                 chip.className = 'opst-chip bank';
                 chip.dataset.id = s.id;
+                chip.style.cssText = extraStyle;
                 chip.innerHTML = '<span class="nr">#' + (s.rugnummer ?? '?') + '</span>' +
-                                 '<span>' + escapeHtmlSimple(s.voornaam || 'Onbekend') + '</span>';
+                                 '<span>' + escapeHtmlSimple(s.voornaam || 'Onbekend') + '</span>' +
+                                 timerHtml;
                 chip.addEventListener('click', () => onBankSpelerClick(s));
                 bankEl.appendChild(chip);
             });
@@ -1860,9 +2035,23 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             }
         }
 
+        // Live bank-tijd refresh: tikt elke 30 sec terwijl modal open is
+        let _bankTickInterval = null;
+        function startBankTick() {
+            if (_bankTickInterval) return;
+            _bankTickInterval = setInterval(() => {
+                const modalOpen = document.getElementById('wissel-modal').style.display === 'flex';
+                if (!modalOpen) { stopBankTick(); return; }
+                if (typeof isRunning !== 'undefined' && isRunning) renderBank();
+            }, 30000);
+        }
+        function stopBankTick() {
+            if (_bankTickInterval) { clearInterval(_bankTickInterval); _bankTickInterval = null; }
+        }
+
         // Speler-picker openen voor een positie (na tap op veld-positie)
         function onPositieClick(positieKey) {
-            const formatie = FORMATIES[huidigeFormatie];
+            const formatie = getPosities(huidigeFormatie);
             const pos = formatie.find(p => p.key === positieKey);
             if (!pos) return;
             const sp = spelerOpPositie(positieKey);
@@ -1909,7 +2098,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
         // Bank-speler tappen: vraag op welke positie
         function onBankSpelerClick(speler) {
             // Toon picker met alleen de eigen lege posities (alle posities)
-            const formatie = FORMATIES[huidigeFormatie];
+            const formatie = getPosities(huidigeFormatie);
 
             opstellingPickerPositie = null;
             opstellingPickerSpelerId = speler.id;
@@ -1947,24 +2136,30 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             const huidig = spelerOpPositie(positie.key);
             const lopend1 = (typeof isRunning !== 'undefined' && isRunning);
             if (huidig && huidig.spelerId !== speler.id) {
-                // Bereken speeltijd voor uitgaande speler
+                // Bereken speeltijd voor uitgaande speler + start bank-tijd
                 if (lopend1) {
                     const sinds = huidig.minuutIn != null ? huidig.minuutIn : 0;
                     const newMin = (huidig.minutenGespeeld || 0) + Math.max(0, minuut - sinds);
-                    o[huidig.spelerId] = { ...huidig, status:'bank', positie:null, minuutIn:null, minutenGespeeld:newMin };
+                    o[huidig.spelerId] = { ...huidig, status:'bank', positie:null, minuutIn:null,
+                                           minutenGespeeld:newMin, bankStartMinuut: minuut };
                 } else {
-                    o[huidig.spelerId] = { ...huidig, status:'bank', positie:null, minuutIn:null };
+                    o[huidig.spelerId] = { ...huidig, status:'bank', positie:null, minuutIn:null, bankStartMinuut:null };
                 }
             }
 
-            // Plaats nieuwe speler
+            // Plaats nieuwe speler — als 'ie van bank kwam, sluit z'n bank-spell af
             const entry = o[speler.id] || {
                 spelerId: speler.id, voornaam: speler.voornaam, rugnummer: speler.rugnummer,
-                status: 'bank', positie: null, minutenGespeeld: 0
+                status: 'bank', positie: null, minutenGespeeld: 0, minutenOpBank: 0
             };
+            // Cumulatief minutenOpBank bijwerken
+            if (lopend1 && entry.bankStartMinuut != null) {
+                entry.minutenOpBank = (entry.minutenOpBank || 0) + Math.max(0, minuut - entry.bankStartMinuut);
+            }
             entry.status = 'in';
             entry.positie = positie.key;
-            entry.minuutIn = (typeof isRunning !== 'undefined' && isRunning) ? minuut : 0;
+            entry.minuutIn = lopend1 ? minuut : 0;
+            entry.bankStartMinuut = null;
             entry.bijgewerkt = Date.now();
             o[speler.id] = entry;
             window._opstelling = o;
@@ -2022,9 +2217,10 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             if (lopend) {
                 const sinds = sp.minuutIn != null ? sp.minuutIn : 0;
                 const newMin = (sp.minutenGespeeld || 0) + Math.max(0, minuut - sinds);
-                o[sp.spelerId] = { ...sp, status:'bank', positie:null, minuutIn:null, minutenGespeeld:newMin };
+                o[sp.spelerId] = { ...sp, status:'bank', positie:null, minuutIn:null,
+                                   minutenGespeeld:newMin, bankStartMinuut: minuut };
             } else {
-                o[sp.spelerId] = { ...sp, status:'bank', positie:null, minuutIn:null };
+                o[sp.spelerId] = { ...sp, status:'bank', positie:null, minuutIn:null, bankStartMinuut:null };
             }
             window._opstelling = o;
             renderVeldSVG(); renderBank();

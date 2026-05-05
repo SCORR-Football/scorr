@@ -1776,6 +1776,57 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             return '4-3-3';
         }
 
+        // === Wisselbeleid voor jeugd JO11 en lager ===
+        // Geeft een gelijkwaardig wisselschema waarbij iedereen ongeveer
+        // evenveel speelt en niet te lang op de bank zit.
+        function berekenWisselbeleid() {
+            const cat = detectLeeftijdsCategorie();
+            // Alleen voor jeugd t/m JO11
+            if (!cat.jeugd || cat.leeftijd > 11) return null;
+            const inVeld = aantalSpelersInVeld(cat.leeftijd);
+            const totaal = (window._huidigSelectie || []).length;
+            if (totaal <= inVeld) return null; // niemand op bank
+            const bank = totaal - inVeld;
+            const totaleSpeel = (typeof halfDuration === 'number' && halfDuration > 0) ? halfDuration * 2 : 50;
+            // Gelijke verdeling
+            const bankPerSpeler  = Math.round((totaleSpeel * bank) / totaal);
+            const veldPerSpeler  = totaleSpeel - bankPerSpeler;
+            // Doel: bank-spell van max ~7-8 min — kort genoeg voor jeugd
+            const targetSpell = 7;
+            const spellsPerSpeler = Math.max(1, Math.round(bankPerSpeler / targetSpell));
+            // Aantal wisselmomenten = spellsPerSpeler * (totaal / bank)
+            const aantalRondes = Math.max(1, Math.round(spellsPerSpeler * (totaal / bank)));
+            const intervalMin = Math.max(2, Math.round(totaleSpeel / aantalRondes));
+            // Wisselmomenten genereren (zonder rust-moment 2x)
+            const momenten = [];
+            let m = intervalMin;
+            while (m < totaleSpeel - 1) {
+                momenten.push(m);
+                m += intervalMin;
+            }
+            return { totaal, inVeld, bank, totaleSpeel, bankPerSpeler, veldPerSpeler, intervalMin, aantalPerWissel: bank, momenten };
+        }
+
+        function renderWisselbeleidInfo() {
+            const box = document.getElementById('wisselbeleid-info');
+            if (!box) return;
+            const wb = berekenWisselbeleid();
+            if (!wb) { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+            const stats = document.getElementById('wb-stats');
+            const moms  = document.getElementById('wb-momenten');
+            stats.innerHTML =
+                '<b>' + wb.totaal + ' spelers</b> · ' + wb.inVeld + ' in het veld, ' + wb.bank + ' op de bank<br>' +
+                'Wissel elke <b>~' + wb.intervalMin + ' min</b> ' + wb.aantalPerWissel + ' speler' + (wb.aantalPerWissel === 1 ? '' : 's') + ' tegelijk.<br>' +
+                'Zo speelt iedereen <b>~' + wb.veldPerSpeler + ' min</b> en zit <b>~' + wb.bankPerSpeler + ' min</b> op de bank.';
+            const halverwege = Math.round(wb.totaleSpeel / 2);
+            const mlabels = wb.momenten.map(m => {
+                const helft = m <= halverwege ? '1e' : '2e';
+                return "<span style=\"display:inline-block; padding:2px 6px; margin:1px 2px; background:rgba(255,184,0,0.15); border-radius:5px;\">" + m + "' <span style=\"opacity:0.55\">(" + helft + ")</span></span>";
+            }).join('');
+            moms.innerHTML = '<b>Wisselmomenten:</b> ' + (mlabels || '—');
+        }
+
         // State
         window._opstelling = {};
         let huidigeFormatie = '4-3-3';
@@ -1867,6 +1918,7 @@ td{padding:10px;border-bottom:1px solid #eee;font-size:14px}.row-goal{border-lef
             renderFormatieChips();
             renderVeldSVG();
             renderBank();
+            renderWisselbeleidInfo();
             updateNoSelectieMessage();
             startBankTick();
         };
@@ -2882,6 +2934,13 @@ awayScore.textContent = 0;
         <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:700;">🪑 Bank <span id="opst-bank-count" style="color:rgba(240,244,255,0.4); font-weight:600;">(0)</span></div>
       </div>
       <div id="opst-bank-list" style="display:flex; flex-wrap:wrap; gap:5px; min-height:36px; padding:6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px;"></div>
+    </div>
+
+    <!-- Wisselbeleid voorstel (jeugd JO11 en lager) -->
+    <div id="wisselbeleid-info" style="display:none; margin-top:10px; background:rgba(255,184,0,0.07); border:1px solid rgba(255,184,0,0.3); border-radius:10px; padding:12px 14px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#FFB800; font-weight:700; margin-bottom:8px;">💡 Wisselbeleid voorstel</div>
+      <div id="wb-stats" style="font-size:13px; color:#F0F4FF; line-height:1.55;"></div>
+      <div id="wb-momenten" style="font-size:11px; color:rgba(240,244,255,0.65); margin-top:6px; line-height:1.5;"></div>
     </div>
 
     <!-- Speler-picker (verschijnt na tap op positie) -->

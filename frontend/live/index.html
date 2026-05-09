@@ -746,9 +746,17 @@ function getLogo(naam) {
 
         function naamUitOmschrijving(o) {
             if (!o) return '';
-            var dash = o.indexOf(' - ');
-            var rest = dash === -1 ? o : o.substring(dash + 3);
-            return rest.replace(/\s*#\d+\s*$/, '').trim();
+            // Strip emoji/event-prefix zoals "⚽ DOELPUNT! "
+            var clean = o.replace(/^[^A-Za-z0-9]*[A-Z][A-Z!\s]+/, '').trim();
+            // Knip op " - "
+            var dash = clean.indexOf(' - ');
+            var rest = dash === -1 ? clean : clean.substring(dash + 3);
+            // Probeer naam tussen haakjes: "#5 (Naam)" → "Naam"
+            var m = rest.match(/\(([^)]+)\)/);
+            if (m && m[1].trim()) return m[1].trim();
+            // Anders: strip #nr aan start of einde, plus losse delen
+            var stripped = rest.replace(/^\s*#\d+\s*/, '').replace(/\s*#\d+\s*$/, '').trim();
+            return stripped;
         }
 
         function fase(minuut, helfttijd) {
@@ -771,12 +779,24 @@ function getLogo(naam) {
             return t + '-' + u;
         }
 
+        function detectHelfttijdFromTeam(thuis, uit) {
+            var c = ((thuis||'') + ' ' + (uit||'')).toLowerCase();
+            var m = c.match(/jo\s*(\d+)/);
+            if (!m) return 45;
+            var lf = parseInt(m[1], 10);
+            if (lf <= 9) return 20;
+            if (lf <= 12) return 25;
+            if (lf <= 14) return 30;
+            if (lf <= 16) return 35;
+            return 45;
+        }
+
         function genereerVerslag(data) {
             var thuis = data.thuisteam || 'Thuis';
             var uit = data.uitteam || 'Uit';
             var thuisScore = data.thuisscore || 0;
             var uitScore = data.uitscore || 0;
-            var helfttijd = data.helfttijd || 45;
+            var helfttijd = data.helfttijd || detectHelfttijdFromTeam(thuis, uit);
 
             var events = [];
             if (data.events) {
@@ -855,11 +875,11 @@ function getLogo(naam) {
                             actor + ' opende de score in de ' + min + 'e minuut (' + stand + ').'
                         ]));
                     } else {
-                        var verb = pickRand(['scoorde', 'tikte raak', 'schoot raak', 'tekende voor de treffer', 'maakte de goal']);
                         zinnen.push(pickRand([
-                            'In de ' + min + 'e minuut ' + verb + ' ' + actor + ' (' + stand + ').',
+                            'In de ' + min + 'e minuut scoorde ' + actor + ' (' + stand + ').',
                             actor + ' bracht de stand op ' + stand + ' ' + faseStr + ' (' + min + 'e min).',
-                            'Vervolgens noteerde ' + actor + ' een treffer in de ' + min + 'e minuut: ' + stand + '.'
+                            actor + ' was trefzeker in de ' + min + 'e minuut: ' + stand + '.',
+                            actor + ' tekende in de ' + min + 'e minuut voor de ' + stand + '.'
                         ]));
                     }
                 }
@@ -1007,26 +1027,41 @@ function getLogo(naam) {
             var verslag = genereerVerslag(huidigeData);
             var html = bouwPdfHtml(verslag);
 
+            // Holder zichtbaar in viewport maar onzichtbaar gemaakt via opacity:
+            // html2canvas heeft moeite met extreem-negatieve coördinaten.
             var holder = document.createElement('div');
-            holder.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;';
+            holder.style.cssText = 'position:fixed;left:0;top:0;width:794px;opacity:0;pointer-events:none;z-index:-9999;background:#fff;';
             holder.innerHTML = html;
             document.body.appendChild(holder);
 
             document.getElementById('verslagLoading').classList.remove('hidden');
             document.getElementById('downloadPdfBtn').disabled = true;
 
-            var safeNaam = function(s) { return (s || '').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase(); };
-            var fname = 'verslag-' + safeNaam(verslag.thuis) + '-vs-' + safeNaam(verslag.uit) + (verslag.datum ? '-' + verslag.datum : '') + '.pdf';
+            var fontsP = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+            var imgs = holder.querySelectorAll('img');
+            var imgP = Promise.all(Array.prototype.map.call(imgs, function(img) {
+                return new Promise(function(resolve) {
+                    if (img.complete && img.naturalHeight !== 0) return resolve();
+                    img.addEventListener('load', resolve);
+                    img.addEventListener('error', resolve);
+                });
+            }));
 
-            html2pdf().set({
-                margin: 0,
-                filename: fname,
-                image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
-                jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css', 'legacy'] }
-            }).from(holder.firstChild).save().then(function() {
-                document.body.removeChild(holder);
+            Promise.all([fontsP, imgP]).then(function() {
+                return new Promise(function(r) { setTimeout(r, 80); });
+            }).then(function() {
+                var safeNaam = function(s) { return (s || '').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase(); };
+                var fname = 'verslag-' + safeNaam(verslag.thuis) + '-vs-' + safeNaam(verslag.uit) + (verslag.datum ? '-' + verslag.datum : '') + '.pdf';
+
+                return html2pdf().set({
+                    margin: 0,
+                    filename: fname,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 794 },
+                    jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+                }).from(holder.firstElementChild).save();
+            }).then(function() {
+                if (holder.parentNode) document.body.removeChild(holder);
                 document.getElementById('verslagLoading').classList.add('hidden');
                 document.getElementById('downloadPdfBtn').disabled = false;
                 showToast('PDF gedownload');

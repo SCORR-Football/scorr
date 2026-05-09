@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SCORR - Live Wedstrijd</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
     <style>
         :root {
             --green: #00FF88;
@@ -157,6 +158,58 @@
             background: rgba(255,255,255,0.2); flex-shrink: 0;
         }
         .toggle-pill.active .dot { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+        /* ===== VERSLAG SECTIE ===== */
+        .verslag-section {
+            margin: 0 16px 16px;
+            background: linear-gradient(135deg, rgba(0,255,136,0.08), rgba(30,39,73,0.6));
+            border: 1px solid rgba(0,255,136,0.25);
+            border-radius: 16px; padding: 18px;
+            display: none;
+        }
+        .verslag-section.show { display: block; }
+        .verslag-title {
+            font-size: 13px; font-weight: 700; color: var(--green);
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
+        }
+        .verslag-sub {
+            font-size: 11px; color: rgba(240,244,255,0.5);
+            margin-bottom: 14px; line-height: 1.4;
+        }
+        .verslag-buttons {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
+        .verslag-btn {
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.4);
+            color: var(--green); padding: 14px 12px;
+            border-radius: 12px; cursor: pointer;
+            font-family: 'Lexend', sans-serif; font-size: 12px;
+            font-weight: 700; letter-spacing: 0.5px;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            transition: all 0.15s;
+        }
+        .verslag-btn:hover { background: rgba(0,255,136,0.18); transform: translateY(-1px); }
+        .verslag-btn:active { transform: translateY(0); }
+        .verslag-btn.whatsapp {
+            background: rgba(37,211,102,0.12);
+            border-color: rgba(37,211,102,0.5);
+            color: #25D366;
+        }
+        .verslag-btn.whatsapp:hover { background: rgba(37,211,102,0.22); }
+        .verslag-btn .icon { font-size: 22px; line-height: 1; }
+        .verslag-btn .lbl { font-size: 11px; }
+        .verslag-btn:disabled {
+            opacity: 0.5; cursor: not-allowed;
+            transform: none !important;
+        }
+        .verslag-loading {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 11px; color: rgba(240,244,255,0.5);
+            margin-top: 10px; justify-content: center;
+        }
+        .verslag-loading.hidden { display: none; }
 
         /* ===== TOAST ===== */
         .toast {
@@ -369,6 +422,23 @@
                 <div class="timeline-header">📋 Wedstrijdverloop</div>
                 <div id="timeline">
                     <div class="timeline-empty">Nog geen gebeurtenissen</div>
+                </div>
+            </div>
+
+            <div class="verslag-section" id="verslagSection">
+                <div class="verslag-title">📰 Wedstrijdverslag</div>
+                <div class="verslag-sub">Het verslag is automatisch samengesteld op basis van de geregistreerde gebeurtenissen. Deel het met familie en vrienden.</div>
+                <div class="verslag-buttons">
+                    <button class="verslag-btn" id="downloadPdfBtn" type="button">
+                        <span class="icon">📥</span><span class="lbl">Download PDF</span>
+                    </button>
+                    <button class="verslag-btn whatsapp" id="shareWaBtn" type="button">
+                        <span class="icon">💬</span><span class="lbl">Deel via WhatsApp</span>
+                    </button>
+                </div>
+                <div class="verslag-loading hidden" id="verslagLoading">
+                    <div class="refresh-spinner" style="border-color:var(--green);border-top-color:transparent;"></div>
+                    PDF wordt aangemaakt…
                 </div>
             </div>
 
@@ -671,6 +741,341 @@ function getLogo(naam) {
             } catch(e) {}
         }
 
+        // ===== VERSLAG GENERATOR =====
+        function pickRand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function naamUitOmschrijving(o) {
+            if (!o) return '';
+            var dash = o.indexOf(' - ');
+            var rest = dash === -1 ? o : o.substring(dash + 3);
+            return rest.replace(/\s*#\d+\s*$/, '').trim();
+        }
+
+        function fase(minuut, helfttijd) {
+            if (minuut <= 5) return 'in de openingsfase';
+            if (minuut <= 15) return 'al vroeg in de wedstrijd';
+            if (minuut < helfttijd - 5) return 'in de eerste helft';
+            if (minuut < helfttijd) return 'vlak voor rust';
+            if (minuut < helfttijd + 5) return 'kort na de pauze';
+            if (minuut < (helfttijd * 2) - 10) return 'in de tweede helft';
+            if (minuut < (helfttijd * 2) - 3) return 'in de slotfase';
+            return 'in de laatste minuten';
+        }
+
+        function berekenStandTotMinuut(goals, idx, thuis) {
+            var t = 0, u = 0;
+            for (var i = 0; i <= idx; i++) {
+                var g = goals[i];
+                if (g.omschrijving && g.omschrijving.indexOf(thuis) !== -1) t++; else u++;
+            }
+            return t + '-' + u;
+        }
+
+        function genereerVerslag(data) {
+            var thuis = data.thuisteam || 'Thuis';
+            var uit = data.uitteam || 'Uit';
+            var thuisScore = data.thuisscore || 0;
+            var uitScore = data.uitscore || 0;
+            var helfttijd = data.helfttijd || 45;
+
+            var events = [];
+            if (data.events) {
+                for (var k in data.events) {
+                    if (data.events.hasOwnProperty(k)) events.push(data.events[k]);
+                }
+                events.sort(function(a, b) {
+                    return (a.minuut || 0) - (b.minuut || 0) || (a.timestamp || 0) - (b.timestamp || 0);
+                });
+            }
+            var goals = events.filter(function(e) { return e.type === 'goal'; });
+            var gele = events.filter(function(e) { return e.type === 'yellow-card'; });
+            var rode = events.filter(function(e) { return e.type === 'red-card'; });
+
+            // ===== INTRO =====
+            var intro, doelp = thuisScore + uitScore;
+            if (thuisScore === uitScore) {
+                intro = doelp === 0
+                    ? pickRand([
+                        thuis + ' en ' + uit + ' deelden de punten in een doelpuntloze wedstrijd.',
+                        'In een wedstrijd zonder doelpunten bleven ' + thuis + ' en ' + uit + ' aan elkaar gewaagd: 0-0.',
+                        thuis + ' en ' + uit + ' kwamen beide niet tot scoren — eindstand 0-0.'
+                    ])
+                    : pickRand([
+                        thuis + ' en ' + uit + ' deelden de punten in een spannend duel (' + thuisScore + '-' + uitScore + ').',
+                        'In een gelijkopgaande wedstrijd kwamen ' + thuis + ' en ' + uit + ' niet tot een winnaar (' + thuisScore + '-' + uitScore + ').',
+                        'De wedstrijd tussen ' + thuis + ' en ' + uit + ' eindigde in een gelijkspel: ' + thuisScore + '-' + uitScore + '.'
+                    ]);
+            } else {
+                var winnaar = thuisScore > uitScore ? thuis : uit;
+                var verliezer = thuisScore > uitScore ? uit : thuis;
+                var verschil = Math.abs(thuisScore - uitScore);
+                if (verschil >= 4) {
+                    intro = pickRand([
+                        winnaar + ' walste over ' + verliezer + ' heen en won met ' + thuisScore + '-' + uitScore + '.',
+                        'Een eenzijdige wedstrijd waarin ' + winnaar + ' geen kind aan ' + verliezer + ' had: ' + thuisScore + '-' + uitScore + '.',
+                        winnaar + ' boekte een ruime overwinning op ' + verliezer + ' (' + thuisScore + '-' + uitScore + ').'
+                    ]);
+                } else if (verschil === 1) {
+                    intro = pickRand([
+                        'In een ' + (doelp >= 4 ? 'enerverend' : 'spannend') + ' duel trok ' + winnaar + ' aan het langste eind tegen ' + verliezer + ' (' + thuisScore + '-' + uitScore + ').',
+                        winnaar + ' won een nipt duel van ' + verliezer + ': ' + thuisScore + '-' + uitScore + '.',
+                        'Met de kleinst mogelijke marge versloeg ' + winnaar + ' ' + verliezer + ' (' + thuisScore + '-' + uitScore + ').'
+                    ]);
+                } else {
+                    intro = pickRand([
+                        winnaar + ' was vandaag te sterk voor ' + verliezer + ' (' + thuisScore + '-' + uitScore + ').',
+                        'In een ' + (doelp >= 5 ? 'doelpuntrijke' : 'goed verzorgde') + ' partij was ' + winnaar + ' de bovenliggende partij: ' + thuisScore + '-' + uitScore + '.',
+                        winnaar + ' boekte een verdiende zege op ' + verliezer + ' (' + thuisScore + '-' + uitScore + ').'
+                    ]);
+                }
+            }
+
+            // ===== VERLOOP =====
+            var verloopParas = [];
+            if (goals.length === 0) {
+                verloopParas.push('Beide ploegen wisten in deze wedstrijd niet tot scoren te komen, hoewel het aan inzet niet ontbrak.');
+            } else {
+                var zinnen = [];
+                for (var i = 0; i < goals.length; i++) {
+                    var g = goals[i];
+                    var team = (g.omschrijving && g.omschrijving.indexOf(thuis) !== -1) ? thuis : uit;
+                    var speler = naamUitOmschrijving(g.omschrijving);
+                    // Strip teamnaam aan begin
+                    if (speler.indexOf(thuis) === 0) speler = speler.substring(thuis.length).replace(/^[\s-]+/, '').trim();
+                    if (speler.indexOf(uit) === 0) speler = speler.substring(uit.length).replace(/^[\s-]+/, '').trim();
+                    var min = g.minuut || '?';
+                    var stand = berekenStandTotMinuut(goals, i, thuis);
+                    var faseStr = typeof min === 'number' ? fase(min, helfttijd) : 'in de wedstrijd';
+                    var actor = speler ? speler + ' (' + team + ')' : team;
+
+                    if (i === 0) {
+                        zinnen.push(pickRand([
+                            'Al in de ' + min + 'e minuut zette ' + actor + ' de score op ' + stand + '.',
+                            'De openingstreffer viel ' + faseStr + ': ' + actor + ' tekende voor de ' + stand + ' (' + min + 'e min).',
+                            actor + ' opende de score in de ' + min + 'e minuut (' + stand + ').'
+                        ]));
+                    } else {
+                        var verb = pickRand(['scoorde', 'tikte raak', 'schoot raak', 'tekende voor de treffer', 'maakte de goal']);
+                        zinnen.push(pickRand([
+                            'In de ' + min + 'e minuut ' + verb + ' ' + actor + ' (' + stand + ').',
+                            actor + ' bracht de stand op ' + stand + ' ' + faseStr + ' (' + min + 'e min).',
+                            'Vervolgens noteerde ' + actor + ' een treffer in de ' + min + 'e minuut: ' + stand + '.'
+                        ]));
+                    }
+                }
+                var eersteHelft = [], tweedeHelft = [];
+                for (var i = 0; i < goals.length; i++) {
+                    if ((goals[i].minuut || 0) <= helfttijd) eersteHelft.push(zinnen[i]);
+                    else tweedeHelft.push(zinnen[i]);
+                }
+                if (eersteHelft.length) verloopParas.push(eersteHelft.join(' '));
+                if (tweedeHelft.length) verloopParas.push(tweedeHelft.join(' '));
+            }
+
+            // Kaarten
+            if (rode.length || gele.length >= 3) {
+                var kZin = '';
+                if (rode.length) {
+                    var r = rode[0];
+                    var rTeam = (r.omschrijving && r.omschrijving.indexOf(thuis) !== -1) ? thuis : uit;
+                    var rSp = naamUitOmschrijving(r.omschrijving);
+                    if (rSp.indexOf(thuis) === 0) rSp = rSp.substring(thuis.length).replace(/^[\s-]+/, '').trim();
+                    if (rSp.indexOf(uit) === 0) rSp = rSp.substring(uit.length).replace(/^[\s-]+/, '').trim();
+                    kZin = (rSp ? rSp : 'Een speler van ' + rTeam) + ' kreeg in de ' + (r.minuut || '?') + 'e minuut rood en moest het veld verlaten. ';
+                    if (gele.length) kZin += 'In totaal werden er ' + gele.length + ' gele kaart' + (gele.length === 1 ? '' : 'en') + ' uitgedeeld.';
+                } else {
+                    kZin = 'De scheidsrechter trok in totaal ' + gele.length + ' keer de gele kaart in een hier en daar gespannen duel.';
+                }
+                verloopParas.push(kZin);
+            }
+
+            // ===== SLOT =====
+            var slot;
+            if (thuisScore === uitScore && doelp === 0) {
+                slot = pickRand([
+                    'Beide ploegen wisten elkaar niet te bedwingen en delen één punt.',
+                    'Een doelpuntloos gelijkspel waarmee beide ploegen leven.'
+                ]);
+            } else if (thuisScore === uitScore) {
+                slot = pickRand([
+                    'Een terecht gelijkspel waarin beide ploegen zich konden vermaken voor het publiek.',
+                    'Met dit gelijkspel kunnen beide ploegen vrede hebben.'
+                ]);
+            } else {
+                var w = thuisScore > uitScore ? thuis : uit;
+                slot = pickRand([
+                    w + ' kan met opgeheven hoofd terugkijken op deze overwinning.',
+                    'Een verdiende driepunter voor ' + w + '.',
+                    w + ' neemt de volle buit mee naar huis.'
+                ]);
+            }
+
+            var paragrafen = [intro];
+            verloopParas.forEach(function(p) { paragrafen.push(p); });
+            paragrafen.push(slot);
+
+            return {
+                thuis: thuis, uit: uit,
+                thuisScore: thuisScore, uitScore: uitScore,
+                klasse: data.klasse || '',
+                datum: data.datum, tijdstip: data.tijdstip,
+                events: events,
+                paragrafen: paragrafen
+            };
+        }
+
+        // ===== PDF GENERATOR =====
+        function bouwPdfHtml(verslag) {
+            var thuisLogo = getLogo(verslag.thuis);
+            var uitLogo = getLogo(verslag.uit);
+            var datumStr = verslag.datum ? new Date(verslag.datum + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+            var subRegel = datumStr + (verslag.tijdstip ? ' · ' + verslag.tijdstip + ' uur' : '') + (verslag.klasse ? ' · ' + verslag.klasse : '');
+
+            var logoBox = function(src, naam) {
+                if (src) {
+                    return '<div style="width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;overflow:hidden;"><img src="' + src + '" style="width:80%;height:80%;object-fit:contain;" /></div>';
+                }
+                var initialen = naam.split(' ').map(function(w) { return w[0]; }).join('').substring(0, 3).toUpperCase();
+                return '<div style="width:84px;height:84px;border-radius:50%;background:#003399;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:white;font-weight:700;font-size:18px;">' + initialen + '</div>';
+            };
+
+            var paragrafenHtml = verslag.paragrafen.map(function(p) {
+                return '<p style="font-size:13px;line-height:1.7;margin:0 0 12px 0;color:#1A2240;">' + p + '</p>';
+            }).join('');
+
+            var iconVoor = function(t) {
+                if (t === 'goal') return '⚽';
+                if (t === 'yellow-card') return '🟨';
+                if (t === 'red-card') return '🟥';
+                if (t === 'half-time') return '⏸️';
+                if (t === 'full-time') return '🏁';
+                return '•';
+            };
+
+            var eventsHtml = verslag.events.map(function(e) {
+                return '<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #eef0f5;">' +
+                       '<div style="font-size:13px;font-weight:700;color:#0A0E27;min-width:38px;">' + (e.minuut || '-') + "'</div>" +
+                       '<div style="font-size:14px;line-height:1;">' + iconVoor(e.type) + '</div>' +
+                       '<div style="flex:1;font-size:12px;color:#3a4566;line-height:1.5;">' + (e.omschrijving || '') + '</div>' +
+                       '</div>';
+            }).join('') || '<div style="font-size:12px;color:#7d8aa8;font-style:italic;">Geen geregistreerde gebeurtenissen.</div>';
+
+            return '' +
+            '<div style="width:794px;background:#ffffff;font-family:Lexend,Helvetica,Arial,sans-serif;color:#0A0E27;">' +
+                // HEADER
+                '<div style="background:linear-gradient(135deg,#0A0E27 0%,#1E2749 100%);padding:32px 40px;color:white;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">' +
+                        '<div style="font-size:30px;font-weight:900;color:#00FF88;letter-spacing:-2px;line-height:1;">SCORR</div>' +
+                        '<div style="font-size:10px;color:rgba(255,255,255,0.55);letter-spacing:3px;text-transform:uppercase;">Wedstrijdverslag</div>' +
+                    '</div>' +
+                    '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">' +
+                        '<div style="text-align:center;flex:1;">' +
+                            logoBox(thuisLogo, verslag.thuis) +
+                            '<div style="font-size:14px;font-weight:700;line-height:1.2;">' + verslag.thuis + '</div>' +
+                        '</div>' +
+                        '<div style="font-size:54px;font-weight:900;color:#00FF88;letter-spacing:-2px;line-height:1;white-space:nowrap;">' + verslag.thuisScore + ' &mdash; ' + verslag.uitScore + '</div>' +
+                        '<div style="text-align:center;flex:1;">' +
+                            logoBox(uitLogo, verslag.uit) +
+                            '<div style="font-size:14px;font-weight:700;line-height:1.2;">' + verslag.uit + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="text-align:center;margin-top:18px;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;">' + subRegel + '</div>' +
+                '</div>' +
+                // VERSLAG
+                '<div style="padding:32px 40px 8px 40px;">' +
+                    '<div style="font-size:11px;font-weight:700;color:#00C76A;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Verslag</div>' +
+                    paragrafenHtml +
+                '</div>' +
+                // VERLOOP
+                '<div style="padding:16px 40px 24px 40px;">' +
+                    '<div style="font-size:11px;font-weight:700;color:#00C76A;letter-spacing:2px;text-transform:uppercase;margin-top:12px;margin-bottom:12px;border-top:1px solid #e6e9f0;padding-top:18px;">Wedstrijdverloop</div>' +
+                    eventsHtml +
+                '</div>' +
+                // FOOTER
+                '<div style="padding:18px 40px;background:#f5f7fb;text-align:center;color:#7d8aa8;font-size:10px;letter-spacing:1px;border-top:1px solid #e6e9f0;">' +
+                    'Powered by SCORR · Live Scores. Real Football.' +
+                '</div>' +
+            '</div>';
+        }
+
+        function downloadVerslagPDF() {
+            if (!huidigeData) return;
+            if (typeof html2pdf === 'undefined') {
+                showToast('PDF-tool nog aan het laden, probeer opnieuw', 3000);
+                return;
+            }
+            var verslag = genereerVerslag(huidigeData);
+            var html = bouwPdfHtml(verslag);
+
+            var holder = document.createElement('div');
+            holder.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;';
+            holder.innerHTML = html;
+            document.body.appendChild(holder);
+
+            document.getElementById('verslagLoading').classList.remove('hidden');
+            document.getElementById('downloadPdfBtn').disabled = true;
+
+            var safeNaam = function(s) { return (s || '').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase(); };
+            var fname = 'verslag-' + safeNaam(verslag.thuis) + '-vs-' + safeNaam(verslag.uit) + (verslag.datum ? '-' + verslag.datum : '') + '.pdf';
+
+            html2pdf().set({
+                margin: 0,
+                filename: fname,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+                jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            }).from(holder.firstChild).save().then(function() {
+                document.body.removeChild(holder);
+                document.getElementById('verslagLoading').classList.add('hidden');
+                document.getElementById('downloadPdfBtn').disabled = false;
+                showToast('PDF gedownload');
+            }).catch(function(err) {
+                console.error('PDF error', err);
+                if (holder.parentNode) document.body.removeChild(holder);
+                document.getElementById('verslagLoading').classList.add('hidden');
+                document.getElementById('downloadPdfBtn').disabled = false;
+                showToast('PDF mislukt — probeer opnieuw', 3000);
+            });
+        }
+
+        // ===== WHATSAPP DEEL =====
+        function deelViaWhatsApp() {
+            if (!huidigeData) return;
+            var verslag = genereerVerslag(huidigeData);
+            var datumStr = verslag.datum ? new Date(verslag.datum + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+
+            var lines = [];
+            lines.push('*' + verslag.thuis + ' ' + verslag.thuisScore + ' — ' + verslag.uitScore + ' ' + verslag.uit + '*');
+            if (datumStr) lines.push('_' + datumStr + (verslag.klasse ? ' · ' + verslag.klasse : '') + '_');
+            lines.push('');
+            verslag.paragrafen.forEach(function(p) { lines.push(p); lines.push(''); });
+
+            // Top events
+            var goals = verslag.events.filter(function(e) { return e.type === 'goal'; });
+            if (goals.length) {
+                lines.push('⚽ *Doelpunten:*');
+                goals.forEach(function(g) {
+                    lines.push('• ' + (g.minuut || '?') + "' — " + (g.omschrijving || ''));
+                });
+                lines.push('');
+            }
+
+            lines.push('📲 Live volgen via SCORR: ' + window.location.href);
+
+            var text = lines.join('\n');
+            var url = 'https://wa.me/?text=' + encodeURIComponent(text);
+            window.open(url, '_blank');
+        }
+
+        // Bind buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            var pdfBtn = document.getElementById('downloadPdfBtn');
+            var waBtn = document.getElementById('shareWaBtn');
+            if (pdfBtn) pdfBtn.addEventListener('click', downloadVerslagPDF);
+            if (waBtn) waBtn.addEventListener('click', deelViaWhatsApp);
+        });
+
         // ===== TIMER =====
         function updateTimer() {
         if (!huidigeData || !huidigeData.startTijd) return;
@@ -827,6 +1232,13 @@ function getLogo(naam) {
 
             // Timeline
             renderTimeline(data.events || null);
+
+            // Verslag-sectie alleen tonen na afloop
+            var verslagSection = document.getElementById('verslagSection');
+            if (verslagSection) {
+                if (data.status === 'afgelopen') verslagSection.classList.add('show');
+                else verslagSection.classList.remove('show');
+            }
 
             // Refresh indicator
             var ri = document.getElementById('refreshIndicator');

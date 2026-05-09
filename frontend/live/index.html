@@ -106,13 +106,16 @@
             border: 1px solid rgba(0,255,136,0.2);
             border-radius: 12px; padding: 16px;
             display: flex; align-items: center; gap: 12px;
+            transition: background 0.2s, border-color 0.2s;
         }
+        .notification-prompt.granted { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.4); }
+        .notification-prompt.denied { background: rgba(255,59,92,0.06); border-color: rgba(255,59,92,0.3); }
 
         .notification-prompt.hidden { display: none; }
         .notification-icon { font-size: 24px; }
-        .notification-text { flex: 1; }
+        .notification-text { flex: 1; min-width: 0; }
         .notification-title { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
-        .notification-desc { font-size: 11px; color: rgba(240,244,255,0.5); }
+        .notification-desc { font-size: 11px; color: rgba(240,244,255,0.5); line-height: 1.35; }
 
         .notification-btn {
             background: var(--green); color: var(--dark); border: none;
@@ -120,6 +123,55 @@
             cursor: pointer; font-family: 'Lexend', sans-serif;
             text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
         }
+        .notification-btn.outline {
+            background: transparent; color: var(--green);
+            border: 1px solid rgba(0,255,136,0.5);
+        }
+        .notification-btn.danger {
+            background: transparent; color: var(--red);
+            border: 1px solid rgba(255,59,92,0.5);
+        }
+
+        /* ===== EXTRA OPTIES (geluid + scherm aan) ===== */
+        .extra-opties {
+            margin: 0 16px 16px;
+            display: flex; gap: 8px; flex-wrap: wrap;
+        }
+        .toggle-pill {
+            flex: 1; min-width: 0;
+            background: rgba(30,39,73,0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; padding: 10px 12px;
+            color: var(--white); font-size: 11px; font-weight: 600;
+            cursor: pointer; font-family: 'Lexend', sans-serif;
+            display: flex; align-items: center; gap: 8px; justify-content: center;
+            transition: all 0.2s;
+        }
+        .toggle-pill.active {
+            background: rgba(0,255,136,0.1);
+            border-color: rgba(0,255,136,0.4);
+            color: var(--green);
+        }
+        .toggle-pill .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); flex-shrink: 0;
+        }
+        .toggle-pill.active .dot { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed; left: 50%; bottom: 24px;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark2); color: var(--white);
+            padding: 10px 18px; border-radius: 24px;
+            border: 1px solid rgba(0,255,136,0.4);
+            font-size: 12px; font-weight: 600;
+            z-index: 10000; opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            max-width: 90vw; text-align: center;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
         .match-info {
             margin: 16px;
@@ -273,12 +325,21 @@
 
         <div style="padding-top: 4px;">
             <div class="notification-prompt" id="notificationPrompt">
-                <div class="notification-icon">🔔</div>
+                <div class="notification-icon" id="notifIcon">🔔</div>
                 <div class="notification-text">
-                    <div class="notification-title">Mis geen doelpunt!</div>
-                    <div class="notification-desc">Ontvang notificaties bij doelpunten en kaarten</div>
+                    <div class="notification-title" id="notifTitle">Mis geen doelpunt!</div>
+                    <div class="notification-desc" id="notifDesc">Ontvang melding bij doelpunten en kaarten zolang dit tabblad open is.</div>
                 </div>
                 <button class="notification-btn" id="notifBtn">Aanzetten</button>
+            </div>
+
+            <div class="extra-opties">
+                <button class="toggle-pill" id="soundToggle" type="button">
+                    <span class="dot"></span><span id="soundLabel">🔊 Geluid uit</span>
+                </button>
+                <button class="toggle-pill" id="wakeToggle" type="button">
+                    <span class="dot"></span><span id="wakeLabel">📱 Scherm uit</span>
+                </button>
             </div>
 
             <div class="match-info">
@@ -322,6 +383,8 @@
             Live
         </div>
     </div>
+
+    <div class="toast" id="toast"></div>
 
     <script>
     
@@ -379,38 +442,233 @@ function getLogo(naam) {
         var notificationsEnabled = false;
         var vorigeThuis = null;
         var vorigeUit = null;
+        var vorigeEventCount = null;
         var timerInterval = null;
         var huidigeData = null;
+        var soundEnabled = localStorage.getItem('scorr_live_sound') === '1';
+        var wakeLockEnabled = false;
+        var wakeLockSentinel = null;
+        var audioCtx = null;
 
-        // ===== NOTIFICATIES =====
-        function checkNotificationStatus() {
+        // ===== TOAST =====
+        function showToast(text, ms) {
+            var t = document.getElementById('toast');
+            t.textContent = text;
+            t.classList.add('show');
+            clearTimeout(t._hideTimer);
+            t._hideTimer = setTimeout(function() { t.classList.remove('show'); }, ms || 2200);
+        }
+
+        // ===== GELUID (Web Audio) =====
+        function ensureAudioCtx() {
+            if (audioCtx) return audioCtx;
+            try {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return null;
+                audioCtx = new Ctx();
+            } catch(e) { return null; }
+            return audioCtx;
+        }
+        function beep(freq, dur, type, vol) {
+            var ctx = ensureAudioCtx();
+            if (!ctx) return;
+            if (ctx.state === 'suspended') ctx.resume();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = type || 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(vol || 0.25, ctx.currentTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + dur + 0.05);
+        }
+        function playGoalChime() {
+            if (!soundEnabled) return;
+            beep(660, 0.18, 'sine', 0.3);
+            setTimeout(function() { beep(880, 0.18, 'sine', 0.3); }, 180);
+            setTimeout(function() { beep(1175, 0.35, 'sine', 0.32); }, 360);
+        }
+        function playCardChime(rood) {
+            if (!soundEnabled) return;
+            beep(rood ? 220 : 440, 0.25, 'sawtooth', 0.22);
+            setTimeout(function() { beep(rood ? 165 : 330, 0.3, 'sawtooth', 0.22); }, 250);
+        }
+
+        // ===== WAKE LOCK =====
+        function isWakeLockSupported() {
+            return 'wakeLock' in navigator;
+        }
+        function requestWakeLock() {
+            if (!isWakeLockSupported()) return Promise.reject(new Error('niet ondersteund'));
+            return navigator.wakeLock.request('screen').then(function(s) {
+                wakeLockSentinel = s;
+                wakeLockSentinel.addEventListener('release', function() {
+                    wakeLockSentinel = null;
+                });
+                return s;
+            });
+        }
+        function releaseWakeLock() {
+            if (wakeLockSentinel) {
+                try { wakeLockSentinel.release(); } catch(e) {}
+                wakeLockSentinel = null;
+            }
+        }
+        // Re-acquire wake lock after page visibility returns
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && wakeLockEnabled && !wakeLockSentinel) {
+                requestWakeLock().catch(function() {});
+            }
+        });
+
+        // ===== NOTIFICATIE-UI STATUS =====
+        function updateNotifUI() {
+            var prompt = document.getElementById('notificationPrompt');
+            var title = document.getElementById('notifTitle');
+            var desc = document.getElementById('notifDesc');
+            var btn = document.getElementById('notifBtn');
+            var icon = document.getElementById('notifIcon');
+
             if (!('Notification' in window)) {
-                document.getElementById('notificationPrompt').classList.add('hidden');
+                prompt.classList.add('hidden');
                 return;
             }
+            prompt.classList.remove('hidden', 'granted', 'denied');
+
             if (Notification.permission === 'granted') {
                 notificationsEnabled = true;
-                document.getElementById('notificationPrompt').classList.add('hidden');
+                prompt.classList.add('granted');
+                icon.textContent = '🔔';
+                title.textContent = 'Notificaties staan aan';
+                desc.textContent = 'Je krijgt een melding bij doelpunten en kaarten zolang dit tabblad geopend is.';
+                btn.textContent = 'Test';
+                btn.className = 'notification-btn outline';
             } else if (Notification.permission === 'denied') {
-                document.getElementById('notificationPrompt').classList.add('hidden');
+                notificationsEnabled = false;
+                prompt.classList.add('denied');
+                icon.textContent = '🔕';
+                title.textContent = 'Notificaties geblokkeerd';
+                desc.textContent = 'Sta meldingen toe in de browser-instellingen om updates te ontvangen.';
+                btn.textContent = 'Hoe?';
+                btn.className = 'notification-btn danger';
+            } else {
+                notificationsEnabled = false;
+                icon.textContent = '🔔';
+                title.textContent = 'Mis geen doelpunt!';
+                desc.textContent = 'Ontvang melding bij doelpunten en kaarten zolang dit tabblad open is.';
+                btn.textContent = 'Aanzetten';
+                btn.className = 'notification-btn';
             }
+        }
+
+        function showHowToUnblock() {
+            showToast('Tik op het slotje 🔒 in de adresbalk → Notificaties → Toestaan, en herlaad.', 4500);
         }
 
         document.getElementById('notifBtn').addEventListener('click', function() {
             if (!('Notification' in window)) return;
+            // Eerst geluid-context activeren (user gesture vereist)
+            ensureAudioCtx();
+
+            if (Notification.permission === 'granted') {
+                // Test
+                sendNotification('🔔 SCORR', 'Test: zo ziet een doelpunt-melding eruit!');
+                playGoalChime();
+                showToast('Test verstuurd');
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                showHowToUnblock();
+                return;
+            }
             Notification.requestPermission().then(function(permission) {
+                updateNotifUI();
                 if (permission === 'granted') {
-                    notificationsEnabled = true;
-                    document.getElementById('notificationPrompt').classList.add('hidden');
-                    new Notification('🔔 SCORR', { body: 'Je ontvangt nu updates bij doelpunten en kaarten!' });
+                    sendNotification('🔔 SCORR', 'Notificaties staan aan! Je hoort het als er gescoord wordt.');
+                    showToast('Notificaties aan');
+                } else if (permission === 'denied') {
+                    showToast('Notificaties geweigerd', 3000);
                 }
             });
         });
 
+        // ===== GELUID TOGGLE =====
+        function updateSoundUI() {
+            var btn = document.getElementById('soundToggle');
+            var label = document.getElementById('soundLabel');
+            if (soundEnabled) {
+                btn.classList.add('active');
+                label.textContent = '🔊 Geluid aan';
+            } else {
+                btn.classList.remove('active');
+                label.textContent = '🔇 Geluid uit';
+            }
+        }
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('scorr_live_sound', soundEnabled ? '1' : '0');
+            updateSoundUI();
+            if (soundEnabled) {
+                ensureAudioCtx();
+                beep(880, 0.15, 'sine', 0.25);
+                showToast('Geluid aan');
+            } else {
+                showToast('Geluid uit');
+            }
+        });
+
+        // ===== WAKE LOCK TOGGLE =====
+        function updateWakeUI() {
+            var btn = document.getElementById('wakeToggle');
+            var label = document.getElementById('wakeLabel');
+            if (!isWakeLockSupported()) {
+                btn.style.display = 'none';
+                return;
+            }
+            if (wakeLockEnabled) {
+                btn.classList.add('active');
+                label.textContent = '📱 Scherm aan';
+            } else {
+                btn.classList.remove('active');
+                label.textContent = '📱 Scherm uit';
+            }
+        }
+        document.getElementById('wakeToggle').addEventListener('click', function() {
+            if (!isWakeLockSupported()) {
+                showToast('Niet ondersteund door deze browser', 3000);
+                return;
+            }
+            if (wakeLockEnabled) {
+                wakeLockEnabled = false;
+                releaseWakeLock();
+                updateWakeUI();
+                showToast('Scherm mag uit');
+            } else {
+                requestWakeLock().then(function() {
+                    wakeLockEnabled = true;
+                    updateWakeUI();
+                    showToast('Scherm blijft aan');
+                }).catch(function() {
+                    showToast('Kon scherm niet aan houden', 3000);
+                });
+            }
+        });
+
         function sendNotification(title, body) {
             if (!notificationsEnabled || Notification.permission !== 'granted') return;
-            var n = new Notification(title, { body: body });
-            setTimeout(function() { n.close(); }, 5000);
+            try {
+                var n = new Notification(title, {
+                    body: body,
+                    icon: '/frontend/assets/logos/logo-512-512.png',
+                    badge: '/frontend/assets/logos/logo-512-512.png',
+                    tag: 'scorr-live',
+                    renotify: true
+                });
+                setTimeout(function() { try { n.close(); } catch(e) {} }, 6000);
+            } catch(e) {}
         }
 
         // ===== TIMER =====
@@ -528,18 +786,44 @@ function getLogo(naam) {
                 timerDisplay.textContent = data.tijdstip || '--:--';
             }
 
-            // Notificatie bij doelpunt
+            // ===== Notificatie bij doelpunt =====
             if (vorigeThuis !== null && data.thuisscore > vorigeThuis) {
-                sendNotification('⚽ DOELPUNT!', (data.thuisteam || 'Thuis') + ' scoort! ' + data.thuisscore + ' - ' + data.uitscore);
-                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+                sendNotification('⚽ DOELPUNT — ' + (data.thuisteam || 'Thuis'),
+                    data.thuisteam + ' scoort! Stand: ' + data.thuisscore + ' - ' + data.uitscore);
+                playGoalChime();
+                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 300]);
             }
             if (vorigeUit !== null && data.uitscore > vorigeUit) {
-                sendNotification('⚽ DOELPUNT!', (data.uitteam || 'Uit') + ' scoort! ' + data.thuisscore + ' - ' + data.uitscore);
-                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+                sendNotification('⚽ DOELPUNT — ' + (data.uitteam || 'Uit'),
+                    data.uitteam + ' scoort! Stand: ' + data.thuisscore + ' - ' + data.uitscore);
+                playGoalChime();
+                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 300]);
             }
 
             vorigeThuis = data.thuisscore;
             vorigeUit = data.uitscore;
+
+            // ===== Notificatie bij nieuwe kaart =====
+            var huidigeEvents = data.events ? Object.keys(data.events) : [];
+            if (vorigeEventCount !== null && huidigeEvents.length > vorigeEventCount) {
+                // Bepaal de nieuwste kaart-events
+                var lijst = [];
+                for (var k in data.events) { if (data.events.hasOwnProperty(k)) lijst.push(data.events[k]); }
+                lijst.sort(function(a,b) { return (a.timestamp||0) - (b.timestamp||0); });
+                var aantalNieuw = huidigeEvents.length - vorigeEventCount;
+                var nieuw = lijst.slice(-aantalNieuw);
+                nieuw.forEach(function(ev) {
+                    if (ev.type === 'yellow-card' || ev.type === 'red-card') {
+                        var rood = ev.type === 'red-card';
+                        var kleur = rood ? '🟥 Rode kaart' : '🟨 Gele kaart';
+                        sendNotification(kleur + ' (' + (ev.minuut || '?') + "')",
+                            ev.omschrijving || '');
+                        playCardChime(rood);
+                        if ('vibrate' in navigator) navigator.vibrate(rood ? [400, 100, 400] : [150, 80, 150]);
+                    }
+                });
+            }
+            vorigeEventCount = huidigeEvents.length;
 
             // Timeline
             renderTimeline(data.events || null);
@@ -569,7 +853,9 @@ function getLogo(naam) {
         if (!wedstrijdId) {
             document.getElementById('matchTitle').textContent = 'GEEN WEDSTRIJD GEVONDEN';
         } else {
-            checkNotificationStatus();
+            updateNotifUI();
+            updateSoundUI();
+            updateWakeUI();
             fetchWedstrijd();
             setInterval(fetchWedstrijd, 5000);
         }

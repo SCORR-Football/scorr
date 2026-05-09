@@ -373,6 +373,17 @@ function getLogo(naam) {
     if (lower.indexOf("afc '34") !== -1 || lower.indexOf('afc 34') !== -1 || lower.indexOf('afc34') !== -1) return '/frontend/clubs/icons/afc-34-512.png';
     if (lower.indexOf('afc') !== -1) return '/frontend/clubs/icons/afc-amsterdam-512.png';
     if (lower.indexOf('sranang') !== -1) return '/frontend/clubs/icons/real-sranang-512.jpg';
+    // Extra clubs uit icons-map (jong hercules vóór hercules!)
+    if (lower.indexOf('jong hercules') !== -1 || lower.indexOf('jong-hercules') !== -1) return '/frontend/clubs/icons/jong-hercules.png';
+    if (lower.indexOf('hercules') !== -1) return '/frontend/clubs/icons/hercules-zaandam.jpg';
+    if (lower.indexOf('vitesse') !== -1) return '/frontend/clubs/icons/vitesse-22.jpg';
+    if (lower.indexOf('zouaven') !== -1) return '/frontend/clubs/icons/zouaven.png';
+    if (lower.indexOf('ofc') !== -1 || lower.indexOf('oostzaan') !== -1) return '/frontend/clubs/icons/ofc-oostzaan.png';
+    if (lower.indexOf('hvs') !== -1 || lower.indexOf('heilo') !== -1) return '/frontend/clubs/icons/hvs-heilo.png';
+    if (lower.indexOf('rood-wit') !== -1 || lower.indexOf('rood wit') !== -1 || lower.indexOf('roodwit') !== -1 || lower.indexOf('zaanstad') !== -1) return '/frontend/clubs/icons/roodwit-zaanstad.png';
+    if (lower.indexOf('zeeburgia') !== -1) return '/frontend/clubs/icons/zeeburgia.jpeg';
+    if (lower.indexOf('bergen') !== -1) return '/frontend/clubs/icons/vv-bergen.jpeg';
+    if (lower.indexOf('scpb') !== -1) return '/frontend/clubs/icons/scpb-22.png';
     return null;
 }
 

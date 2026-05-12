@@ -813,6 +813,8 @@ function getLogo(naam) {
 
         function naamUitOmschrijving(o) {
             if (!o) return '';
+            // Eigen doelpunt? Geen speler-naam.
+            if (/EIGEN\s*DOELPUNT|\bE\.D\.\b/i.test(o)) return '';
             // Strip emoji/event-prefix zoals "⚽ DOELPUNT! "
             var clean = o.replace(/^[^A-Za-z0-9]*[A-Z][A-Z!\s]+/, '').trim();
             // Knip op " - "
@@ -824,6 +826,13 @@ function getLogo(naam) {
             // Anders: strip #nr aan start of einde, plus losse delen
             var stripped = rest.replace(/^\s*#\d+\s*/, '').replace(/\s*#\d+\s*$/, '').trim();
             return stripped;
+        }
+
+        function isEigenDoelpunt(g) {
+            if (!g) return false;
+            if (g.eigenDoelpunt === true) return true;
+            if (g.omschrijving && /EIGEN\s*DOELPUNT|\bE\.D\.\b/i.test(g.omschrijving)) return true;
+            return false;
         }
 
         function fase(minuut, helfttijd) {
@@ -935,7 +944,15 @@ function getLogo(naam) {
                     var faseStr = typeof min === 'number' ? fase(min, helfttijd) : 'in de wedstrijd';
                     var actor = speler ? speler + ' (' + team + ')' : team;
 
-                    if (i === 0) {
+                    if (isEigenDoelpunt(g)) {
+                        // Wie maakte het = de andere ploeg dan 'team' (die er voordeel van had)
+                        var tegen = team === thuis ? uit : thuis;
+                        zinnen.push(pickRand([
+                            'In de ' + min + 'e minuut viel een eigen doelpunt in het voordeel van ' + team + ' (' + stand + ').',
+                            'Een ongelukkige actie bij ' + tegen + ' leverde ' + team + ' in de ' + min + 'e minuut een eigen doelpunt op (' + stand + ').',
+                            'Via een eigen doelpunt kwam ' + team + ' in de ' + min + 'e minuut op ' + stand + '.'
+                        ]));
+                    } else if (i === 0) {
                         zinnen.push(pickRand([
                             'Al in de ' + min + 'e minuut zette ' + actor + ' de score op ' + stand + '.',
                             'De openingstreffer viel ' + faseStr + ': ' + actor + ' tekende voor de ' + stand + ' (' + min + 'e min).',

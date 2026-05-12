@@ -142,11 +142,48 @@
         .wa-btn { width:100%; padding:9px; background:#25D366; border:none; border-radius:8px; color:white; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:6px; }
         .toast { position:fixed; bottom:20px; right:20px; background:var(--dark2); border:1px solid rgba(0,255,136,0.4); border-radius:10px; padding:10px 16px; font-size:13px; font-weight:600; color:var(--green); z-index:9999; display:none; box-shadow:0 4px 20px rgba(0,0,0,0.4); }
         @media(max-width:900px) { .stats-twocol{grid-template-columns:1fr} }
+
+        /* ===== MOBILE ===== */
+        .menu-toggle { display:none; position:fixed; top:12px; left:12px; z-index:200; background:var(--dark2); border:1px solid rgba(0,255,136,0.3); color:var(--green); width:42px; height:42px; border-radius:10px; font-size:20px; cursor:pointer; align-items:center; justify-content:center; }
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+        .sidebar-overlay.open { display:block; }
+        @media (max-width: 768px) {
+            .menu-toggle { display:flex; }
+            .sidebar { transform:translateX(-100%); transition:transform 0.25s ease; width:240px; }
+            .sidebar.open { transform:translateX(0); }
+            .main { margin-left:0; }
+            .topbar { padding:12px 14px 12px 64px; flex-wrap:wrap; gap:8px; }
+            .topbar-title { font-size:16px; }
+            .topbar-sub { font-size:10px; }
+            .content { padding:14px; }
+            .stats-grid { grid-template-columns:1fr 1fr; gap:8px; }
+            .stat-card { padding:12px; }
+            .stat-value { font-size:24px; }
+            .stat-label { font-size:9px; }
+            .filter-bar, .tabs { flex-wrap:wrap; }
+            .filter-select { font-size:11px; min-width:0; flex:1; }
+            .tab { padding:5px 10px; font-size:11px; }
+            .section-title { font-size:13px; }
+            .section-action { padding:6px 10px; font-size:11px; }
+            /* Tabellen: laat scrollen horizontaal */
+            .card { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+            .w-table, .teams-table { min-width:560px; }
+            .w-table th, .w-table td, .teams-table th, .teams-table td { padding:8px 10px; font-size:11px; }
+            .action-cell { gap:3px; }
+            .status-select { font-size:10px; padding:3px 4px; max-width:110px; }
+            .table-btn { padding:3px 6px; font-size:10px; }
+            .modal { padding:18px; max-width:calc(100vw - 24px); }
+            .form-row { grid-template-columns:1fr; }
+            .modal h3 { font-size:16px; margin-bottom:14px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
+<button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Menu">&#x2630;</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
         <div class="scorr">SCORR</div>
         <div class="sub">Clubadmin</div>
@@ -1017,6 +1054,16 @@ function showSection(naam, el) {
     document.getElementById('pageTitle').textContent = t[naam][0];
     document.getElementById('pageSubtitle').textContent = t[naam][1];
     if(naam==='stats') window.renderStats && window.renderStats();
+    // Op mobiel: sidebar automatisch sluiten na een sectie-keuze
+    if (window.matchMedia('(max-width: 768px)').matches) toggleSidebar(false);
+}
+
+function toggleSidebar(force) {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    const open = (typeof force === 'boolean') ? force : !sb.classList.contains('open');
+    sb.classList.toggle('open', open);
+    ov.classList.toggle('open', open);
 }
 </script>
 </body>

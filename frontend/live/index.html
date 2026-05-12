@@ -226,6 +226,26 @@
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+        /* ===== SMALLE SCHERMEN (iPhone SE etc.) ===== */
+        @media (max-width: 380px) {
+            .container { padding-bottom: 30px; }
+            .scorr-header { padding: 18px 14px 16px; }
+            .scorr-logo { font-size: 28px; }
+            .match-info { margin: 12px; padding: 18px 14px; }
+            .team-name { font-size: 11px; margin-bottom: 8px; }
+            .team-logo { width: 44px; height: 44px; margin-bottom: 6px; }
+            .score-display { font-size: 56px; }
+            .timer-section, .notification-prompt, .verslag-section, .extra-opties { margin-left: 12px; margin-right: 12px; }
+            .notification-prompt { padding: 12px; gap: 10px; }
+            .notification-icon { font-size: 20px; }
+            .notification-title { font-size: 12px; }
+            .notification-desc { font-size: 10px; }
+            .notification-btn { padding: 7px 12px; font-size: 11px; }
+            .toggle-pill { padding: 9px 10px; font-size: 10px; }
+            .verslag-btn { padding: 12px 10px; }
+            .verslag-btn .lbl { font-size: 10px; }
+        }
+
         .match-info {
             margin: 16px;
             background: rgba(30,39,73,0.8);

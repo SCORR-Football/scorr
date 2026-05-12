@@ -65,7 +65,10 @@
         .wc-score { font-size: 20px; font-weight: 900; color: var(--green); min-width: 48px; text-align: center; }
         .wc-score.gepland { color: rgba(240,244,255,0.3); font-size: 14px; }
         .wc-meta { font-size: 11px; color: rgba(240,244,255,0.3); display: flex; gap: 8px; flex-wrap: wrap; }
-        .wc-actions { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 6px; }
+        .wc-actions { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 6px; flex-wrap: wrap; }
+        .wc-status-select { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--white); padding: 6px 10px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; outline: none; appearance: none; flex: 1; min-width: 0; }
+        .wc-status-select:hover { background: rgba(0,255,136,0.18); }
+        .wc-status-select option { background: var(--dark2); color: var(--white); }
         .wc-btn { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; }
         .wc-btn.afgelast-btn { background: rgba(255,59,92,0.1); border: 1px solid rgba(255,59,92,0.3); color: var(--red); }
         .wc-btn.herstel-btn { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--green); }
@@ -141,10 +144,55 @@
         .periode-tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; margin-bottom: 20px; width: fit-content; }
         .periode-tab { padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; color: rgba(240,244,255,0.5); }
         .periode-tab.active { background: var(--dark2); color: var(--white); }
+
+        /* ===== MOBILE ===== */
+        .menu-toggle { display:none; position:fixed; top:12px; left:12px; z-index:200; background:var(--dark2); border:1px solid rgba(0,255,136,0.3); color:var(--green); width:42px; height:42px; border-radius:10px; font-size:20px; cursor:pointer; align-items:center; justify-content:center; }
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; }
+        .sidebar-overlay.open { display:block; }
+        @media (max-width: 768px) {
+            .menu-toggle { display:flex; }
+            .sidebar { transform:translateX(-100%); transition:transform 0.25s ease; width:240px; }
+            .sidebar.open { transform:translateX(0); }
+            .main { margin-left:0; }
+            .topbar { padding:12px 14px 12px 64px; flex-wrap:wrap; gap:8px; }
+            .topbar-title { font-size:17px; }
+            .topbar-sub { font-size:11px; }
+            .content { padding:16px 14px; }
+            .stats-grid { grid-template-columns:1fr 1fr; gap:10px; }
+            .stat-card { padding:14px; }
+            .stat-value { font-size:24px; }
+            .stat-label { font-size:10px; }
+            .section-title { font-size:14px; }
+            .section-action { padding:7px 12px; font-size:12px; }
+            .wedstrijd-grid, .clubs-grid { grid-template-columns:1fr; }
+            .wedstrijd-card { padding:14px 16px; }
+            .wc-team { font-size:12px; }
+            .wc-score { font-size:18px; min-width:42px; }
+            .club-filter { width:100%; flex-direction:column; gap:6px; }
+            .club-filter-select { width:100%; min-width:0; font-size:12px; padding:7px 28px 7px 10px; }
+            .live-indicator { font-size:10px; }
+            /* Analytics tabellen: scrollable */
+            .card { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+            .analytics-table { min-width:560px; }
+            .analytics-table th, .analytics-table td { padding:9px 10px; font-size:11px; }
+            .clubs-table { min-width:520px; }
+            .clubs-table th, .clubs-table td { padding:9px 10px; font-size:12px; }
+            .sponsor-hero { padding:18px 16px; }
+            .sponsor-hero .title { font-size:17px; }
+            .sponsor-hero .desc { font-size:12px; }
+            .periode-tabs { width:100%; overflow-x:auto; }
+            .periode-tab { white-space:nowrap; padding:6px 12px; font-size:11px; }
+            .wc-status-select { font-size:11px; }
+            .modal { padding:20px; max-width:calc(100vw - 24px); }
+            .modal h3 { font-size:17px; margin-bottom:18px; }
+            .form-row { grid-template-columns:1fr; }
+        }
     </style>
 </head>
 <body>
-<div class="sidebar">
+<button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Menu">&#x2630;</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
     <div class="sidebar-logo"><div class="scorr">SCORR</div><div class="sub">Superadmin</div></div>
     <nav class="sidebar-nav">
         <div class="nav-section">Overzicht</div>
@@ -755,6 +803,40 @@
         alert(afgelast ? '✅ Wedstrijd gemarkeerd als afgelast.' : '✅ Wedstrijd hersteld naar gepland.');
     };
 
+    // SCORR-team kan tijdens de pilot elke wedstrijd-status corrigeren als trainer/ouder vergeet.
+    window.wijzigStatusSuper = async function(wedstrijdId, sel) {
+        const actie = sel.value;
+        sel.value = '';
+        if (!actie) return;
+        const w = alleWedstrijden.find(x => x.id === wedstrijdId);
+        if (!w) return;
+        const labels = { gepland:'op Gepland', start1:'op LIVE (1e helft)', rust:'op RUST', start2:'op LIVE (2e helft)', afgelopen:'op Afgelopen (FT)', afgelast:'op Afgelast' };
+        if (!confirm(`Wedstrijd ${w.thuisteam || ''} vs ${w.uitteam || ''}\n\nStatus ${labels[actie] || actie} zetten?`)) return;
+        let payload = {};
+        if (actie === 'gepland') {
+            payload = { status: 'gepland', startTijd: null, accumulatedSeconds: 0, currentHalf: 0 };
+        } else if (actie === 'start1') {
+            payload = { status: 'bezig', startTijd: Date.now(), accumulatedSeconds: 0, currentHalf: 1 };
+        } else if (actie === 'rust') {
+            const elapsed = (w.status === 'bezig' && w.startTijd) ? Math.floor((Date.now() - w.startTijd) / 1000) : 0;
+            const acc = (w.accumulatedSeconds || 0) + elapsed;
+            payload = { status: 'rust', startTijd: null, accumulatedSeconds: acc, currentHalf: w.currentHalf || 1 };
+        } else if (actie === 'start2') {
+            const halftijd = (w.helfttijd || 45) * 60;
+            const acc = Math.max(w.accumulatedSeconds || 0, halftijd);
+            payload = { status: 'bezig', startTijd: Date.now(), accumulatedSeconds: acc, currentHalf: 2 };
+        } else if (actie === 'afgelopen') {
+            payload = { status: 'afgelopen', startTijd: null };
+        } else if (actie === 'afgelast') {
+            payload = { status: 'afgelast', startTijd: null };
+        }
+        try {
+            await update(ref(db, 'wedstrijden/' + wedstrijdId), payload);
+        } catch(e) {
+            alert('❌ ' + (e.message || 'Mislukt'));
+        }
+    };
+
     window.setClubFilter = function(club) {
         huidigClubFilter = club;
         // Bij wisselen van club is het oude team-filter waarschijnlijk niet meer relevant
@@ -800,11 +882,16 @@
 
         let actiesHtml = '';
         if (toonActies) {
-            if (isAfgelast) {
-                actiesHtml = `<div class="wc-actions"><button class="wc-btn herstel-btn" onclick="setAfgelast('${w.id}', false)">↩ Herstel naar gepland</button></div>`;
-            } else if (!isAfgelopen && !isLive && !isRust) {
-                actiesHtml = `<div class="wc-actions"><button class="wc-btn afgelast-btn" onclick="setAfgelast('${w.id}', true)">⛔ Afgelasten</button></div>`;
-            }
+            const statusMenu = `<select class="wc-status-select" title="Status wijzigen" onchange="wijzigStatusSuper('${w.id}', this)">
+                <option value="" selected>↻ Status wijzigen…</option>
+                <option value="gepland">📅 Terug naar gepland</option>
+                <option value="start1">▶ Start 1e helft</option>
+                <option value="rust">⏸ Rust</option>
+                <option value="start2">▶ Start 2e helft</option>
+                <option value="afgelopen">⏹ Afgelopen (FT)</option>
+                <option value="afgelast">⛔ Afgelast</option>
+            </select>`;
+            actiesHtml = `<div class="wc-actions">${statusMenu}</div>`;
         }
 
         return `<div class="wedstrijd-card ${cardClass}">
@@ -1013,6 +1100,15 @@
         };
         document.getElementById('pageTitle').textContent = titels[naam][0];
         document.getElementById('pageSubtitle').textContent = titels[naam][1];
+        if (window.matchMedia('(max-width: 768px)').matches) toggleSidebar(false);
+    }
+
+    function toggleSidebar(force) {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('sidebarOverlay');
+        const open = (typeof force === 'boolean') ? force : !sb.classList.contains('open');
+        sb.classList.toggle('open', open);
+        ov.classList.toggle('open', open);
     }
 </script>
 </body>

@@ -174,6 +174,9 @@
             <select class="club-filter-select" id="clubFilterSelect" onchange="setClubFilter(this.value)">
                 <option value="alle">🏟️ Alle clubs</option>
             </select>
+            <select class="club-filter-select" id="teamFilterSelect" onchange="setTeamFilterSuper(this.value)">
+                <option value="alle">👥 Alle teams</option>
+            </select>
         </div>
         <div class="live-indicator"><div class="live-dot"></div> Live</div>
     </div>
@@ -453,7 +456,7 @@
     });
 
     let alleWedstrijden = [], alleGebruikers = {}, clubsData = {};
-    let huidigStatusFilter = 'alle', huidigClubFilter = 'alle', huidigDetailClub = null;
+    let huidigStatusFilter = 'alle', huidigClubFilter = 'alle', huidigTeamFilter = 'alle', huidigDetailClub = null;
     let analyticsData = {}; // {wedstrijdId: {views, shares, pdfDownloads, notifEnables, lastTs, club, teamNaam, thuisteam, uitteam}}
     let analyticsPeriode = 0; // 0 = alle tijd, anders aantal dagen
 
@@ -471,6 +474,7 @@
             alleWedstrijden = [];
             if (snap.exists()) snap.forEach(c => { alleWedstrijden.push({ id: c.key, ...c.val() }); });
             updateStats();
+            updateTeamFilterDropdown();
             renderDashboardWedstrijden();
             renderWedstrijdenGrid();
             renderAnalytics();
@@ -479,6 +483,7 @@
         onValue(ref(db, 'gebruikers'), (snap) => {
             alleGebruikers = snap.exists() ? snap.val() : {};
             updateStats();
+            updateTeamFilterDropdown();
             renderGebruikers();
             renderClubsGrid();
             if (huidigDetailClub) renderClubDetail(huidigDetailClub);
@@ -657,6 +662,30 @@
         const filterSelect = document.getElementById('clubFilterSelect');
         filterSelect.innerHTML = '<option value="alle">🏟️ Alle clubs</option>' + opties;
         filterSelect.value = huidigClubFilter;
+        updateTeamFilterDropdown();
+    }
+
+    function updateTeamFilterDropdown() {
+        // Verzamel unieke team-namen — alleen voor gekozen club, of alle clubs als filter 'alle' is
+        const teams = new Set();
+        Object.values(alleGebruikers).forEach(g => {
+            if (g.rol !== 'team') return;
+            if (huidigClubFilter !== 'alle' && g.club !== huidigClubFilter) return;
+            if (g.naam) teams.add(g.naam);
+        });
+        // Ook teamnamen uit bestaande wedstrijden meenemen (zodat oude teams die geen 'gebruiker' meer zijn ook filterbaar blijven)
+        alleWedstrijden.forEach(w => {
+            if (huidigClubFilter !== 'alle' && w.club !== huidigClubFilter) return;
+            if (w.teamNaam) teams.add(w.teamNaam);
+        });
+        const sel = document.getElementById('teamFilterSelect');
+        const sortedTeams = Array.from(teams).sort((a, b) => a.localeCompare(b));
+        sel.innerHTML = '<option value="alle">👥 Alle teams</option>' + sortedTeams.map(t => `<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');
+        // Reset team-filter naar 'alle' als het huidige team niet meer in de lijst voorkomt
+        if (huidigTeamFilter !== 'alle' && !teams.has(huidigTeamFilter)) {
+            huidigTeamFilter = 'alle';
+        }
+        sel.value = huidigTeamFilter;
     }
 
     window.laadTeamsVoorClub = function(clubId) {
@@ -728,14 +757,26 @@
 
     window.setClubFilter = function(club) {
         huidigClubFilter = club;
+        // Bij wisselen van club is het oude team-filter waarschijnlijk niet meer relevant
+        huidigTeamFilter = 'alle';
+        updateTeamFilterDropdown();
+        updateStats();
+        renderDashboardWedstrijden();
+        renderWedstrijdenGrid();
+    };
+
+    window.setTeamFilterSuper = function(team) {
+        huidigTeamFilter = team;
         updateStats();
         renderDashboardWedstrijden();
         renderWedstrijdenGrid();
     };
 
     function gefilterdOpClub(lijst) {
-        if (huidigClubFilter === 'alle') return lijst;
-        return lijst.filter(w => w.club === huidigClubFilter);
+        let out = lijst;
+        if (huidigClubFilter !== 'alle') out = out.filter(w => w.club === huidigClubFilter);
+        if (huidigTeamFilter !== 'alle') out = out.filter(w => w.teamNaam === huidigTeamFilter);
+        return out;
     }
 
     function updateStats() {

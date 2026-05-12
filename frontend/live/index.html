@@ -509,6 +509,72 @@ function getLogo(naam) {
         var urlParams = new URLSearchParams(window.location.search);
         var wedstrijdId = urlParams.get('id');
 
+        // ===== ANALYTICS (voor superadmin dashboard / sponsor-pitch) =====
+        // Schrijft elke view, share en pdf-download naar /analytics/events
+        // en houdt per wedstrijd een aggregate-teller bij in /analytics/wedstrijden
+        function getSessionId() {
+            var s = '';
+            try { s = localStorage.getItem('scorr_session_id') || ''; } catch(e) {}
+            if (!s) {
+                s = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 8);
+                try { localStorage.setItem('scorr_session_id', s); } catch(e) {}
+            }
+            return s;
+        }
+        var _viewLogged = false;
+        function logAnalyticsEvent(type, extra) {
+            if (!wedstrijdId) return;
+            var payload = {
+                type: type,
+                wedstrijdId: wedstrijdId,
+                ts: Date.now(),
+                sessionId: getSessionId(),
+                ua: (navigator.userAgent || '').slice(0, 200)
+            };
+            if (window.huidigeData) {
+                payload.club = window.huidigeData.club || '';
+                payload.teamNaam = window.huidigeData.teamNaam || '';
+                payload.thuisteam = window.huidigeData.thuisteam || '';
+                payload.uitteam = window.huidigeData.uitteam || '';
+            }
+            if (extra) for (var k in extra) payload[k] = extra[k];
+            try {
+                fetch(DB_BASE + '/analytics/events.json', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    keepalive: true
+                }).catch(function() {});
+            } catch(e) {}
+            // Aggregate update — handig voor snelle dashboard rendering.
+            // Race-condition bij gelijktijdige writers: bij low traffic acceptabel.
+            try {
+                var aggUrl = DB_BASE + '/analytics/wedstrijden/' + wedstrijdId + '.json';
+                fetch(aggUrl).then(function(r){ return r.json(); }).then(function(cur) {
+                    cur = cur || {};
+                    var field = (type === 'share') ? 'shares'
+                              : (type === 'pdf') ? 'pdfDownloads'
+                              : (type === 'notif_enable') ? 'notifEnables'
+                              : 'views';
+                    cur[field] = (cur[field] || 0) + 1;
+                    cur.lastTs = Date.now();
+                    if (!cur.firstTs) cur.firstTs = cur.lastTs;
+                    if (window.huidigeData) {
+                        cur.club = window.huidigeData.club || cur.club || '';
+                        cur.teamNaam = window.huidigeData.teamNaam || cur.teamNaam || '';
+                        cur.thuisteam = window.huidigeData.thuisteam || cur.thuisteam || '';
+                        cur.uitteam = window.huidigeData.uitteam || cur.uitteam || '';
+                    }
+                    return fetch(aggUrl, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(cur),
+                        keepalive: true
+                    });
+                }).catch(function() {});
+            } catch(e) {}
+        }
+
         var notificationsEnabled = false;
         var vorigeThuis = null;
         var vorigeUit = null;
@@ -659,6 +725,7 @@ function getLogo(naam) {
                 if (permission === 'granted') {
                     sendNotification('🔔 SCORR', 'Notificaties staan aan! Je hoort het als er gescoord wordt.');
                     showToast('Notificaties aan');
+                    logAnalyticsEvent('notif_enable');
                 } else if (permission === 'denied') {
                     showToast('Notificaties geweigerd', 3000);
                 }
@@ -1024,6 +1091,7 @@ function getLogo(naam) {
                 showToast('PDF-tool nog aan het laden, probeer opnieuw', 3000);
                 return;
             }
+            logAnalyticsEvent('pdf');
             var verslag = genereerVerslag(huidigeData);
             var html = bouwPdfHtml(verslag);
 
@@ -1100,6 +1168,7 @@ function getLogo(naam) {
 
             var text = lines.join('\n');
             var url = 'https://wa.me/?text=' + encodeURIComponent(text);
+            logAnalyticsEvent('share', { channel: 'whatsapp' });
             window.open(url, '_blank');
         }
 
@@ -1181,6 +1250,12 @@ function getLogo(naam) {
         // ===== DATA UPDATE =====
         function updateUI(data) {
             huidigeData = data;
+            window.huidigeData = data;
+            // Eén view per page-load loggen (eerste keer dat data binnenkomt).
+            if (!_viewLogged) {
+                _viewLogged = true;
+                logAnalyticsEvent('view');
+            }
 
             document.getElementById('homeTeam').textContent = data.thuisteam || 'Thuis';
             document.getElementById('awayTeam').textContent = data.uitteam || 'Uit';

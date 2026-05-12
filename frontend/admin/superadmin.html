@@ -123,6 +123,24 @@
         .empty-state { text-align: center; padding: 40px; color: rgba(240,244,255,0.25); font-size: 14px; }
         .club-kleur-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
         @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .wedstrijd-grid,.clubs-grid { grid-template-columns: 1fr; } }
+        /* Analytics */
+        .analytics-table { width: 100%; border-collapse: collapse; }
+        .analytics-table th { text-align: left; padding: 12px 16px; font-size: 11px; color: rgba(240,244,255,0.4); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .analytics-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; color: var(--white); }
+        .analytics-table tr:last-child td { border-bottom: none; }
+        .analytics-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .analytics-table th.num, .analytics-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        .analytics-table .num-val { font-weight: 700; color: var(--green); font-size: 14px; }
+        .analytics-table .num-val.muted { color: rgba(240,244,255,0.4); font-weight: 500; }
+        .sponsor-hero { background: linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(75,111,191,0.05) 100%); border: 1px solid rgba(0,255,136,0.15); border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; }
+        .sponsor-hero .label { font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+        .sponsor-hero .title { font-size: 22px; font-weight: 800; color: var(--white); margin-bottom: 4px; }
+        .sponsor-hero .desc { font-size: 13px; color: rgba(240,244,255,0.5); max-width: 720px; }
+        .export-btn { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--green); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .export-btn:hover { background: rgba(0,255,136,0.18); }
+        .periode-tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; margin-bottom: 20px; width: fit-content; }
+        .periode-tab { padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; color: rgba(240,244,255,0.5); }
+        .periode-tab.active { background: var(--dark2); color: var(--white); }
     </style>
 </head>
 <body>
@@ -132,6 +150,7 @@
         <div class="nav-section">Overzicht</div>
         <a class="nav-item active" onclick="showSection('dashboard',this)"><span class="icon">📊</span> Dashboard</a>
         <a class="nav-item" onclick="showSection('wedstrijden',this)"><span class="icon">⚽</span> Wedstrijden</a>
+        <a class="nav-item" onclick="showSection('analytics',this)"><span class="icon">📈</span> Analytics</a>
         <div class="nav-section">Beheer</div>
         <a class="nav-item" onclick="showSection('clubs',this)"><span class="icon">🏟️</span> Clubs</a>
         <a class="nav-item" onclick="showSection('gebruikers',this)"><span class="icon">👥</span> Gebruikers</a>
@@ -226,6 +245,68 @@
                 <button class="section-action" onclick="openModal('gebruiker')">+ Gebruiker toevoegen</button>
             </div>
             <div class="card" id="gebruikers-list"><div class="empty-state">Laden...</div></div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div id="section-analytics" style="display:none;">
+            <div class="sponsor-hero">
+                <div class="label">📈 Ouder-view gebruik</div>
+                <div class="title">Bereik per club, team en wedstrijd</div>
+                <div class="desc">Cijfers over hoe vaak de live-link van een wedstrijd geopend wordt door ouders, grootouders en vrienden, plus hoe vaak ze de link via WhatsApp doorsturen of het verslag downloaden. Bruikbaar voor sponsor-pitches en advertentieruimte.</div>
+            </div>
+
+            <div class="periode-tabs" id="periode-tabs">
+                <div class="periode-tab" data-p="7" onclick="setAnalyticsPeriode(7,this)">7 dagen</div>
+                <div class="periode-tab" data-p="30" onclick="setAnalyticsPeriode(30,this)">30 dagen</div>
+                <div class="periode-tab" data-p="90" onclick="setAnalyticsPeriode(90,this)">90 dagen</div>
+                <div class="periode-tab active" data-p="0" onclick="setAnalyticsPeriode(0,this)">Alle tijd</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Totaal page-views</div><div class="stat-value green" id="a-views">—</div><div class="stat-sub">Ouder-view opens</div></div>
+                <div class="stat-card"><div class="stat-label">WhatsApp shares</div><div class="stat-value yellow" id="a-shares">—</div><div class="stat-sub">Doorgestuurde links</div></div>
+                <div class="stat-card"><div class="stat-label">PDF downloads</div><div class="stat-value" id="a-pdf">—</div><div class="stat-sub">Wedstrijdverslagen</div></div>
+                <div class="stat-card"><div class="stat-label">Notif. aanzettingen</div><div class="stat-value red" id="a-notif">—</div><div class="stat-sub">Push aangevraagd</div></div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">🏆 Top wedstrijden op page-views</div>
+                    <button class="export-btn" onclick="exportAnalyticsCSV('wedstrijden')">⬇ Export CSV</button>
+                </div>
+                <div class="card">
+                    <table class="analytics-table">
+                        <thead><tr><th>Wedstrijd</th><th>Club</th><th class="num">Views</th><th class="num">Shares</th><th class="num">PDF</th><th class="num">Notif</th></tr></thead>
+                        <tbody id="a-top-wedstrijden"><tr><td colspan="6" class="empty-state">Laden...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">🏟️ Per club</div>
+                    <button class="export-btn" onclick="exportAnalyticsCSV('clubs')">⬇ Export CSV</button>
+                </div>
+                <div class="card">
+                    <table class="analytics-table">
+                        <thead><tr><th>Club</th><th class="num">Wedstrijden</th><th class="num">Views</th><th class="num">Shares</th><th class="num">PDF</th><th class="num">Notif</th><th class="num">Avg. views/wed.</th></tr></thead>
+                        <tbody id="a-per-club"><tr><td colspan="7" class="empty-state">Laden...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">👥 Per team</div>
+                    <button class="export-btn" onclick="exportAnalyticsCSV('teams')">⬇ Export CSV</button>
+                </div>
+                <div class="card">
+                    <table class="analytics-table">
+                        <thead><tr><th>Team</th><th>Club</th><th class="num">Wedstrijden</th><th class="num">Views</th><th class="num">Shares</th><th class="num">PDF</th></tr></thead>
+                        <tbody id="a-per-team"><tr><td colspan="6" class="empty-state">Laden...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -373,6 +454,8 @@
 
     let alleWedstrijden = [], alleGebruikers = {}, clubsData = {};
     let huidigStatusFilter = 'alle', huidigClubFilter = 'alle', huidigDetailClub = null;
+    let analyticsData = {}; // {wedstrijdId: {views, shares, pdfDownloads, notifEnables, lastTs, club, teamNaam, thuisteam, uitteam}}
+    let analyticsPeriode = 0; // 0 = alle tijd, anders aantal dagen
 
     function laadAlles() {
         onValue(ref(db, 'clubs'), (snap) => {
@@ -381,6 +464,7 @@
             updateStats();
             renderClubsGrid();
             renderGebruikers();
+            renderAnalytics();
             if (huidigDetailClub) renderClubDetail(huidigDetailClub);
         });
         onValue(ref(db, 'wedstrijden'), (snap) => {
@@ -389,6 +473,7 @@
             updateStats();
             renderDashboardWedstrijden();
             renderWedstrijdenGrid();
+            renderAnalytics();
             if (huidigDetailClub) renderClubDetail(huidigDetailClub);
         });
         onValue(ref(db, 'gebruikers'), (snap) => {
@@ -398,7 +483,172 @@
             renderClubsGrid();
             if (huidigDetailClub) renderClubDetail(huidigDetailClub);
         });
+        onValue(ref(db, 'analytics/wedstrijden'), (snap) => {
+            analyticsData = snap.exists() ? snap.val() : {};
+            renderAnalytics();
+        });
     }
+
+    // ===== ANALYTICS =====
+    function getAnalyticsPerWedstrijd() {
+        // Merge analytics aggregate met wedstrijd-data zodat we club/team naam vanuit beide bronnen kennen
+        const out = [];
+        const cutoff = analyticsPeriode > 0 ? Date.now() - analyticsPeriode * 86400000 : 0;
+        for (const wid in analyticsData) {
+            const a = analyticsData[wid] || {};
+            if (cutoff && a.lastTs && a.lastTs < cutoff) continue;
+            const w = alleWedstrijden.find(x => x.id === wid);
+            out.push({
+                wedstrijdId: wid,
+                views: a.views || 0,
+                shares: a.shares || 0,
+                pdfDownloads: a.pdfDownloads || 0,
+                notifEnables: a.notifEnables || 0,
+                lastTs: a.lastTs || 0,
+                club: (w && w.club) || a.club || '',
+                teamNaam: (w && w.teamNaam) || a.teamNaam || '',
+                thuisteam: (w && w.thuisteam) || a.thuisteam || '',
+                uitteam: (w && w.uitteam) || a.uitteam || '',
+                datum: w ? w.datum : ''
+            });
+        }
+        return out;
+    }
+
+    function renderAnalytics() {
+        const rows = getAnalyticsPerWedstrijd();
+        // Totalen
+        const tot = rows.reduce((s, r) => {
+            s.views += r.views; s.shares += r.shares; s.pdf += r.pdfDownloads; s.notif += r.notifEnables;
+            return s;
+        }, { views:0, shares:0, pdf:0, notif:0 });
+        document.getElementById('a-views').textContent = tot.views.toLocaleString('nl-NL');
+        document.getElementById('a-shares').textContent = tot.shares.toLocaleString('nl-NL');
+        document.getElementById('a-pdf').textContent = tot.pdf.toLocaleString('nl-NL');
+        document.getElementById('a-notif').textContent = tot.notif.toLocaleString('nl-NL');
+
+        // Top wedstrijden (top 20 op views)
+        const tbody1 = document.getElementById('a-top-wedstrijden');
+        const top = rows.slice().sort((a, b) => (b.views||0) - (a.views||0)).slice(0, 20);
+        if (!top.length) {
+            tbody1.innerHTML = '<tr><td colspan="6" class="empty-state">Nog geen views geregistreerd</td></tr>';
+        } else {
+            tbody1.innerHTML = top.map(r => {
+                const clubNaam = clubsData[r.club]?.naam || r.club || '—';
+                const wTxt = (r.thuisteam || '—') + ' vs ' + (r.uitteam || '—');
+                return `<tr>
+                    <td><div style="font-weight:600;">${wTxt}</div><div style="font-size:11px;color:rgba(240,244,255,0.4);">${r.datum||''} · ${r.teamNaam||''}</div></td>
+                    <td style="font-size:12px;color:rgba(240,244,255,0.6);">${clubNaam}</td>
+                    <td class="num"><span class="num-val">${r.views}</span></td>
+                    <td class="num"><span class="num-val ${r.shares?'':'muted'}">${r.shares}</span></td>
+                    <td class="num"><span class="num-val ${r.pdfDownloads?'':'muted'}">${r.pdfDownloads}</span></td>
+                    <td class="num"><span class="num-val ${r.notifEnables?'':'muted'}">${r.notifEnables}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Per club aggregaat
+        const perClub = {};
+        rows.forEach(r => {
+            const k = r.club || '_onbekend';
+            if (!perClub[k]) perClub[k] = { club:k, wedstrijden:0, views:0, shares:0, pdf:0, notif:0 };
+            perClub[k].wedstrijden++;
+            perClub[k].views += r.views;
+            perClub[k].shares += r.shares;
+            perClub[k].pdf += r.pdfDownloads;
+            perClub[k].notif += r.notifEnables;
+        });
+        const tbody2 = document.getElementById('a-per-club');
+        const clubLijst = Object.values(perClub).sort((a, b) => b.views - a.views);
+        if (!clubLijst.length) {
+            tbody2.innerHTML = '<tr><td colspan="7" class="empty-state">Nog geen data</td></tr>';
+        } else {
+            tbody2.innerHTML = clubLijst.map(c => {
+                const naam = clubsData[c.club]?.naam || c.club || '— Onbekend —';
+                const avg = c.wedstrijden ? Math.round(c.views / c.wedstrijden) : 0;
+                return `<tr>
+                    <td><div style="font-weight:700;">${naam}</div><div style="font-size:11px;color:rgba(240,244,255,0.4);">${c.club||''}</div></td>
+                    <td class="num"><span class="num-val muted">${c.wedstrijden}</span></td>
+                    <td class="num"><span class="num-val">${c.views}</span></td>
+                    <td class="num"><span class="num-val ${c.shares?'':'muted'}">${c.shares}</span></td>
+                    <td class="num"><span class="num-val ${c.pdf?'':'muted'}">${c.pdf}</span></td>
+                    <td class="num"><span class="num-val ${c.notif?'':'muted'}">${c.notif}</span></td>
+                    <td class="num"><span class="num-val ${avg?'':'muted'}">${avg}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Per team aggregaat
+        const perTeam = {};
+        rows.forEach(r => {
+            const k = (r.club || '_') + '||' + (r.teamNaam || '_onbekend');
+            if (!perTeam[k]) perTeam[k] = { club:r.club, team:r.teamNaam, wedstrijden:0, views:0, shares:0, pdf:0 };
+            perTeam[k].wedstrijden++;
+            perTeam[k].views += r.views;
+            perTeam[k].shares += r.shares;
+            perTeam[k].pdf += r.pdfDownloads;
+        });
+        const tbody3 = document.getElementById('a-per-team');
+        const teamLijst = Object.values(perTeam).sort((a, b) => b.views - a.views);
+        if (!teamLijst.length) {
+            tbody3.innerHTML = '<tr><td colspan="6" class="empty-state">Nog geen data</td></tr>';
+        } else {
+            tbody3.innerHTML = teamLijst.map(t => {
+                const clubNaam = clubsData[t.club]?.naam || t.club || '—';
+                return `<tr>
+                    <td><div style="font-weight:700;">${t.team||'— Onbekend —'}</div></td>
+                    <td style="font-size:12px;color:rgba(240,244,255,0.6);">${clubNaam}</td>
+                    <td class="num"><span class="num-val muted">${t.wedstrijden}</span></td>
+                    <td class="num"><span class="num-val">${t.views}</span></td>
+                    <td class="num"><span class="num-val ${t.shares?'':'muted'}">${t.shares}</span></td>
+                    <td class="num"><span class="num-val ${t.pdf?'':'muted'}">${t.pdf}</span></td>
+                </tr>`;
+            }).join('');
+        }
+    }
+
+    window.setAnalyticsPeriode = function(dagen, el) {
+        analyticsPeriode = dagen;
+        document.querySelectorAll('#periode-tabs .periode-tab').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+        renderAnalytics();
+    };
+
+    window.exportAnalyticsCSV = function(soort) {
+        const rows = getAnalyticsPerWedstrijd();
+        let csv = '';
+        if (soort === 'wedstrijden') {
+            csv = 'Wedstrijd,Club,Team,Datum,Views,Shares,PDF,Notificaties\n';
+            rows.forEach(r => {
+                const clubNaam = (clubsData[r.club]?.naam || r.club || '').replace(/"/g,'""');
+                const wTxt = ((r.thuisteam || '') + ' vs ' + (r.uitteam || '')).replace(/"/g,'""');
+                csv += `"${wTxt}","${clubNaam}","${(r.teamNaam||'').replace(/"/g,'""')}","${r.datum||''}",${r.views},${r.shares},${r.pdfDownloads},${r.notifEnables}\n`;
+            });
+        } else if (soort === 'clubs') {
+            const m = {};
+            rows.forEach(r => { const k = r.club||'_'; if (!m[k]) m[k] = { club:k, w:0, v:0, s:0, p:0, n:0 }; m[k].w++; m[k].v+=r.views; m[k].s+=r.shares; m[k].p+=r.pdfDownloads; m[k].n+=r.notifEnables; });
+            csv = 'Club,Wedstrijden,Views,Shares,PDF,Notificaties,Avg views/wed\n';
+            Object.values(m).forEach(c => {
+                const naam = (clubsData[c.club]?.naam || c.club || '').replace(/"/g,'""');
+                csv += `"${naam}",${c.w},${c.v},${c.s},${c.p},${c.n},${c.w?Math.round(c.v/c.w):0}\n`;
+            });
+        } else {
+            const m = {};
+            rows.forEach(r => { const k = (r.club||'_')+'||'+(r.teamNaam||'_'); if (!m[k]) m[k] = { c:r.club, t:r.teamNaam, w:0, v:0, s:0, p:0 }; m[k].w++; m[k].v+=r.views; m[k].s+=r.shares; m[k].p+=r.pdfDownloads; });
+            csv = 'Team,Club,Wedstrijden,Views,Shares,PDF\n';
+            Object.values(m).forEach(t => {
+                const naam = (clubsData[t.c]?.naam || t.c || '').replace(/"/g,'""');
+                csv += `"${(t.t||'').replace(/"/g,'""')}","${naam}",${t.w},${t.v},${t.s},${t.p}\n`;
+            });
+        }
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'scorr-analytics-' + soort + '-' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     function updateClubDropdowns() {
         const opties = Object.entries(clubsData).map(([id, c]) => `<option value="${id}">${c.naam}</option>`).join('');
@@ -707,7 +957,7 @@
 
 <script>
     function showSection(naam, el) {
-        ['dashboard','wedstrijden','clubs','gebruikers'].forEach(s => {
+        ['dashboard','wedstrijden','analytics','clubs','gebruikers'].forEach(s => {
             document.getElementById('section-'+s).style.display = s===naam ? 'block' : 'none';
         });
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -716,6 +966,7 @@
         const titels = {
             dashboard: ['Dashboard','Overzicht van alle clubs en wedstrijden'],
             wedstrijden: ['Wedstrijden','Alle wedstrijden in het systeem'],
+            analytics: ['Analytics','Ouder-view gebruik per club, team en wedstrijd'],
             clubs: ['Clubs','Klik op een club voor het teamoverzicht'],
             gebruikers: ['Gebruikers','Accounts aanmaken en beheren']
         };

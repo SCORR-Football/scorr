@@ -89,7 +89,10 @@
         .w-status.afgelast  { background:rgba(255,59,92,0.2); color:var(--red); border:1px solid rgba(255,59,92,0.3); }
         .live-score { display:inline-flex; align-items:center; gap:4px; font-size:13px; font-weight:900; color:var(--green); }
         .live-min { font-size:9px; font-weight:600; color:rgba(0,255,136,0.7); background:rgba(0,255,136,0.1); padding:1px 5px; border-radius:6px; }
-        .action-cell { display:flex; gap:4px; flex-wrap:nowrap; }
+        .action-cell { display:flex; gap:4px; flex-wrap:nowrap; align-items:center; }
+        .status-select { background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.3); color:var(--white); padding:4px 6px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; outline:none; appearance:none; max-width:130px; }
+        .status-select:hover { background:rgba(0,255,136,0.14); }
+        .status-select option { background:var(--dark2); color:var(--white); }
 
         .stats-section { margin-bottom:20px; }
         .stats-section-title { font-size:12px; font-weight:700; color:rgba(240,244,255,0.5); text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; }
@@ -629,20 +632,28 @@ function renderWedstrijden() {
         const scoreCell = isLive
             ? `<span class="live-score">${minStr?`<span class="live-min">${minStr}</span>`:''} ${w.thuisscore||0}&#x2013;${w.uitscore||0}</span>`
             : `<span style="color:rgba(240,244,255,0.4);font-size:11px;">${w.thuisscore||0}&#x2013;${w.uitscore||0}</span>`;
-        let acties = `<button class="table-btn" title="Deel link" onclick="openDelen('${w.id}','${th} vs ${ut}','${liveUrl}')">&#x1F4E4;</button>`;
+        // Status-keuzemenu (handmatig de status zetten als trainer/ouder vergeet)
+        let statusMenu = `<select class="status-select" title="Status wijzigen" onchange="wijzigStatusViaMenu('${w.id}', this)">
+            <option value="" selected>&#x21BB; Status...</option>
+            <option value="gepland">&#x1F4C5; Gepland</option>
+            <option value="start1">&#x25B6; Start 1e helft</option>
+            <option value="rust">&#x23F8; Rust</option>
+            <option value="start2">&#x25B6; Start 2e helft</option>
+            <option value="afgelopen">&#x23F9; Afgelopen (FT)</option>
+            <option value="afgelast">&#x26D4; Afgelast</option>
+        </select>`;
+        let acties = statusMenu;
+        acties += `<button class="table-btn" title="Deel link" onclick="openDelen('${w.id}','${th} vs ${ut}','${liveUrl}')">&#x1F4E4;</button>`;
         if (isLive) {
-            acties += `<button class="table-btn primary" onclick="openStandModal('${w.id}','${th}','${ut}',${w.thuisscore||0},${w.uitscore||0})">&#x270F;&#xFE0F;</button>`;
-            acties += `<button class="table-btn warn" onclick="openAfgelopenModal('${w.id}','${th} vs ${ut}')">&#x23F9; FT</button>`;
+            acties += `<button class="table-btn primary" title="Stand wijzigen" onclick="openStandModal('${w.id}','${th}','${ut}',${w.thuisscore||0},${w.uitscore||0})">&#x270F;&#xFE0F;</button>`;
         }
-        if (w.status==='afgelopen') acties += `<button class="table-btn primary" onclick="openStandModal('${w.id}','${th}','${ut}',${w.thuisscore||0},${w.uitscore||0})">&#x270F;&#xFE0F;</button>`;
+        if (w.status==='afgelopen') acties += `<button class="table-btn primary" title="Eindstand bewerken" onclick="openStandModal('${w.id}','${th}','${ut}',${w.thuisscore||0},${w.uitscore||0})">&#x270F;&#xFE0F;</button>`;
         if (isGepland) {
-            acties += `<button class="table-btn" onclick="openWedstrijdModalBewerken('${w.id}')">&#x270F;&#xFE0F;</button>`;
-            acties += `<button class="table-btn danger" onclick="openAfgelastModal('${w.id}','${th} vs ${ut}')">&#x26D4;</button>`;
-            acties += `<button class="table-btn danger" onclick="openVerwijderModal('${w.id}','${th} vs ${ut}')">&#x1F5D1;</button>`;
+            acties += `<button class="table-btn" title="Bewerken" onclick="openWedstrijdModalBewerken('${w.id}')">&#x270F;&#xFE0F;</button>`;
+            acties += `<button class="table-btn danger" title="Verwijderen" onclick="openVerwijderModal('${w.id}','${th} vs ${ut}')">&#x1F5D1;</button>`;
         }
         if (w.status==='afgelast') {
-            acties += `<button class="table-btn primary" onclick="herstelWedstrijd('${w.id}')">&#x21A9;</button>`;
-            acties += `<button class="table-btn danger" onclick="openVerwijderModal('${w.id}','${th} vs ${ut}')">&#x1F5D1;</button>`;
+            acties += `<button class="table-btn danger" title="Verwijderen" onclick="openVerwijderModal('${w.id}','${th} vs ${ut}')">&#x1F5D1;</button>`;
         }
         return `<tr>
             <td style="font-size:11px;color:var(--green);font-weight:600;">${w.teamNaam||'&#x2014;'}</td>
@@ -654,6 +665,46 @@ function renderWedstrijden() {
         </tr>`;
     }).join('');
 }
+
+// ===== STATUS WIJZIGEN VANAF DASHBOARD =====
+// Wordt aangeroepen vanuit het dropdown-menu in de wedstrijdenlijst.
+// Vangt alle veld-updates die bij elke status-transitie horen (timer, helft, etc.)
+window.wijzigStatusViaMenu = async (id, sel) => {
+    const actie = sel.value;
+    sel.value = ''; // reset zodat eenzelfde actie nogmaals gekozen kan worden
+    if (!actie) return;
+    const w = alleWedstrijden.find(x => x.id === id);
+    if (!w) return;
+    const labels = { gepland:'op Gepland', start1:'op LIVE (1e helft)', rust:'op RUST', start2:'op LIVE (2e helft)', afgelopen:'op Afgelopen (FT)', afgelast:'op Afgelast' };
+    if (!confirm('Wedstrijd ' + (w.thuisteam||'') + ' vs ' + (w.uitteam||'') + '\n\nStatus ' + (labels[actie]||actie) + ' zetten?')) return;
+    let payload = {};
+    if (actie === 'gepland') {
+        payload = { status:'gepland', startTijd:null, accumulatedSeconds:0, currentHalf:0 };
+    } else if (actie === 'start1') {
+        payload = { status:'bezig', startTijd:Date.now(), accumulatedSeconds:0, currentHalf:1 };
+    } else if (actie === 'rust') {
+        // bevries timer op huidige stand
+        const elapsed = (w.status==='bezig' && w.startTijd) ? Math.floor((Date.now() - w.startTijd)/1000) : 0;
+        const acc = (w.accumulatedSeconds||0) + elapsed;
+        payload = { status:'rust', startTijd:null, accumulatedSeconds:acc, currentHalf: w.currentHalf || 1 };
+    } else if (actie === 'start2') {
+        // 2e helft: accumulatedSeconds blijft staan, currentHalf=2, nieuwe startTijd
+        const halftijd = (w.helfttijd || 45) * 60;
+        // Als acc nog onder helft-tijd zit (te vroege 2e helft), zet acc naar exact 1 helft
+        const acc = Math.max(w.accumulatedSeconds || 0, halftijd);
+        payload = { status:'bezig', startTijd:Date.now(), accumulatedSeconds:acc, currentHalf:2 };
+    } else if (actie === 'afgelopen') {
+        payload = { status:'afgelopen', startTijd:null };
+    } else if (actie === 'afgelast') {
+        payload = { status:'afgelast', startTijd:null };
+    }
+    try {
+        await update(ref(db, 'wedstrijden/'+id), payload);
+        toast('&#x2705; Status: ' + (labels[actie]||actie));
+    } catch(e) {
+        toast('&#x274C; ' + (e.message||'Mislukt'));
+    }
+};
 
 let afgelopenId = null;
 window.openAfgelopenModal = (id, naam) => { afgelopenId = id; document.getElementById('afgelopen-naam').textContent = naam; openModal('afgelopen'); };

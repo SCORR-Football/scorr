@@ -1,0 +1,35 @@
+{
+  "_comment": "Voorbeeld rules — de ouder-view (publiek, zonder login) moet kunnen schrijven naar /analytics. De huidige live rules staan in de Firebase Console; deze file is documentatie. Pas alleen het analytics-block toe en behoud je bestaande rules voor wedstrijden/clubs/gebruikers/etc.",
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+
+    "wedstrijden": {
+      ".read": true,
+      "$wid": {
+        ".read": true,
+        "events": {
+          ".indexOn": ["tijdstip"]
+        }
+      }
+    },
+
+    "clubs": {
+      ".read": true
+    },
+
+    "analytics": {
+      ".read": "auth != null",
+      "events": {
+        ".write": true,
+        ".indexOn": ["wedstrijdId", "ts", "type", "sessionId"]
+      },
+      "wedstrijden": {
+        "$wid": {
+          ".read": true,
+          ".write": true
+        }
+      }
+    }
+  }
+}

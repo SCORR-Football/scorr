@@ -544,13 +544,19 @@ function getLogo(naam) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
                     keepalive: true
-                }).catch(function() {});
-            } catch(e) {}
+                }).then(function(r) {
+                    if (!r.ok) console.warn('[SCORR analytics] event POST faalde:', r.status, r.statusText);
+                }).catch(function(e) { console.warn('[SCORR analytics] event POST exception:', e); });
+            } catch(e) { console.warn('[SCORR analytics] event try-catch:', e); }
             // Aggregate update — handig voor snelle dashboard rendering.
             // Race-condition bij gelijktijdige writers: bij low traffic acceptabel.
             try {
                 var aggUrl = DB_BASE + '/analytics/wedstrijden/' + wedstrijdId + '.json';
-                fetch(aggUrl).then(function(r){ return r.json(); }).then(function(cur) {
+                fetch(aggUrl).then(function(r) {
+                    if (!r.ok) { console.warn('[SCORR analytics] aggregate GET faalde:', r.status); return null; }
+                    return r.json();
+                }).then(function(cur) {
+                    if (cur === null) return;
                     cur = cur || {};
                     var field = (type === 'share') ? 'shares'
                               : (type === 'pdf') ? 'pdfDownloads'
@@ -570,9 +576,12 @@ function getLogo(naam) {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(cur),
                         keepalive: true
+                    }).then(function(r) {
+                        if (!r.ok) console.warn('[SCORR analytics] aggregate PUT faalde:', r.status, r.statusText);
+                        else console.log('[SCORR analytics] ' + type + ' geregistreerd voor', wedstrijdId);
                     });
-                }).catch(function() {});
-            } catch(e) {}
+                }).catch(function(e) { console.warn('[SCORR analytics] aggregate exception:', e); });
+            } catch(e) { console.warn('[SCORR analytics] aggregate try-catch:', e); }
         }
 
         var notificationsEnabled = false;

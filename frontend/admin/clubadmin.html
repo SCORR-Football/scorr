@@ -106,6 +106,54 @@
         .stat-num.red { color:var(--red); }
         .stats-twocol { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 
+        /* Club Hoogtepunten cards */
+        .hoogtepunten-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+        .hl-card { background:var(--dark2); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:14px; position:relative; overflow:hidden; }
+        .hl-card.green  { border-color:rgba(0,255,136,0.25); background:linear-gradient(135deg, rgba(0,255,136,0.06), var(--dark2)); }
+        .hl-card.red    { border-color:rgba(255,59,92,0.25); background:linear-gradient(135deg, rgba(255,59,92,0.06), var(--dark2)); }
+        .hl-card.yellow { border-color:rgba(255,214,0,0.25); background:linear-gradient(135deg, rgba(255,214,0,0.06), var(--dark2)); }
+        .hl-card.wide { grid-column:1/-1; }
+        .hl-label { font-size:9px; color:rgba(240,244,255,0.5); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; margin-bottom:6px; }
+        .hl-team { font-size:15px; font-weight:700; color:var(--white); line-height:1.2; }
+        .hl-value { font-size:24px; font-weight:900; margin-top:4px; line-height:1; }
+        .hl-value.green  { color:var(--green); }
+        .hl-value.red    { color:var(--red); }
+        .hl-value.yellow { color:var(--yellow); }
+        .hl-sub { font-size:10px; color:rgba(240,244,255,0.4); margin-top:4px; }
+
+        /* Teamranglijst */
+        .rang-table { width:100%; border-collapse:collapse; }
+        .rang-table th { text-align:left; padding:9px 10px; font-size:10px; color:rgba(240,244,255,0.4); text-transform:uppercase; letter-spacing:1px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap; }
+        .rang-table th.num, .rang-table td.num { text-align:center; }
+        .rang-table td { padding:9px 10px; border-bottom:1px solid rgba(255,255,255,0.04); font-size:12px; color:var(--white); vertical-align:middle; }
+        .rang-table tr:last-child td { border-bottom:none; }
+        .rang-table tr:hover td { background:rgba(255,255,255,0.02); }
+        .rang-pos { width:28px; font-weight:900; color:rgba(240,244,255,0.5); text-align:center; }
+        .rang-pos.top { color:var(--green); }
+        .rang-team { font-weight:700; white-space:nowrap; }
+        .rang-cat { font-size:10px; color:rgba(240,244,255,0.4); font-weight:500; margin-left:6px; }
+        .rang-punten { font-weight:900; color:var(--green); font-size:14px; }
+        .rang-vorm { display:inline-flex; gap:2px; }
+        .rang-vorm-dot { width:16px; height:16px; border-radius:3px; font-size:9px; font-weight:900; color:var(--dark); display:inline-flex; align-items:center; justify-content:center; }
+        .rang-vorm-dot.W { background:var(--green); }
+        .rang-vorm-dot.G { background:var(--yellow); }
+        .rang-vorm-dot.V { background:var(--red); color:white; }
+        .ds-pos { color:var(--green); }
+        .ds-neg { color:var(--red); }
+
+        /* Soort-wedstrijd badge (klein, subtiel) */
+        .soort-badge {
+            display:inline-flex; align-items:center; gap:3px;
+            font-size:10px; font-weight:700; padding:1px 6px; border-radius:8px;
+            margin-left:6px; vertical-align:middle; letter-spacing:0.3px;
+            background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+            color:rgba(240,244,255,0.7);
+        }
+        .soort-badge.oefen    { background:rgba(75,111,191,0.12); border-color:rgba(75,111,191,0.35); color:#8BA4E8; }
+        .soort-badge.beker    { background:rgba(255,214,0,0.12);  border-color:rgba(255,214,0,0.35);  color:var(--yellow); }
+        .soort-badge.toernooi { background:rgba(255,59,92,0.12);  border-color:rgba(255,59,92,0.35);  color:var(--red); }
+        .soort-icon-only { font-size:13px; line-height:1; margin-left:5px; vertical-align:middle; opacity:0.9; }
+
 
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
         .modal-overlay.open { display:flex; }
@@ -141,7 +189,8 @@
         .copy-btn { width:100%; padding:9px; background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3); border-radius:8px; color:var(--green); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; margin-bottom:7px; }
         .wa-btn { width:100%; padding:9px; background:#25D366; border:none; border-radius:8px; color:white; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:6px; }
         .toast { position:fixed; bottom:20px; right:20px; background:var(--dark2); border:1px solid rgba(0,255,136,0.4); border-radius:10px; padding:10px 16px; font-size:13px; font-weight:600; color:var(--green); z-index:9999; display:none; box-shadow:0 4px 20px rgba(0,0,0,0.4); }
-        @media(max-width:900px) { .stats-twocol{grid-template-columns:1fr} }
+        @media(max-width:900px) { .stats-twocol{grid-template-columns:1fr} .hoogtepunten-grid{grid-template-columns:1fr 1fr;} }
+        @media(max-width:560px) { .hoogtepunten-grid{grid-template-columns:1fr;} .rang-table{min-width:580px;} }
 
         /* ===== MOBILE ===== */
         .menu-toggle { display:none; position:fixed; top:12px; left:12px; z-index:200; background:var(--dark2); border:1px solid rgba(0,255,136,0.3); color:var(--green); width:42px; height:42px; border-radius:10px; font-size:20px; cursor:pointer; align-items:center; justify-content:center; }
@@ -286,7 +335,26 @@
                             <option value="3">Laatste 3 maanden</option>
                             <option value="6">Laatste 6 maanden</option>
                         </select>
+                        <select class="filter-select" id="stats-soort-filter" onchange="renderStats()" title="Filter op soort wedstrijd">
+                            <option value="alle">&#x1F3DF; Alle soorten</option>
+                            <option value="competitie">&#x1F3C6; Alleen competitie</option>
+                            <option value="oefen">&#x1F94E; Oefen</option>
+                            <option value="beker">&#x1F3C5; Beker</option>
+                            <option value="toernooi">&#x1F3DF; Toernooi</option>
+                        </select>
                     </div>
+                </div>
+
+                <!-- Club Hoogtepunten -->
+                <div class="hoogtepunten-grid" id="stats-hoogtepunten"></div>
+
+                <!-- Teamranglijst -->
+                <div style="margin-bottom:18px;">
+                    <div class="stats-section-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span>&#x1F3C6; Ranglijst clubteams</span>
+                        <span style="font-size:9px;font-weight:600;color:rgba(240,244,255,0.35);letter-spacing:1px;text-transform:none;">alleen competitie</span>
+                    </div>
+                    <div class="card" id="stats-ranglijst" style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><div class="empty-state">Laden...</div></div>
                 </div>
 
                 <div class="stats-twocol">
@@ -413,9 +481,20 @@
                 <input type="text" class="form-input" id="w-tegenstander" placeholder="Ajax O14">
             </div>
         </div>
-        <div class="form-group">
-            <label class="form-label">Veld <span>(optioneel)</span></label>
-            <input type="text" class="form-input" id="w-veld" placeholder="bijv. 3">
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Soort</label>
+                <select class="form-select" id="w-soort">
+                    <option value="competitie">&#x1F3C6; Competitie</option>
+                    <option value="oefen">&#x1F94E; Oefenwedstrijd</option>
+                    <option value="beker">&#x1F3C5; Beker</option>
+                    <option value="toernooi">&#x1F3DF; Toernooi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Veld <span>(optioneel)</span></label>
+                <input type="text" class="form-input" id="w-veld" placeholder="bijv. 3">
+            </div>
         </div>
         <div class="form-hint" id="w-namen-hint" style="margin-bottom:4px;">Selecteer eerst een team</div>
         <div class="modal-error" id="wedstrijd-modal-error"></div>
@@ -644,6 +723,21 @@ function getMin(w) {
     return min>max ? max+'+'+(min-max)+"'" : min+"'";
 }
 
+// Soort wedstrijd: alleen badge bij niet-competitie zodat het stil blijft
+const SOORT_LABELS = {
+    competitie: { icon:'',   label:'Competitie' },
+    oefen:      { icon:'🥎', label:'Oefen' },
+    beker:      { icon:'🏅', label:'Beker' },
+    toernooi:   { icon:'🏟', label:'Toernooi' }
+};
+function soortBadge(w) {
+    const s = w && w.soort;
+    if (!s || s === 'competitie') return '';
+    const def = SOORT_LABELS[s];
+    if (!def) return '';
+    return '<span class="soort-badge ' + s + '" title="' + def.label + '">' + def.icon + ' ' + def.label + '</span>';
+}
+
 function renderWedstrijden() {
     const tbody = document.getElementById('wedstrijden-tbody');
     let lijst = [...alleWedstrijden];
@@ -694,7 +788,7 @@ function renderWedstrijden() {
         }
         return `<tr>
             <td style="font-size:11px;color:var(--green);font-weight:600;">${w.teamNaam||'&#x2014;'}</td>
-            <td><div style="font-weight:600;font-size:12px;">${w.thuisteam||'&#x2014;'} vs ${w.uitteam||'&#x2014;'}</div>${scoreCell}</td>
+            <td><div style="font-weight:600;font-size:12px;">${w.thuisteam||'&#x2014;'} vs ${w.uitteam||'&#x2014;'}${soortBadge(w)}</div>${scoreCell}</td>
             <td style="font-size:11px;color:rgba(240,244,255,0.5);">${w.datum||'&#x2014;'}</td>
             <td style="font-size:11px;color:rgba(240,244,255,0.5);">${w.tijdstip||'&#x2014;'}</td>
             <td><span class="w-status ${sCls}">${sTxt}</span></td>
@@ -806,10 +900,158 @@ function filterOpPeriode(weds) {
 }
 
 // ─── STATISTIEKEN ────────────────────────────────────
+function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function berekenRanglijst(weds) {
+    const standings = {};
+    Object.entries(alleTeams).forEach(([key, t]) => {
+        if (!t.naam) return;
+        standings[t.naam] = {
+            teamKey: key, naam: t.naam, categorie: t.categorie || '',
+            speeld: 0, w: 0, g: 0, v: 0, dv: 0, dt: 0, punten: 0,
+            wedstrijden: []
+        };
+    });
+    // Alleen competitiewedstrijden tellen voor de ranglijst.
+    // Backwards compat: oude wedstrijden zonder .soort worden als competitie behandeld.
+    weds.filter(w => w.status === 'afgelopen' && (!w.soort || w.soort === 'competitie')).forEach(w => {
+        const std = standings[w.teamNaam];
+        if (!std) return;
+        const tS = Number(w.thuisscore) || 0, uS = Number(w.uitscore) || 0;
+        const isThuis = (w.thuisteam || '').toLowerCase() === (w.teamNaam || '').toLowerCase();
+        const eigen = isThuis ? tS : uS;
+        const tegen = isThuis ? uS : tS;
+        std.speeld++; std.dv += eigen; std.dt += tegen;
+        let res;
+        if (eigen > tegen)      { std.w++; std.punten += 3; res = 'W'; }
+        else if (eigen < tegen) { std.v++;                  res = 'V'; }
+        else                    { std.g++; std.punten += 1; res = 'G'; }
+        std.wedstrijden.push({ datum: w.datum || '', res, eigen, tegen, tegenstander: isThuis ? (w.uitteam || '?') : (w.thuisteam || '?') });
+    });
+    return Object.values(standings)
+        .filter(s => s.speeld > 0)
+        .sort((a,b) => b.punten - a.punten || (b.dv - b.dt) - (a.dv - a.dt) || b.dv - a.dv);
+}
+
+function renderHoogtepunten(ranglijst) {
+    const el = document.getElementById('stats-hoogtepunten');
+    if (!el) return;
+    if (ranglijst.length === 0) { el.innerHTML = ''; return; }
+
+    const beste       = ranglijst[0];
+    const besteAanval = [...ranglijst].sort((a,b) => (b.dv/b.speeld) - (a.dv/a.speeld))[0];
+    const besteDef    = [...ranglijst].sort((a,b) => (a.dt/a.speeld) - (b.dt/b.speeld))[0];
+
+    let grootsteZege = null;
+    ranglijst.forEach(s => {
+        s.wedstrijden.forEach(w => {
+            if (w.res !== 'W') return;
+            const marge = w.eigen - w.tegen;
+            if (!grootsteZege || marge > grootsteZege.marge) {
+                grootsteZege = { marge, team: s.naam, eigen: w.eigen, tegen: w.tegen, tegenstander: w.tegenstander, datum: w.datum };
+            }
+        });
+    });
+
+    let html = ''
+        + '<div class="hl-card green">'
+        +   '<div class="hl-label">&#x1F947; Beste team</div>'
+        +   '<div class="hl-team">' + escapeHtml(beste.naam) + '</div>'
+        +   '<div class="hl-value green">' + beste.punten + ' pt</div>'
+        +   '<div class="hl-sub">' + beste.w + 'W &middot; ' + beste.g + 'G &middot; ' + beste.v + 'V uit ' + beste.speeld + ' wedstr.</div>'
+        + '</div>'
+        + '<div class="hl-card green">'
+        +   '<div class="hl-label">&#x26BD; Aanvalsmonster</div>'
+        +   '<div class="hl-team">' + escapeHtml(besteAanval.naam) + '</div>'
+        +   '<div class="hl-value green">' + (besteAanval.dv / besteAanval.speeld).toFixed(1) + '</div>'
+        +   '<div class="hl-sub">doelpunten per wedstrijd (' + besteAanval.dv + ' totaal)</div>'
+        + '</div>'
+        + '<div class="hl-card yellow">'
+        +   '<div class="hl-label">&#x1F6E1; IJzeren defensie</div>'
+        +   '<div class="hl-team">' + escapeHtml(besteDef.naam) + '</div>'
+        +   '<div class="hl-value yellow">' + (besteDef.dt / besteDef.speeld).toFixed(1) + '</div>'
+        +   '<div class="hl-sub">tegendoelpunten per wedstrijd (' + besteDef.dt + ' totaal)</div>'
+        + '</div>';
+
+    if (grootsteZege) {
+        html += '<div class="hl-card red wide">'
+            +     '<div class="hl-label">&#x1F680; Grootste zege</div>'
+            +     '<div class="hl-team">' + escapeHtml(grootsteZege.team) + ' <span style="color:var(--green);">' + grootsteZege.eigen + '&ndash;' + grootsteZege.tegen + '</span> ' + escapeHtml(grootsteZege.tegenstander) + '</div>'
+            +     '<div class="hl-sub">Marge van ' + grootsteZege.marge + ' ' + (grootsteZege.marge === 1 ? 'doelpunt' : 'doelpunten') + (grootsteZege.datum ? ' &middot; ' + escapeHtml(grootsteZege.datum) : '') + '</div>'
+            +   '</div>';
+    }
+
+    el.innerHTML = html;
+}
+
+function renderRanglijst(ranglijst) {
+    const el = document.getElementById('stats-ranglijst');
+    if (!el) return;
+    if (ranglijst.length === 0) {
+        el.innerHTML = '<div class="empty-state">Nog geen afgelopen wedstrijden in deze periode</div>';
+        return;
+    }
+    const rows = ranglijst.map((s, idx) => {
+        const ds = s.dv - s.dt;
+        const dsStr = (ds > 0 ? '+' : '') + ds;
+        const dsClass = ds > 0 ? 'ds-pos' : (ds < 0 ? 'ds-neg' : '');
+        const laatste5 = [...s.wedstrijden]
+            .sort((a,b) => (a.datum || '').localeCompare(b.datum || ''))
+            .slice(-5);
+        const vormHtml = laatste5.length
+            ? laatste5.map(w => '<span class="rang-vorm-dot ' + w.res + '" title="' + escapeHtml(w.tegenstander) + ' ' + w.eigen + '-' + w.tegen + '">' + w.res + '</span>').join('')
+            : '<span style="font-size:10px;color:rgba(240,244,255,0.3);">&ndash;</span>';
+        return '<tr>'
+            + '<td class="rang-pos ' + (idx < 3 ? 'top' : '') + '">' + (idx + 1) + '</td>'
+            + '<td class="rang-team">' + escapeHtml(s.naam) + (s.categorie ? '<span class="rang-cat">' + escapeHtml(s.categorie) + '</span>' : '') + '</td>'
+            + '<td class="num">' + s.speeld + '</td>'
+            + '<td class="num">' + s.w + '</td>'
+            + '<td class="num">' + s.g + '</td>'
+            + '<td class="num">' + s.v + '</td>'
+            + '<td class="num">' + s.dv + '</td>'
+            + '<td class="num">' + s.dt + '</td>'
+            + '<td class="num ' + dsClass + '">' + dsStr + '</td>'
+            + '<td class="num rang-punten">' + s.punten + '</td>'
+            + '<td><span class="rang-vorm">' + vormHtml + '</span></td>'
+            + '</tr>';
+    }).join('');
+    el.innerHTML = '<table class="rang-table">'
+        + '<thead><tr>'
+        +   '<th class="num">#</th><th>Team</th>'
+        +   '<th class="num" title="Gespeeld">Sp</th>'
+        +   '<th class="num" title="Winst">W</th>'
+        +   '<th class="num" title="Gelijk">G</th>'
+        +   '<th class="num" title="Verlies">V</th>'
+        +   '<th class="num" title="Doelpunten voor">DV</th>'
+        +   '<th class="num" title="Doelpunten tegen">DT</th>'
+        +   '<th class="num" title="Doelsaldo">DS</th>'
+        +   '<th class="num" title="Punten">Pt</th>'
+        +   '<th>Vorm</th>'
+        + '</tr></thead>'
+        + '<tbody>' + rows + '</tbody>'
+        + '</table>';
+}
+
 window.renderStats = function() {
     const tf = document.getElementById('stats-team-filter')?.value || 'alle';
+    const sf = document.getElementById('stats-soort-filter')?.value || 'alle';
     let weds = filterOpPeriode([...alleWedstrijden]);
+
+    // Ranglijst + hoogtepunten gebruiken altijd ALLE clubteams + ALLEEN competitie
+    // (onafhankelijk van team/soort filter — het is een vergelijking tussen teams).
+    const ranglijst = berekenRanglijst(weds);
+    renderHoogtepunten(ranglijst);
+    renderRanglijst(ranglijst);
+
     if (tf !== 'alle') { const t = alleTeams[tf]; if (t) weds = weds.filter(w => w.teamNaam===t.naam); }
+
+    // Soort-filter: 'alle' = alles, anders alleen die soort.
+    // Backwards compat: wedstrijden zonder .soort gelden als 'competitie'.
+    if (sf !== 'alle') {
+        weds = weds.filter(w => (w.soort || 'competitie') === sf);
+    }
 
     const goals = {}, yellow = {}, red = {};
     const voorBuckets = Array(18).fill(0);
@@ -1008,6 +1250,7 @@ window.openWedstrijdModal = () => {
     ['w-helfttijd','w-klasse','w-tegenstander','w-veld'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('w-team').value=''; document.getElementById('w-datum').value=new Date().toISOString().split('T')[0];
     document.getElementById('w-tijd').value=''; document.getElementById('w-thuisof').value='thuis';
+    document.getElementById('w-soort').value='competitie';
     document.getElementById('w-namen-hint').textContent='Selecteer eerst een team';
     document.getElementById('wedstrijd-modal-error').style.display='none';
     openModal('wedstrijd');
@@ -1021,6 +1264,7 @@ window.openWedstrijdModalBewerken = id => {
     document.getElementById('w-datum').value=w.datum||''; document.getElementById('w-tijd').value=w.tijdstip||'';
     document.getElementById('w-tegenstander').value=w.uitteam===w.teamNaam?w.thuisteam:w.uitteam||'';
     document.getElementById('w-veld').value=w.veld||'';
+    document.getElementById('w-soort').value=w.soort||'competitie';
     document.getElementById('wedstrijd-modal-error').style.display='none';
     openModal('wedstrijd');
 };
@@ -1028,10 +1272,11 @@ window.slaWedstrijdOp = async () => {
     const tk=document.getElementById('w-team').value, datum=document.getElementById('w-datum').value;
     const tijd=document.getElementById('w-tijd').value, teg=document.getElementById('w-tegenstander').value.trim();
     const veld=document.getElementById('w-veld').value.trim(), tot=document.getElementById('w-thuisof').value;
+    const soort=document.getElementById('w-soort').value||'competitie';
     const err=document.getElementById('wedstrijd-modal-error');
     if(!tk||!datum||!teg){err.textContent='Vul team, datum en tegenstander in.';err.style.display='block';return;}
     const t=alleTeams[tk];
-    const wd={club,teamId:t.gebruikersnaam,teamNaam:t.naam,thuisteam:tot==='thuis'?t.naam:teg,uitteam:tot==='thuis'?teg:t.naam,datum,tijdstip:tijd,veld,klasse:t.klasse||'',helfttijd:t.helfttijd||45,thuisscore:0,uitscore:0,status:'gepland'};
+    const wd={club,teamId:t.gebruikersnaam,teamNaam:t.naam,thuisteam:tot==='thuis'?t.naam:teg,uitteam:tot==='thuis'?teg:t.naam,datum,tijdstip:tijd,veld,soort,klasse:t.klasse||'',helfttijd:t.helfttijd||45,thuisscore:0,uitscore:0,status:'gepland'};
     try {
         if(bewerkWedstrijdKey) await update(ref(db,'wedstrijden/'+bewerkWedstrijdKey),wd);
         else await push(ref(db,'wedstrijden'),wd);

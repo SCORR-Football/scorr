@@ -103,7 +103,24 @@
         }
 
         /* ===== MATCH CARD ===== */
-        .match-card { background: rgba(30,39,73,0.6); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 12px 20px; margin-bottom: 8px; display: flex; align-items: stretch; gap: 16px; transition: all 0.3s ease; }
+        .match-card { background: rgba(30,39,73,0.6); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 12px 20px; margin-bottom: 8px; display: flex; align-items: stretch; gap: 16px; transition: all 0.3s ease; position: relative; }
+
+        /* Soort wedstrijd: klein, subtiel hoek-badge (alleen voor niet-competitie) */
+        .soort-tag {
+            position: absolute; top: 6px; right: 8px;
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+            padding: 2px 7px; border-radius: 6px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(240,244,255,0.7); pointer-events: none;
+            text-transform: uppercase;
+        }
+        .soort-tag.oefen    { background: rgba(75,111,191,0.15); border-color: rgba(75,111,191,0.4); color: #8BA4E8; }
+        .soort-tag.beker    { background: rgba(255,214,0,0.15);  border-color: rgba(255,214,0,0.4);  color: var(--yellow); }
+        .soort-tag.toernooi { background: rgba(255,59,92,0.15);  border-color: rgba(255,59,92,0.4);  color: var(--red); }
+        @media (max-width: 768px) {
+            .soort-tag { top: 4px; right: 6px; font-size: 8px; padding: 1px 5px; }
+        }
         .match-card.live { border-color: rgba(0,255,136,0.3); background: linear-gradient(135deg, rgba(30,39,73,0.8) 0%, rgba(0,255,136,0.04) 100%); box-shadow: 0 0 24px rgba(0,255,136,0.06); }
         .match-card.afgelopen { opacity: 0.7; }
         .match-status-datum { display: none; }
@@ -536,7 +553,18 @@ function getLogo(naam) {
                 for (var j = 0; j < uitGeel; j++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FFD600;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
                 for (var j = 0; j < uitRood; j++) uitKaarten += '<span style="display:inline-block;width:8px;height:11px;background:#FF3B5C;border-radius:1px;margin:0 1px;opacity:0.85;"></span>';
 
+                // Soort wedstrijd: alleen tonen bij niet-competitie (klein hoek-tagje)
+                var soortHtml = '';
+                if (w.soort && w.soort !== 'competitie') {
+                    var soortIcons = { oefen: '🥎', beker: '🏅', toernooi: '🏟' };
+                    var soortLabels = { oefen: 'Oefen', beker: 'Beker', toernooi: 'Toernooi' };
+                    if (soortLabels[w.soort]) {
+                        soortHtml = '<span class="soort-tag ' + w.soort + '" title="' + soortLabels[w.soort] + '">' + soortIcons[w.soort] + ' ' + soortLabels[w.soort] + '</span>';
+                    }
+                }
+
                 html += '<div class="match-card ' + ((isLive || isRust) ? 'live' : '') + ' ' + (isAfgelopen ? 'afgelopen' : '') + '">';
+                if (soortHtml) html += soortHtml;
                 html += '<div class="match-status">';
                 html += '<div class="match-time ' + (isLive ? 'live' : '') + '">' + tijdText + '</div>';
                 html += '<div class="status-badge ' + badgeClass + '">' + badgeText + '</div>';

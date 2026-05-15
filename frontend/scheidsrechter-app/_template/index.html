@@ -2920,6 +2920,7 @@ document.getElementById('banner-share-btn').href = 'https://wa.me/?text=' + what
     document.getElementById('popup-error').style.display = 'none';
 document.getElementById('popup-tegenstander').value = bestaandeData ? bestaandeData.uitteam : '';
 document.getElementById('popup-klasse').value = bestaandeData ? bestaandeData.klasse : '';
+document.getElementById('popup-soort').value = (bestaandeData && bestaandeData.soort) ? bestaandeData.soort : 'competitie';
 thuisOfUit = 'thuis';
 window._selecteerThuisUit('thuis');
 
@@ -2945,6 +2946,7 @@ document.getElementById('popup-afgelast-btn').onclick = () => {
       const tijdstip = document.getElementById('popup-tijdstip').value;
       const helfttijd = parseInt(document.getElementById('popup-helfttijd').value) || 45;
       const veld = document.getElementById('popup-veld').value;
+      const soort = document.getElementById('popup-soort').value || 'competitie';
 
       if (!tegenstander || !klasse) {
         document.getElementById('popup-error').style.display = 'block';
@@ -2977,11 +2979,12 @@ document.getElementById('popup-afgelast-btn').onclick = () => {
         tijdstip: tijdstip,
         helfttijd: helfttijd,
         veld: veld,
+        soort: soort,
         thuisscore: 0,
         uitscore: 0,
         status: 'gepland',
-        club: huidigTeamId.indexOf('vvm') !== -1 ? 'vv-monnickendam' 
-        : huidigTeamId.indexOf('rkav') !== -1 ? 'rkav-volendam' 
+        club: huidigTeamId.indexOf('vvm') !== -1 ? 'vv-monnickendam'
+        : huidigTeamId.indexOf('rkav') !== -1 ? 'rkav-volendam'
         : 'fc-purmerend',
         teamId: huidigTeamId,
         teamNaam: teamNaam
@@ -3087,6 +3090,16 @@ awayScore.textContent = 0;
     <div style="margin-bottom:16px;">
       <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Klasse *</label>
       <input id="popup-klasse" type="text" placeholder="bijv. 4e klasse district" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none;" />
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(240,244,255,0.6); font-weight:600; display:block; margin-bottom:6px;">Soort wedstrijd</label>
+      <select id="popup-soort" style="width:100%; background:#1E2749; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:12px 16px; font-size:15px; color:#F0F4FF; font-family:'Lexend',sans-serif; outline:none; appearance:none;">
+        <option value="competitie">🏆 Competitie</option>
+        <option value="oefen">🥎 Oefenwedstrijd</option>
+        <option value="beker">🏅 Beker</option>
+        <option value="toernooi">🏟 Toernooi</option>
+      </select>
     </div>
 
     <div style="margin-bottom:16px;">

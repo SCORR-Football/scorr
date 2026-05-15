@@ -1027,13 +1027,21 @@
     document.getElementById('wa-share-week').addEventListener('click', shareWeekViaWhatsApp);
   }
 
+  function bouwPubliekeUrl() {
+    // Publieke URL voor de huidige week + dit team
+    const origin = window.location.origin && window.location.origin !== 'null'
+      ? window.location.origin
+      : 'https://scorr-c604a.web.app';
+    return origin + '/frontend/training/index.html?team=' + encodeURIComponent(huidigTeamId) + '&week=' + isoDate(weekStart);
+  }
+
   function shareWeekViaWhatsApp() {
     const teamNaam = document.getElementById('team-naam').textContent || 'Team';
     const weekNo   = isoWeekNumber(weekStart);
     const range    = formatDayRange(weekStart);
     const months   = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-    const allVormen = BASIS_VORMEN.concat(eigenVormen);
 
+    // Korte text-samenvatting + publieke link. WhatsApp toont automatisch een preview-card van de link.
     let lines = ['🏃 *' + teamNaam + ' — Trainingen week ' + weekNo + '*', '_' + range + '_', ''];
     let count = 0;
 
@@ -1049,22 +1057,9 @@
       const start = (sessie && sessie.start) || schema.start || '19:00';
       const eind  = (sessie && sessie.eind)  || schema.eind  || '20:30';
       const veld  = (sessie && sessie.veld)  || schema.veld  || 'A';
-      const vormenMap = (sessie && sessie.vormen) || {};
-      const vormIds   = Object.keys(vormenMap).filter(k => vormenMap[k]);
 
-      const datumStr = d.label + ' ' + datum.getDate() + ' ' + months[datum.getMonth()];
-      lines.push('📅 *' + datumStr + '* · ' + start + '–' + eind + ' · Veld ' + veld);
-
-      if (vormIds.length > 0) {
-        const namen = vormIds.map(id => {
-          const v = allVormen.find(x => x.id === id);
-          return v ? v.naam : null;
-        }).filter(Boolean);
-        lines.push('   ' + namen.join(', '));
-      } else {
-        lines.push('   _(programma volgt)_');
-      }
-      lines.push('');
+      const datumStr = d.short + ' ' + datum.getDate() + ' ' + months[datum.getMonth()];
+      lines.push('📅 ' + datumStr + ' · ' + start + '–' + eind + ' · Veld ' + veld);
     });
 
     if (count === 0) {
@@ -1072,7 +1067,10 @@
       return;
     }
 
-    lines.push('Tot dan! ⚽');
+    lines.push('');
+    lines.push('📋 Volledig schema (altijd actueel):');
+    lines.push(bouwPubliekeUrl());
+
     const tekst = lines.join('\n');
     const url   = 'https://wa.me/?text=' + encodeURIComponent(tekst);
     window.open(url, '_blank', 'noopener');

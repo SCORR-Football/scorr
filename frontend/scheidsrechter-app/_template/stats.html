@@ -117,6 +117,19 @@
   .w-row .uitslag.tie  { background:rgba(255,184,0,0.1); border-color:rgba(255,184,0,0.3); color:#FFB800; }
   .w-row .arrow { color:rgba(240,244,255,0.3); font-size:18px; flex-shrink:0; }
 
+  /* Soort wedstrijd: kleine pill — alleen voor niet-competitie */
+  .soort-pill {
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:9px; font-weight:700; padding:1px 6px; border-radius:7px;
+    margin-left:6px; vertical-align:middle; letter-spacing:0.3px; text-transform:uppercase;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    color:rgba(240,244,255,0.7);
+  }
+  .soort-pill.oefen    { background:rgba(75,111,191,0.15); border-color:rgba(75,111,191,0.4); color:#8BA4E8; }
+  .soort-pill.beker    { background:rgba(255,184,0,0.15);  border-color:rgba(255,184,0,0.4);  color:var(--scorr-yellow); }
+  .soort-pill.toernooi { background:rgba(255,59,92,0.15);   border-color:rgba(255,59,92,0.4);  color:var(--scorr-accent); }
+  .det-header .soort-pill { font-size:10px; margin-left:0; margin-top:8px; padding:3px 10px; }
+
   /* Spelers tab (bestaand) */
   .stats-list { display:flex; flex-direction:column; gap:8px; }
   .speler-card {
@@ -417,6 +430,19 @@
     }[c]));
   }
 
+  // Soort wedstrijd: alleen pill voor niet-competitie
+  const SOORT_MAP = {
+    oefen:    { icon:'🥎', label:'Oefen' },
+    beker:    { icon:'🏅', label:'Beker' },
+    toernooi: { icon:'🏟', label:'Toernooi' }
+  };
+  function soortPill(w) {
+    if (!w || !w.soort || w.soort === 'competitie') return '';
+    const def = SOORT_MAP[w.soort];
+    if (!def) return '';
+    return '<span class="soort-pill ' + w.soort + '" title="' + def.label + '">' + def.icon + ' ' + def.label + '</span>';
+  }
+
   function matchSpelerForEvent(ev, spelersById) {
     if (ev.spelerId && spelersById[ev.spelerId]) return ev.spelerId;
     const m = (ev.omschrijving || '').match(/#(\d+)\s+([^\s(]+)/);
@@ -609,7 +635,7 @@
       row.innerHTML =
         '<div class="datum"><div class="dag">' + dag + '</div><div class="mnd">' + mnd + '</div></div>' +
         '<div class="info">' +
-          '<div class="teams">' + escapeHtml(w.thuisteam || '?') + ' vs ' + escapeHtml(w.uitteam || '?') + '</div>' +
+          '<div class="teams">' + escapeHtml(w.thuisteam || '?') + ' vs ' + escapeHtml(w.uitteam || '?') + soortPill(w) + '</div>' +
           '<div class="meta">' + escapeHtml(meta) + '</div>' +
         '</div>' +
         '<div class="uitslag ' + uitslagClass + '">' + uitslagTxt + '</div>' +
@@ -694,14 +720,21 @@
   // ===== Wedstrijd-detail modal =====
   function openDetailModal(w) {
     const modal = document.getElementById('w-detail-modal');
-    document.getElementById('wd-teams').textContent = (w.thuisteam || '?') + ' vs ' + (w.uitteam || '?');
+    const teamsEl = document.getElementById('wd-teams');
+    teamsEl.innerHTML = escapeHtml(w.thuisteam || '?') + ' vs ' + escapeHtml(w.uitteam || '?');
     const tScore = w.thuisscore, uScore = w.uitscore;
     document.getElementById('wd-uitslag').textContent = (tScore != null && uScore != null) ? (tScore + ' – ' + uScore) : '–';
     const months = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
     let datumStr = w.datum || '';
     try { const d = new Date(w.datum); if (!isNaN(d.getTime())) datumStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear(); } catch (e) {}
     const meta = [datumStr, w.tijdstip, w.klasse, w.veld ? 'Veld ' + w.veld : null, w.formatie].filter(Boolean).join(' · ');
-    document.getElementById('wd-meta').textContent = meta;
+    const metaEl = document.getElementById('wd-meta');
+    metaEl.textContent = meta;
+    // Soort-pill toevoegen onder de meta (eerst oude verwijderen om dubbel te voorkomen)
+    const oldPill = metaEl.parentNode.querySelector('.soort-pill');
+    if (oldPill) oldPill.remove();
+    const pillHtml = soortPill(w);
+    if (pillHtml) metaEl.insertAdjacentHTML('afterend', pillHtml);
 
     renderTimeline(w);
     renderOpstellingDetail(w);

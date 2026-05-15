@@ -18,6 +18,19 @@
       ".read": true
     },
 
+    "teams": {
+      "$teamId": {
+        "naam":      { ".read": true },
+        "categorie": { ".read": true },
+        "klasse":    { ".read": true },
+        "club":      { ".read": true },
+        "trainingen": {
+          ".read": true,
+          ".comment": "Publiek leesbaar zodat ouders/spelers het trainingsschema via deel-link kunnen openen zonder login. Schrijven blijft beperkt tot ingelogde trainer/coach."
+        }
+      }
+    },
+
     "analytics": {
       ".read": "auth != null",
       "events": {
